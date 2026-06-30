@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+
 public class GameSetUpService {
         private final IdGenerator idGenerator;
 
@@ -30,7 +31,7 @@ public class GameSetUpService {
             return new Territory(idGenerator.nextId(EntityType.TERRITORY), profile.territoryName());
         }
 
-        public City creaCapitaleyPerLeader(LeaderType leader, Player owner){
+        public City creaCapitalePerLeader(LeaderType leader, Player owner){
             if(owner == null){throw new IllegalArgumentException("owner is null");}
             StartingProfile profile = getStartingProfile(leader);
             City capitale = new City(profile.capitalName());
@@ -44,7 +45,7 @@ public class GameSetUpService {
 
             Territory territory = creaTerritorioPerLeader(leader);
             Player player = new Player(idGenerator.nextId(EntityType.PLAYER),nome, leader, denari, territory);
-            City capitale = creaCapitaleyPerLeader(leader, player);
+            City capitale = creaCapitalePerLeader(leader, player);
 
             territory.addCity(capitale);
             territory.setCapitale(capitale);

@@ -33,7 +33,7 @@ public class Territory {
         this.owner = owner;
     }
 
-    //SPECIALIZZAZIONI CAPITALE
+    //SPECIALIZZAZIONI E SVILUPPO
     private int punteggioSviluppo(City c){
         return switch (c.getLevel()){
             case ACCAMPAMENTO -> 0;
