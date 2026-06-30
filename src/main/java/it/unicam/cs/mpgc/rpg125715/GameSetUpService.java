@@ -34,30 +34,24 @@ public class GameSetUpService {
             return new Territory(idGenerator.nextId(EntityType.TERRITORY), profile.territoryName());
         }
 
-        public City creaCapitalePerLeader(LeaderType leader, Player owner){
-            if(owner == null){throw new IllegalArgumentException("owner is null");}
-            StartingProfile profile = getStartingProfile(leader);
-            City capitale = new City(profile.capitalName());
-            capitale.setOwner(owner);
-            return capitale;
-        }
-
         public Player creaPlayerIniziale(String nome, LeaderType leader, int denari){
             if(nome == null || nome.isBlank()){throw new IllegalArgumentException("nome is null");}
             if(leader == null){throw new IllegalArgumentException("leader is null");}
+            if(denari<0){throw new IllegalArgumentException("denari is negative");}
 
             Territory territory = creaTerritorioPerLeader(leader);
             Player player = new Player(idGenerator.nextId(EntityType.PLAYER),nome, leader, denari, territory);
 
+            territory.setOwner(player);
+
             List<City> cities = creaCitiesForLeader(leader, player);
-            String capitalName = getCapitaleForLeader(leader).getDisplayName();
 
             for(City city : cities){
                 territory.addCity(city);
-                if(city.getName().equals(capitalName)){
-                    territory.setCapitale(city);
-                }
             }
+
+            City capitale = trovaCapitale(cities, leader);
+            territory.setCapitale(capitale);
             return player;
         }
 
@@ -67,7 +61,8 @@ public class GameSetUpService {
 
         public City creaCity(CityType cityType){
             if(cityType == null){throw new IllegalArgumentException("cityType is null");}
-            City c =new City(cityType.getDisplayName());
+
+            City c = new City(cityType.getDisplayName());
             if(cityType.getStartLeaderType().haCapitaleInizialeSviluppata() && cityType.isCapital()){
                 c.upgrade();
             }
@@ -103,6 +98,19 @@ public class GameSetUpService {
                 cities.add(c);
             }
             return cities;
+        }
+
+        public City trovaCapitale(List<City> cities, LeaderType leader){
+            if(cities == null || cities.isEmpty()){throw new IllegalArgumentException("cities is null or empty");}
+            if(leader == null){throw new IllegalArgumentException("leader is null");}
+
+            String capitalName = getCapitaleForLeader(leader).getDisplayName();
+            for(City city : cities){
+                if(city.getName().equals(capitalName)){
+                    return city;
+                }
+            }
+            throw new IllegalArgumentException("nessuna capitale trovata");
         }
 
 }
