@@ -1,6 +1,9 @@
 package it.unicam.cs.mpgc.rpg125715;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameSetUpService {
         private final IdGenerator idGenerator;
 
@@ -62,5 +65,14 @@ public class GameSetUpService {
             return new City(cityType.getDisplayName());
         }
 
-
+        public List<CityType> getCityTypesForLeader(LeaderType leader){
+            if(leader == null){throw new IllegalArgumentException("leader is null");}
+            List<CityType> cityTypes = new ArrayList<>();
+            for(CityType city : CityType.values()){
+                if(city.getLeaderType()== leader){
+                    cityTypes.add(city);
+                }
+            }
+            return cityTypes;
+        }
 }
