@@ -83,4 +83,17 @@ public class GameSetUpService {
             throw new IllegalArgumentException("nessuna capitale trovata");
         }
 
+        public List<City> creaCitiesForLeader(LeaderType leader, Player owner){
+            if(leader == null){throw new IllegalArgumentException("leader is null");}
+            if(owner == null){throw new IllegalArgumentException("owner is null");}
+
+            List<City> cities = new ArrayList<>();
+            for(CityType city : getCityTypesForLeader(leader)){
+                City c = creaCity(city);
+                c.setOwner(owner);
+                cities.add(c);
+            }
+            return cities;
+        }
+
 }
