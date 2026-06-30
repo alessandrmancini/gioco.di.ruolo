@@ -67,7 +67,11 @@ public class GameSetUpService {
 
         public City creaCity(CityType cityType){
             if(cityType == null){throw new IllegalArgumentException("cityType is null");}
-            return new City(cityType.getDisplayName());
+            City c =new City(cityType.getDisplayName());
+            if(cityType.getStartLeaderType().haCapitaleInizialeSviluppata() && cityType.isCapital()){
+                c.upgrade();
+            }
+            return c;
         }
 
         public List<CityType> getCityTypesForLeader(LeaderType leader){

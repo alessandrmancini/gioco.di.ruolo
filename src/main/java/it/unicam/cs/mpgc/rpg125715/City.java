@@ -48,7 +48,7 @@ public class City {
     //LOCATION
     public Location getLocation() {return location;}
     public void setLocation(Location l){
-        if(location == null){throw new IllegalArgumentException("location null");}
+        if(l == null){throw new IllegalArgumentException("location null");}
         this.location = l;
     }
 }

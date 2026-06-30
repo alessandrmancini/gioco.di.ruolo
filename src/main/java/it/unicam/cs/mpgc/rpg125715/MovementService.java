@@ -6,8 +6,8 @@ public class MovementService {
 
     public MovementService(BattleService battaglia, ArmyService armyService) {
         if(battaglia == null|| armyService == null){throw new IllegalArgumentException("battleService o armyService null");}
-        this.battaglia = null;
-        this.armyService = null;
+        this.battaglia = battaglia;
+        this.armyService = armyService;
     }
 
     public void muovi(Army army, Location destinazione) {
