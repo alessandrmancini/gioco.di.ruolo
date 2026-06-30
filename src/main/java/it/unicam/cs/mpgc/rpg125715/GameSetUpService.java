@@ -75,4 +75,12 @@ public class GameSetUpService {
             }
             return cityTypes;
         }
+        public CityType getCapitaleForLeader(LeaderType leader){
+            if(leader == null){throw new IllegalArgumentException("leader is null");}
+            for(CityType city : CityType.values()){
+                if(city.getLeaderType()== leader && city.isCapital()){return city;}
+            }
+            throw new IllegalArgumentException("nessuna capitale trovata");
+        }
+
 }
