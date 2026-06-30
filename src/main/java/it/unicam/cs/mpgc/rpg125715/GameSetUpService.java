@@ -57,4 +57,10 @@ public class GameSetUpService {
             return new Location(idGenerator.nextId(EntityType.LOCATION), x, y);
         }
 
+        public City creaCity(CityType cityType){
+            if(cityType == null){throw new IllegalArgumentException("cityType is null");}
+            return new City(cityType.getDisplayName());
+        }
+
+
 }
