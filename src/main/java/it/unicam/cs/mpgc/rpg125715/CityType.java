@@ -44,11 +44,11 @@ public enum CityType {
     Copenaghen("Copenaghen", LeaderType.FEDERICO_BARBAROSSA, false),
 
     //ANNIBALE
-    Cartagine("Cartagine", LeaderType.ATTILA, true),
-    Il_Cairo("Il Cairo", LeaderType.ATTILA, false),
-    Rabat("Rabat", LeaderType.ATTILA, false),
-    Madrid("Madrid", LeaderType.ATTILA, false),
-    Tariff("Tariff", LeaderType.ATTILA, false);
+    Cartagine("Cartagine", LeaderType.ANNIBALE, true),
+    Il_Cairo("Il Cairo", LeaderType.ANNIBALE, false),
+    Rabat("Rabat", LeaderType.ANNIBALE, false),
+    Madrid("Madrid", LeaderType.ANNIBALE, false),
+    Tariff("Tariff", LeaderType.ANNIBALE, false);
 
 
     private final String displayName;
