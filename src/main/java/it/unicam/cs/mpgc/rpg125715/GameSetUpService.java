@@ -48,11 +48,16 @@ public class GameSetUpService {
 
             Territory territory = creaTerritorioPerLeader(leader);
             Player player = new Player(idGenerator.nextId(EntityType.PLAYER),nome, leader, denari, territory);
-            City capitale = creaCapitalePerLeader(leader, player);
 
-            territory.addCity(capitale);
-            territory.setCapitale(capitale);
+            List<City> cities = creaCitiesForLeader(leader, player);
+            String capitalName = getCapitaleForLeader(leader).getDisplayName();
 
+            for(City city : cities){
+                territory.addCity(city);
+                if(city.getName().equals(capitalName)){
+                    territory.setCapitale(city);
+                }
+            }
             return player;
         }
 
