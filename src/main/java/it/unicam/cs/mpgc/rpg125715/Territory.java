@@ -82,6 +82,10 @@ public class Territory {
     }
     public void rimuoviCapitale(){this.capitale = null;}
 
+    public void setCapitale(City c){
+        if (c == null){throw new IllegalArgumentException("città null");}
+        this.capitale = c;
+    }
 
     //CITTA
     private void removeCity(City c){
