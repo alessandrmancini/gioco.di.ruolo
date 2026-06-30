@@ -74,7 +74,7 @@ public class GameSetUpService {
             if(leader == null){throw new IllegalArgumentException("leader is null");}
             List<CityType> cityTypes = new ArrayList<>();
             for(CityType city : CityType.values()){
-                if(city.getLeaderType()== leader){
+                if(city.getStartLeaderType()== leader){
                     cityTypes.add(city);
                 }
             }
@@ -83,7 +83,7 @@ public class GameSetUpService {
         public CityType getCapitaleForLeader(LeaderType leader){
             if(leader == null){throw new IllegalArgumentException("leader is null");}
             for(CityType city : CityType.values()){
-                if(city.getLeaderType()== leader && city.isCapital()){return city;}
+                if(city.getStartLeaderType()== leader && city.isCapital()){return city;}
             }
             throw new IllegalArgumentException("nessuna capitale trovata");
         }

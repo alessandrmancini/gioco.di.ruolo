@@ -64,7 +64,7 @@ public enum CityType {
         return displayName;
     }
     //A CHE LEADER APPARTIENE
-    public LeaderType getLeaderType() {
+    public LeaderType getStartLeaderType() {
         return leaderType;
     }
     //TRUE SE CAPITALE
