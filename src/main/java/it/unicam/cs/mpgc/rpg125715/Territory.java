@@ -71,12 +71,12 @@ public class Territory {
     public City getCapitale() {return capitale;}
     public boolean isCapitale(City c){return c!= null  && c == capitale;}
 
-    public void nominaCapitale(Player p){
-        if(p == null) {throw new IllegalArgumentException("Player o città non possono essere null");}
-        if(owner != p){throw new IllegalArgumentException("solo il proprietario del territorio può nominare la capitale");}
+    public void nominaCapitale(){
+        if(owner == null) {throw new IllegalStateException("owner null");}
         if(cities.isEmpty()){
-            p.getTerritorio().capitale = null;
-            p.setSconfitto();
+            this.capitale = null;
+            owner.setSconfitto();
+            return;
         }
         this.capitale = prioritaCapitale(cities);
     }
@@ -84,32 +84,22 @@ public class Territory {
 
     public void setCapitale(City c){
         if (c == null){throw new IllegalArgumentException("città null");}
+        if(!cities.contains(c)){throw new IllegalArgumentException("città non presente nel territorio");}
         this.capitale = c;
     }
 
     //CITTA
-    private void removeCity(City c){
+    public void removeCity(City c){
         if(c == null || !cities.contains(c)){return;}
-        c.resetOwner();
         cities.remove(c);
+        if(c == capitale){
+            capitale = null;
+        }
     }
     public void addCity(City c){
-        if(c == null || cities.contains(c) || c.getOwner()==null){throw new IllegalArgumentException("città null o già presente");}
+        if(c == null){throw new IllegalArgumentException("città null o già presente");}
         if(owner== null){throw new IllegalArgumentException("owner null");}
-        Territory vecchioTerritorio = c.getOwner().getTerritorio();
-        if(vecchioTerritorio.isCapitale(c)){
-            vecchioTerritorio.removeCity(c);
-            if(!vecchioTerritorio.getCities().isEmpty()){
-                vecchioTerritorio.nominaCapitale(vecchioTerritorio.getOwner());
-            }
-            else{
-                vecchioTerritorio.getOwner().setSconfitto();
-                vecchioTerritorio.rimuoviCapitale();
-            }
-        }
-        else{
-            vecchioTerritorio.removeCity(c);
-        }
+        if(cities.contains(c)){throw new IllegalArgumentException("città già presente");}
         c.setOwner(owner);
         cities.add(c);
     }
