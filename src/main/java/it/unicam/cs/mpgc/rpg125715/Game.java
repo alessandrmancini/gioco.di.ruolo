@@ -40,7 +40,14 @@ public class Game {
     public List<Player> getPlayers(){return players;}
     public int numeroPlayerAttivi(){return getActivePlayers().size();}
     public boolean haSoloUnPlayerAttivo(){
-        return getActivePlayers().size() == 1;
+        int count =  0;
+        for(Player p : players){
+            if(!p.isSconfitto()){
+                count++;
+                if(count > 1){return false;}
+            }
+        }
+        return count == 1;
     }
 
     //LOCATION
