@@ -27,7 +27,5 @@ public class Ribellione {
         turniAttiva = 0;
     }
 
-    public boolean applicaMalusOro(){
-        return attiva && turniAttiva >= 2;
-    }
+    public boolean applicaMalusOro(){return attiva && turniAttiva >= 2;}
 }
