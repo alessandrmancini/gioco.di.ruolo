@@ -37,8 +37,11 @@ public class Game {
             turno = (turno+1)%players.size();
         }while(players.get(turno).isSconfitto() && turno != start);
     }
-
     public List<Player> getPlayers(){return players;}
+    public int numeroPlayerAttivi(){return getActivePlayers().size();}
+    public boolean haSoloUnPlayerAttivo(){
+        return getActivePlayers().size() == 1;
+    }
 
     //LOCATION
     public List<Location> getLocations(){return locations;}
@@ -46,6 +49,7 @@ public class Game {
         for(Location l : locations){
             if(l.getId() == id){return l;}
         }
+        throw new IllegalArgumentException("location non presente");
     }
     public int getTurno(){return turno;}
 
