@@ -37,7 +37,7 @@ public class Game {
             turno = (turno+1)%players.size();
         }while(players.get(turno).isSconfitto() && turno != start);
     }
-    public List<Player> getPlayers(){return players;}
+    public List<Player> getPlayers(){return new ArrayList<>(players);}
     public int numeroPlayerAttivi(){return getActivePlayers().size();}
     public boolean haSoloUnPlayerAttivo(){
         int count =  0;
@@ -51,7 +51,7 @@ public class Game {
     }
 
     //LOCATION
-    public List<Location> getLocations(){return locations;}
+    public List<Location> getLocations(){return new ArrayList<>(locations);}
     public Location getLocationById(int id){
         for(Location l : locations){
             if(l.getId() == id){return l;}
@@ -61,7 +61,7 @@ public class Game {
     public int getTurno(){return turno;}
 
     //GAME INIZIATO
-    public void setIniziato(){iniziato = true;}
+    public void iniziaPartita(){iniziato = true;}
     public boolean isIniziato(){return iniziato;}
 
     //GAME FINITO
