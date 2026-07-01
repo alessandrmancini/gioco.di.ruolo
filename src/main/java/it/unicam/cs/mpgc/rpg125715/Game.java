@@ -1,0 +1,59 @@
+package it.unicam.cs.mpgc.rpg125715;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Game {
+    private List<Player> players;
+    private List<Location> locations;
+    private int turno;
+    private boolean iniziato;
+    private boolean finita;
+
+    public Game(List<Player> players, List<Location> locations){
+        if(players == null ||players.isEmpty()){throw new IllegalArgumentException("players null o vuota");}
+        if(locations == null || locations.isEmpty()){throw new IllegalArgumentException("locations null o vuota");}
+        this.players = new  ArrayList<>(players);
+        this.locations = new  ArrayList<>(locations);
+        this.turno = 0;
+        this.iniziato = false;
+        this.finita = false;
+    }
+    //PLAYER
+    public List<Player> getActivePlayers(){
+        List<Player> activePlayers = new ArrayList<>();
+        for(Player p : players){
+            if(!p.isSconfitto()){
+                activePlayers.add(p);
+            }
+        }
+        return activePlayers;
+    }
+    public Player getCurrentPlayer(){return players.get(turno);}
+    public void nextPlayer(){
+        if(finita){return;}
+        int start = turno;
+        do{
+            turno = (turno+1)%players.size();
+        }while(players.get(turno).isSconfitto() && turno != start);
+    }
+
+    public List<Player> getPlayers(){return players;}
+
+    //LOCATION
+    public List<Location> getLocations(){return locations;}
+    public Location getLocationById(int id){
+        for(Location l : locations){
+            if(l.getId() == id){return l;}
+        }
+    }
+    public int getTurno(){return turno;}
+
+    //GAME INIZIATO
+    public void setIniziato(){iniziato = true;}
+    public boolean isIniziato(){return iniziato;}
+
+    //GAME FINITO
+    public void setFinita(){finita = true;}
+    public boolean isGameOver(){return finita;}
+}
