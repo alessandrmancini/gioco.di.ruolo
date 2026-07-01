@@ -9,6 +9,7 @@ public class TurnService {
         Player corrente = game.getCurrentPlayer();
         sbloccaEsercitiPlayer(game,corrente);
         assegnaOroTurno(corrente);
+        aggiornaRibellioni(corrente, game);
     }
 
     private void validaGame(Game game){
@@ -28,7 +29,7 @@ public class TurnService {
     private void assegnaOroTurno(Player player){
         player.aggiungiOro(5);
     }
-    private void aggiornaRibellioni(Player player){
+    private void aggiornaRibellioni(Player player, Game game){
 
     }
 }
