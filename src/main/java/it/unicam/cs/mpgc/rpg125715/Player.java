@@ -17,6 +17,7 @@ public class Player {
         if(name == null || name.isBlank()){throw  new IllegalArgumentException("il nome del player non può essere vuoto");}
         if(leader == null){throw new IllegalArgumentException("il leader non può essere null");}
         if(oroIniziale<0){throw new IllegalArgumentException("l'oro non può essere negativo");}
+        if(territorio == null){throw new IllegalArgumentException("territorio null");}
         this.id = id;
         this.name = name;
         this.leader = leader;
