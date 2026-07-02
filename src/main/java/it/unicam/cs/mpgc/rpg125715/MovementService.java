@@ -22,12 +22,7 @@ public class MovementService {
         army.aggiornaPosizione(destinazione);
         army.bloccaMovimento();
 
-        if(!destinazione.isContesa()){
-            if(army.isVuoto()){
-                destinazione.removeArmy(army);
-            }
-            return;
-        }
+        if(!destinazione.isContesa()){return;}
         Army nemico = destinazione.getEnemyArmyFor(army);
         if(nemico == null){throw new IllegalArgumentException("nemico null");}
         BattleResult result = battaglia.combatti(army, nemico, destinazione.getCity());
@@ -40,8 +35,7 @@ public class MovementService {
             armyService.distruggiERespawn(sconfitto);
         }
         else{
-            destinazione.removeArmy(sconfitto);
-            ritirata.addArmy(army);
+            ritirata.addArmy(sconfitto);
             sconfitto.aggiornaPosizione(ritirata);
         }
         if(army.isVuoto()){destinazione.removeArmy(army);}

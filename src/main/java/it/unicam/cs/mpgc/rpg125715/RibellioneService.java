@@ -82,7 +82,7 @@ public class RibellioneService {
         for(City city : territory.getCities()){
             Location l = city.getLocation();
             for(Army a: l.getArmies()){
-                if(a.getOwner() == territory.getOwner()){return false;}
+                if(a != null && a.getOwner() == territory.getOwner()){return false;}
             }
         }
         return true;
@@ -102,7 +102,7 @@ public class RibellioneService {
         for(City city : territory.getCities()){
             Location l = city.getLocation();
             for(Army a: l.getArmies()){
-                if(a.getOwner() == territory.getOwner() && a.getNumeroUnita()>=4){return true;}
+                if(a != null && a.getOwner() == territory.getOwner() && a.getNumeroUnita()>=4){return true;}
             }
         }
         return false;
