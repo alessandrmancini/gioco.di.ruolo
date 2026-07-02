@@ -43,7 +43,10 @@ public class City {
     //OWNER
     public Player getOwner(){return owner;}
     public void resetOwner(){owner = null;}
-    public void setOwner(Player owner){this.owner = owner;}
+    public void setOwner(Player owner){
+        if(owner == null){throw new IllegalArgumentException("owner null");}
+        this.owner = owner;
+    }
 
     //LOCATION
     public Location getLocation() {return location;}
