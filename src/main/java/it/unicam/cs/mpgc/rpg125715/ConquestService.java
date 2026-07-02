@@ -11,15 +11,19 @@ public class ConquestService {
         if(vecchioOwner == null){throw new IllegalStateException("la città non ha proprietario");}
 
         Territory vecchioTerritory = vecchioOwner.getTerritorio();
+        Territory nuovoTerritory = conquistatore.getTerritorio();
 
         vecchioTerritory.removeCity(city);
+        city.setOwner(conquistatore);
+        nuovoTerritory.addCity(city);
 
         if(vecchioTerritory.getCities().isEmpty()){
             vecchioOwner.setSconfitto();
+            vecchioTerritory.rimuoviCapitale();
         }
         else if(vecchioTerritory.getCapitale() == null){
             vecchioTerritory.nominaCapitale();
         }
-        conquistatore.getTerritorio().addCity(city);
+        if(nuovoTerritory.getCapitale() == null){nuovoTerritory.nominaCapitale();}
     }
 }
