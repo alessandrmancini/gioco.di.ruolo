@@ -42,7 +42,10 @@ public class RibellioneService {
 
         ribellione.nextTurn();
 
-        if(ribellione.getTurniAttiva()>7){territory.getOwner().setSconfitto();}
+        if(ribellione.getTurniAttiva()>7){
+            territory.getOwner().setSconfitto();
+            territory.rimuoviRibellione();
+        }
     }
 
     public boolean territorioProduceOro(Territory territory){
