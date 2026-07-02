@@ -38,6 +38,13 @@ public class TurnService {
             a.sbloccaMovimento();
         }
     }
+    private void aggiornaRibellioni(Player player, Game game){
+        if(player == null){throw new IllegalArgumentException("Player is null");}
+        if(game == null){throw new IllegalArgumentException("Game is null");}
+
+        ribellioneService.aggiornaRibellioneTurno(player.getTerritorio());
+        if(player.isSconfitto() && game.haSoloUnPlayerAttivo()){game.setFinita();}
+    }
     private void assegnaOroTurno(Player player){
         if(player == null){throw new IllegalArgumentException("Player is null");}
 
@@ -50,11 +57,5 @@ public class TurnService {
         }
         player.aggiungiOro(5);
     }
-    private void aggiornaRibellioni(Player player, Game game){
-        if(player == null){throw new IllegalArgumentException("Player is null");}
-        if(game == null){throw new IllegalArgumentException("Game is null");}
 
-        ribellioneService.aggiornaRibellioneTurno(player.getTerritorio());
-        if(player.isSconfitto() && game.haSoloUnPlayerAttivo()){game.setFinita();}
-    }
 }
