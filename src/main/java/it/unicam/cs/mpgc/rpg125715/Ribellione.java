@@ -30,9 +30,7 @@ public class Ribellione {
             pacificazione = false;
         }
     }
-    public void nextTurn(){
-        if(attiva){turniAttiva++;}
-    }
+    public void nextTurn(){if(attiva){turniAttiva++;}}
 
     public void pacifica(){
         attiva = false;

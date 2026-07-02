@@ -1,6 +1,7 @@
 package it.unicam.cs.mpgc.rpg125715;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Location {
@@ -94,6 +95,9 @@ public class Location {
             if( army1 != null && army1 != army && army1.getOwner() != army.getOwner()){return army1;}
         }
         return null;
+    }
+    public Army[] getArmies(){
+        return Arrays.copyOf(armies, armies.length);
     }
     // LOCATION CONTESA
     public boolean isContesa(){return contesa;}

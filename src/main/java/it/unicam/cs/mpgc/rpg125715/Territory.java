@@ -110,9 +110,7 @@ public class Territory {
     //RIBELLIONE
     public Ribellione getRibellione() {return ribellione;}
     public void setRibellione(Ribellione ribellione) {this.ribellione = ribellione;}
-    public boolean hasRibellione(){
-        return ribellione != null && ribellione.isAttiva();
-    }
+    public boolean hasRibellione(){return ribellione != null && ribellione.isAttiva();}
     public void attivaRibellione(){
         if(ribellione == null){
             ribellione = new Ribellione();
