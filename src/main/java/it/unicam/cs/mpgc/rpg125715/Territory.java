@@ -31,6 +31,9 @@ public class Territory {
     public void setOwner(Player owner) {
         if(owner == null){throw new IllegalArgumentException("il proprietario non può essere null");}
         this.owner = owner;
+        for(City c : cities){
+            c.setOwner(owner);
+        }
     }
 
     //SPECIALIZZAZIONI E SVILUPPO
@@ -97,7 +100,7 @@ public class Territory {
         }
     }
     public void addCity(City c){
-        if(c == null){throw new IllegalArgumentException("città null o già presente");}
+        if(c == null){throw new IllegalArgumentException("città null");}
         if(owner== null){throw new IllegalArgumentException("owner null");}
         if(cities.contains(c)){throw new IllegalArgumentException("città già presente");}
         c.setOwner(owner);
