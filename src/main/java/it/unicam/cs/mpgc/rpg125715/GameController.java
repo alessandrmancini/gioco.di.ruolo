@@ -27,7 +27,7 @@ public class GameController {
             //creazione giocatori
             game = gameInitializationService.creaPartitaBase(configurazioneBase());
 
-            statusLabel.setText("Partita creata. Giocatore corrente: "+game.getCurrentPlayer().getName()+", locations: "+game.getLocations().size());
+            statusLabel.setText(creaMessaggioPartita());
         }catch(Exception e){
             statusLabel.setText("Errore: "+e.getMessage());
             e.printStackTrace();
@@ -40,5 +40,26 @@ public class GameController {
                 new GameInitializationService.PlayerConfig(
                         "Giocatore 2", LeaderType.ANNIBALE,10));
     }
+
+    private String creaMessaggioPartita(){
+        Player currentPlayer = game.getCurrentPlayer();
+        int numeroCitta = currentPlayer.getTerritorio().getCities().size();
+        String nomeCapitale = currentPlayer.getCapitale().getName();
+
+        String elencoGiocatori = "";
+        for(Player player : game.getPlayers()){
+            elencoGiocatori = elencoGiocatori
+                    + "- "
+                    + player.getName()
+                    +" ("+player.getLeader()
+                    +") \n";
+        }
+
+        return "Partita creata \n"+
+                "Giocatore corrente: "+game.getCurrentPlayer().getName()+"\n"+
+                ", numero città: "+game.getCurrentPlayer().getTerritorio().getCities().size()+"\n"+
+                "Giocatori creati:\n"+ elencoGiocatori;
+    }
+
     public Game getGame() {return game;}
 }
