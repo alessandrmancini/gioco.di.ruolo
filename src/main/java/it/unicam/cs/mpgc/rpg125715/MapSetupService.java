@@ -118,9 +118,110 @@ public class MapSetupService {
     }
     private void assegnaAdiacenzaBase(List<int[]> adiacenze){
         if(adiacenze == null){throw new IllegalArgumentException("adiacenze is null");}
+        // Ovest
+        adiacenze.add(new int[]{17,16});
+        adiacenze.add(new int[]{16,14});
+        adiacenze.add(new int[]{14,15});
+        adiacenze.add(new int[]{14, 12});
+        adiacenze.add(new int[]{12, 6});
+        adiacenze.add(new int[]{6, 13});
+        adiacenze.add(new int[]{6, 5});
+        adiacenze.add(new int[]{5, 4});
+        adiacenze.add(new int[]{4, 3});
+        adiacenze.add(new int[]{6, 7});
+        adiacenze.add(new int[]{7, 1});
+        adiacenze.add(new int[]{1, 2});
+        adiacenze.add(new int[]{2, 3});
+
+        // Centro Europa
+        adiacenze.add(new int[]{4, 8});
+        adiacenze.add(new int[]{8, 9});
+        adiacenze.add(new int[]{9, 10});
+        adiacenze.add(new int[]{9, 11});
+        adiacenze.add(new int[]{8, 18});
+        adiacenze.add(new int[]{18, 19});
+        adiacenze.add(new int[]{18, 20});
+
+        // Sud-est / Medio Oriente
+        adiacenze.add(new int[]{20, 35});
+        adiacenze.add(new int[]{35, 21});
+        adiacenze.add(new int[]{21, 22});
+        adiacenze.add(new int[]{22, 23});
+        adiacenze.add(new int[]{23, 2});
+        adiacenze.add(new int[]{23, 19});
+
+        // Urali
+        adiacenze.add(new int[]{10, 24});
+        adiacenze.add(new int[]{24, 34});
+        adiacenze.add(new int[]{34, 27});
+        adiacenze.add(new int[]{27, 25});
+        adiacenze.add(new int[]{25, 26});
+
+        // Cina / India
+        adiacenze.add(new int[]{21, 36});
+        adiacenze.add(new int[]{36, 37});
+        adiacenze.add(new int[]{37, 28});
+        adiacenze.add(new int[]{28, 38});
+        adiacenze.add(new int[]{38, 29});
+        adiacenze.add(new int[]{29, 39});
+        adiacenze.add(new int[]{39, 40});
+        adiacenze.add(new int[]{40, 30});
+        adiacenze.add(new int[]{30, 31});
+
+        // collegamenti alternativi interni
+        adiacenze.add(new int[]{3, 32});
+        adiacenze.add(new int[]{32, 4});
+        adiacenze.add(new int[]{4, 33});
+        adiacenze.add(new int[]{33, 8});
+        adiacenze.add(new int[]{20, 24});
     }
     private void assegnaCittaAiNodi(List<Player> players, Map<Integer,City> cityPerLocation){
         if(players == null){throw new IllegalArgumentException("players is null");}
         if(cityPerLocation == null){throw new IllegalArgumentException("cityPerLocation is null");}
+
+        for(Player player: players){
+            if(player == null){throw new IllegalArgumentException("player is null");}
+            for(City city: player.getTerritorio().getCities()){
+                int locationId = trovaLocationPerNomeCitta(city.getName());
+                cityPerLocation.put(locationId,city);
+            }
+        }
+    }
+
+    private int trovaLocationPerNomeCitta(String nome){
+        if(nome == null){throw new IllegalArgumentException("nome is null");}
+        return switch (nome){
+          case "Rabat" -> 1;
+          case "Cartagine" -> 2;
+            case "Cagliari" -> 3;
+            case "Roma" -> 4;
+            case "Marsiglia" -> 5;
+            case "Parigi" -> 6;
+            case "Madrid" -> 7;
+            case "Vienna" -> 8;
+            case "Berlino" -> 9;
+            case "Varsavia" -> 10;
+            case "Copenaghen" -> 11;
+            case "Amsterdam" -> 12;
+            case "Rennes" -> 13;
+            case "Londra" -> 14;
+            case "Dublino" -> 15;
+            case "Edimburgo" -> 16;
+            case "Reykjavik" -> 17;
+            case "Pella" -> 18;
+            case "Creta" -> 19;
+            case "Ankara" -> 20;
+            case "Babilonia" -> 21;
+            case "Gedda" -> 22;
+            case "Il Cairo" -> 23;
+            case "Mosca" -> 24;
+            case "Astana" -> 25;
+            case "Bratsk" -> 26;
+            case "Delhi" -> 28;
+            case "Xianyang" -> 29;
+            case "Hong Kong" -> 30;
+            case "Tokyo" -> 31;
+            default -> throw new IllegalArgumentException("nome non riconosciuto");
+        };
     }
 }
