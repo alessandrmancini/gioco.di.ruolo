@@ -57,7 +57,7 @@ public class GameController {
 
         return "Partita creata \n"+
                 "Giocatore corrente: "+game.getCurrentPlayer().getName()+"\n"+
-                ", numero città: "+game.getCurrentPlayer().getTerritorio().getCities().size()+"\n"+
+                "numero città: "+game.getCurrentPlayer().getTerritorio().getCities().size()+"\n"+
                 "Giocatori creati:\n"+ elencoGiocatori;
     }
 
