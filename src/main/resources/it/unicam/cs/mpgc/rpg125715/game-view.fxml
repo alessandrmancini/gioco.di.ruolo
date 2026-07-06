@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="20"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="it.unicam.cs.mpgc.rpg125715.GameController">
+
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+
+    <Label text="Conquest Game"
+           style="-fx-font-size: 26px; -fx-font-weight: bold;"/>
+
+    <Button text="Nuova partita"
+            onAction="#onNuovaPartitaClick"/>
+
+    <Label fx:id="statusLabel"
+           text="Premi il bottone per iniziare"/>
+</VBox>
