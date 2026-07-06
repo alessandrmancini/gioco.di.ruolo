@@ -84,6 +84,10 @@ public class MapSetupService {
         coordinates.put(15, new int[]{80, 40});   // Dublino
         coordinates.put(16, new int[]{200, 10});  // Edimburgo
         coordinates.put(17, new int[]{20, 0});  // Reykjavik
+        coordinates.put(42, new int[]{110, 200});  // Tariff
+
+        // NORD EUROPA
+        coordinates.put(41, new int[]{560, 20});
 
         // BALCANI / MEDIO ORIENTE
         coordinates.put(18, new int[]{470, 200}); // Pella
@@ -97,7 +101,7 @@ public class MapSetupService {
         coordinates.put(24, new int[]{700, 70});  // Mosca
         coordinates.put(25, new int[]{880, 110}); // Astana
         coordinates.put(26, new int[]{1040, 70}); // Bratsk
-        coordinates.put(27, new int[]{860, 220}); // nodo intermedio area Attila
+
 
         // INDIA / CINA / EST ASIA
         coordinates.put(28, new int[]{980, 300});  // Delhi
@@ -106,6 +110,7 @@ public class MapSetupService {
         coordinates.put(31, new int[]{1360, 330}); // Tokyo
 
         // nodi intermedi utili
+        coordinates.put(27, new int[]{860, 220});
         coordinates.put(32, new int[]{260, 180});
         coordinates.put(33, new int[]{390, 150});
         coordinates.put(34, new int[]{540, 150});
@@ -119,9 +124,9 @@ public class MapSetupService {
     private void assegnaAdiacenzaBase(List<int[]> adiacenze){
         if(adiacenze == null){throw new IllegalArgumentException("adiacenze is null");}
         // Ovest
-        adiacenze.add(new int[]{17,16});
-        adiacenze.add(new int[]{16,14});
-        adiacenze.add(new int[]{14,15});
+        adiacenze.add(new int[]{17, 16});
+        adiacenze.add(new int[]{16, 14});
+        adiacenze.add(new int[]{14, 15});
         adiacenze.add(new int[]{14, 12});
         adiacenze.add(new int[]{12, 6});
         adiacenze.add(new int[]{6, 13});
@@ -132,6 +137,13 @@ public class MapSetupService {
         adiacenze.add(new int[]{7, 1});
         adiacenze.add(new int[]{1, 2});
         adiacenze.add(new int[]{2, 3});
+
+        // Tariff vicino madrid e rabat
+        adiacenze.add(new int[]{42, 7});
+        adiacenze.add(new int[]{42, 1});
+
+        //Nord europa
+        adiacenze.add(new int[]{11, 41});
 
         // Centro Europa
         adiacenze.add(new int[]{4, 8});
@@ -193,35 +205,37 @@ public class MapSetupService {
         return switch (nome){
           case "Rabat" -> 1;
           case "Cartagine" -> 2;
-            case "Cagliari" -> 3;
-            case "Roma" -> 4;
-            case "Marsiglia" -> 5;
-            case "Parigi" -> 6;
-            case "Madrid" -> 7;
-            case "Vienna" -> 8;
-            case "Berlino" -> 9;
-            case "Varsavia" -> 10;
-            case "Copenaghen" -> 11;
-            case "Amsterdam" -> 12;
-            case "Rennes" -> 13;
-            case "Londra" -> 14;
-            case "Dublino" -> 15;
-            case "Edimburgo" -> 16;
-            case "Reykjavik" -> 17;
-            case "Pella" -> 18;
-            case "Creta" -> 19;
-            case "Ankara" -> 20;
-            case "Babilonia" -> 21;
-            case "Gedda" -> 22;
-            case "Il Cairo" -> 23;
-            case "Mosca" -> 24;
-            case "Astana" -> 25;
-            case "Bratsk" -> 26;
-            case "Delhi" -> 28;
-            case "Xianyang" -> 29;
-            case "Hong Kong" -> 30;
-            case "Tokyo" -> 31;
-            default -> throw new IllegalArgumentException("nome non riconosciuto");
+          case "Cagliari" -> 3;
+          case "Roma" -> 4;
+          case "Marsiglia" -> 5;
+          case "Parigi" -> 6;
+          case "Madrid" -> 7;
+          case "Vienna" -> 8;
+          case "Berlino" -> 9;
+          case "Varsavia" -> 10;
+          case "Copenaghen" -> 11;
+          case "Amsterdam" -> 12;
+          case "Rennes" -> 13;
+          case "Londra" -> 14;
+          case "Dublino" -> 15;
+          case "Edimburgo" -> 16;
+          case "Reykjavik" -> 17;
+          case "Pella" -> 18;
+          case "Creta" -> 19;
+          case "Ankara" -> 20;
+          case "Babilonia" -> 21;
+          case "Gedda" -> 22;
+          case "Il Cairo" -> 23;
+          case "Mosca" -> 24;
+          case "Astana" -> 25;
+          case "Bratsk" -> 26;
+          case "Delhi" -> 28;
+          case "Xianyang" -> 29;
+          case "Hong Kong" -> 30;
+          case "Tokyo" -> 31;
+          case "Stoccolma" -> 41;
+          case "Tariff" -> 42;
+          default -> throw new IllegalArgumentException("nome non riconosciuto: "+ nome);
         };
     }
 }
