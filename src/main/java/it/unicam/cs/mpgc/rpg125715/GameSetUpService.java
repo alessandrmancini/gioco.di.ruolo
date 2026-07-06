@@ -90,6 +90,7 @@ public class GameSetUpService {
         public List<City> creaCitiesForLeader(LeaderType leader, Player owner){
             if(leader == null){throw new IllegalArgumentException("leader is null");}
             if(owner == null){throw new IllegalArgumentException("owner is null");}
+            if(owner.getLeader() != leader){throw new IllegalArgumentException("leader mismatch");}
 
             List<City> cities = new ArrayList<>();
             for(CityType city : getCityTypesForLeader(leader)){
