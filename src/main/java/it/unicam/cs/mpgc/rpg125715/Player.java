@@ -11,13 +11,15 @@ public class Player {
     private final Territory territorio;
     private final List<Army> eserciti;
     private boolean sconfitto;
+    private final PlayerKind kind;
 
-    public Player(int id, String name, LeaderType leader,int oroIniziale, Territory territorio) {
+    public Player(int id, String name, LeaderType leader, int oroIniziale, Territory territorio, PlayerKind kind) {
         if(id<0){throw new IllegalArgumentException("id negativo");}
         if(name == null || name.isBlank()){throw  new IllegalArgumentException("il nome del player non può essere vuoto");}
         if(leader == null){throw new IllegalArgumentException("il leader non può essere null");}
         if(oroIniziale<0){throw new IllegalArgumentException("l'oro non può essere negativo");}
         if(territorio == null){throw new IllegalArgumentException("territorio null");}
+        if(kind == null){throw new IllegalArgumentException("kind null");}
         this.id = id;
         this.name = name;
         this.leader = leader;
@@ -25,6 +27,7 @@ public class Player {
         this.territorio = territorio;
         this.eserciti = new ArrayList<>();
         this.sconfitto = false;
+        this.kind = kind;
     }
 
     public int getId() {return id;}
@@ -67,4 +70,7 @@ public class Player {
 
     public int numeroCitta(){return territorio.getCities().size();}
     public int numeroEserciti(){return eserciti.size();}
+
+    //Human o bot
+    public PlayerKind getKind() {return kind;}
 }
