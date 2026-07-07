@@ -16,8 +16,9 @@
     <Label text="Conquest Game"
            style="-fx-font-size: 26px; -fx-font-weight: bold;"/>
 
-    <Button text="Nuova partita"
-            onAction="#onNuovaPartitaClick"/>
+    <Button text="Nuova partita" onAction="#onNuovaPartitaClick" />
+    <Button text="Fine turno" onAction="#onFineTurnoClick" />
+    <Button text="Turno bot" onAction="#onTurnoBotClick" />
 
     <Label fx:id="statusLabel"
            text="Premi il bottone per iniziare"/>

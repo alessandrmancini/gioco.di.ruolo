@@ -34,13 +34,14 @@ public class GameSetUpService {
             return new Territory(idGenerator.nextId(EntityType.TERRITORY), profile.territoryName());
         }
 
-        public Player creaPlayerIniziale(String nome, LeaderType leader, int denari){
+        public Player creaPlayerIniziale(String nome, LeaderType leader, int denari, PlayerKind playerKind){
             if(nome == null || nome.isBlank()){throw new IllegalArgumentException("nome is null");}
             if(leader == null){throw new IllegalArgumentException("leader is null");}
             if(denari<0){throw new IllegalArgumentException("denari is negative");}
+            if(playerKind == null){throw new IllegalArgumentException("playerKind is null");}
 
             Territory territory = creaTerritorioPerLeader(leader);
-            Player player = new Player(idGenerator.nextId(EntityType.PLAYER),nome, leader, denari, territory);
+            Player player = new Player(idGenerator.nextId(EntityType.PLAYER),nome, leader, denari, territory,  playerKind);
 
             territory.setOwner(player);
 

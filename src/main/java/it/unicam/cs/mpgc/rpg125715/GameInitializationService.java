@@ -34,7 +34,7 @@ public class GameInitializationService {
         for(PlayerConfig config : configPlayer){
             if(config == null){throw new IllegalArgumentException("config is null");}
 
-            Player player = gameSetUpService.creaPlayerIniziale(config.nome(), config.leader(), config.oroIniziale());
+            Player player = gameSetUpService.creaPlayerIniziale(config.nome(), config.leader(), config.oroIniziale(), config.playerKind);
             players.add(player);
         }
         return players;
@@ -72,11 +72,12 @@ public class GameInitializationService {
         }
     }
 
-    public record PlayerConfig(String nome, LeaderType leader, int oroIniziale){
+    public record PlayerConfig(String nome, LeaderType leader, int oroIniziale, PlayerKind playerKind) {
         public PlayerConfig{
             if(nome == null || nome.isBlank()){throw new IllegalArgumentException("nome is null");}
             if(leader == null){throw new IllegalArgumentException("leader is null");}
             if(oroIniziale < 0){throw new IllegalArgumentException("oro iniziale is negative");}
+            if(playerKind == null){throw new IllegalArgumentException("playerKind is null");}
         }
     }
 }

@@ -10,7 +10,11 @@ public class GameController {
     private Label statusLabel;
 
     private Game game;
+
     private final GameInitializationService gameInitializationService;
+    private final BotDecisionService botDecisionService;
+    private final BotTurnService botTurnService;
+    private final TurnService turnService;
 
     public GameController() {
         IdGenerator idGenerator = new IdGenerator();
@@ -18,48 +22,111 @@ public class GameController {
         GameSetUpService gameSetUpService = new GameSetUpService(idGenerator);
         MapSetupService mapSetupService = new MapSetupService(gameSetUpService);
         ArmyService armyService = new ArmyService(idGenerator);
+        RibellioneService ribellioneService = new RibellioneService();
 
         this.gameInitializationService = new GameInitializationService(gameSetUpService, mapSetupService, armyService);
+        this.turnService = new TurnService(ribellioneService);
+        this.botDecisionService = new BotDecisionService();
+        this.botTurnService = new BotTurnService(botDecisionService, turnService);
     }
+
+    @FXML
+    private void inizialize(){
+        statusLabel.setText("Premi 'Nuova partita' per iniziare");
+    }
+
     @FXML
     protected void onNuovaPartitaClick() {
         try {
             //creazione giocatori
             game = gameInitializationService.creaPartitaBase(configurazioneBase());
 
-            statusLabel.setText(creaMessaggioPartita());
+            statusLabel.setText(creaMessaggioStatoPartita());
+
         }catch(Exception e){
             statusLabel.setText("Errore: "+e.getMessage());
             e.printStackTrace();
         }
     }
-    private List<GameInitializationService.PlayerConfig> configurazioneBase(){
-        return List.of(
-                new GameInitializationService.PlayerConfig(
-                        "Giocatore 1", LeaderType.ALESSANDRO_MAGNO,10),
-                new GameInitializationService.PlayerConfig(
-                        "Giocatore 2", LeaderType.ANNIBALE,10));
+    @FXML
+    protected void onTurnoBotClick(){
+        try{
+            controllaPartitaCreata();
+
+            Player currentPlayer = game.getCurrentPlayer();
+
+            if(currentPlayer.getKind() != PlayerKind.BOT){
+                statusLabel.setText("Il giocatore corrente non è un bot. \n" + "Giocatore corrente: "+ currentPlayer.getName());
+                return;
+            }
+
+            String esitoBot = botTurnService.eseguiTurnoBot(game);
+
+            statusLabel.setText(esitoBot+ "\n\n" + creaMessaggioStatoPartita());
+        }catch(Exception e){
+            statusLabel.setText("Errore bot: "+e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    protected void onFineTurnoClick(){
+        try{
+            controllaPartitaCreata();
+
+            turnService.fineTurno(game);
+
+            statusLabel.setText("Turno terminato\n\n" + creaMessaggioStatoPartita());
+        } catch (Exception e) {
+            statusLabel.setText("Errore fine turno: "+e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    private String creaMessaggioPartita(){
-        Player currentPlayer = game.getCurrentPlayer();
-        int numeroCitta = currentPlayer.getTerritorio().getCities().size();
-        String nomeCapitale = currentPlayer.getCapitale().getName();
+    private void controllaPartitaCreata(){
+        if(game == null){throw new IllegalArgumentException("devi prima creare una partita");}
+    }
 
+    private String creaMessaggioStatoPartita(){
+
+        if (game == null){return "Nessuna partita creata";}
+
+        Player currentPlayer = game.getCurrentPlayer();
+        String elencoGiocatori = creaElencoGiocatori();
+
+        String nomeCapitale = currentPlayer.hasCapitale() ? currentPlayer.getCapitale().getName() : "Nessuna";
+
+        return "Partita creata \n"+
+                "Giocatore corrente: "+currentPlayer.getName()+"\n"+
+                "Tipo giocatore corrente: " + currentPlayer.getKind() + "\n" +
+                "Numero città: " + currentPlayer.numeroCitta() + "\n" +
+                "Capitale: " + nomeCapitale + "\n" +
+                "Oro: " + currentPlayer.getOro() + "\n" +
+                "Giocatori creati:\n" +
+                elencoGiocatori;
+    }
+
+    private String creaElencoGiocatori(){
         String elencoGiocatori = "";
+
         for(Player player : game.getPlayers()){
             elencoGiocatori = elencoGiocatori
                     + "- "
-                    + player.getName()
-                    +" ("+player.getLeader()
-                    +") \n";
+                    +player.getName()
+                    +" ("
+                    +player.getLeader()
+                    +", "
+                    +player.getKind()
+                    +")\n";
         }
-
-        return "Partita creata \n"+
-                "Giocatore corrente: "+game.getCurrentPlayer().getName()+"\n"+
-                "numero città: "+game.getCurrentPlayer().getTerritorio().getCities().size()+"\n"+
-                "Giocatori creati:\n"+ elencoGiocatori;
+        return elencoGiocatori;
     }
 
+    private List<GameInitializationService.PlayerConfig> configurazioneBase(){
+        return List.of(
+                new GameInitializationService.PlayerConfig(
+                        "Giocatore 1", LeaderType.ALESSANDRO_MAGNO,10, PlayerKind.HUMAN),
+                new GameInitializationService.PlayerConfig(
+                        "Giocatore 2", LeaderType.ANNIBALE,10, PlayerKind.BOT));
+    }
     public Game getGame() {return game;}
 }
