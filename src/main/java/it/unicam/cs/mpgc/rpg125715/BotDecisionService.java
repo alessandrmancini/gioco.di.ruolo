@@ -7,7 +7,7 @@ public class BotDecisionService {
         if(bot == null){throw new IllegalArgumentException("bot null");}
         if(bot.getKind() != PlayerKind.BOT){throw new IllegalArgumentException("il player non è un bot");}
 
-        if(bot.getOro() > 0){return new BotDecision(BotActionType.RECRUIT, bot.getCapitale());}
+        if(bot.getOro() > 0 && bot.hasCapitale()){return new BotDecision(BotActionType.RECRUIT, bot.getCapitale());}
         return new  BotDecision(BotActionType.PASS, null);
     }
 }
