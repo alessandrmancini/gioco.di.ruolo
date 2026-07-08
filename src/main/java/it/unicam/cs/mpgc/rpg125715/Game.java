@@ -9,6 +9,7 @@ public class Game {
     private int turno;
     private boolean iniziato;
     private boolean finita;
+    private int numeroTurno;
 
     public Game(List<Player> players, List<Location> locations){
         if(players == null ||players.isEmpty()){throw new IllegalArgumentException("players null o vuota");}
@@ -18,6 +19,7 @@ public class Game {
         this.turno = 0;
         this.iniziato = false;
         this.finita = false;
+        this.numeroTurno = 1;
     }
     //PLAYER
     public List<Player> getActivePlayers(){
@@ -58,7 +60,12 @@ public class Game {
         }
         throw new IllegalArgumentException("location non presente");
     }
+
+    //TURNI
     public int getTurno(){return turno;}
+    public int getNumeroTurno(){return numeroTurno;}
+    public void incrementaNumeroTurno(){this.numeroTurno++;}
+
 
     //GAME INIZIATO
     public void iniziaPartita(){iniziato = true;}

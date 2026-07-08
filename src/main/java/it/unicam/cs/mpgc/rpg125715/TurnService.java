@@ -14,13 +14,16 @@ public class TurnService {
         validaGame(game);
         if(game.isGameOver()){return;}
         if(game.haSoloUnPlayerAttivo()){game.setFinita();return;}
+
+        game.incrementaNumeroTurno();
+
         prossimoPlayer(game);
         if(game.haSoloUnPlayerAttivo()){game.setFinita();return;}
 
         Player corrente = game.getCurrentPlayer();
         sbloccaEsercitiPlayer(corrente);
         aggiornaRibellioni(corrente, game);
-        assegnaOroTurno(corrente);
+        assegnaOroTurno(corrente, game);
 
         if(game.haSoloUnPlayerAttivo()){game.setFinita();}
     }
@@ -45,8 +48,11 @@ public class TurnService {
         ribellioneService.aggiornaRibellioneTurno(player.getTerritorio());
         if(player.isSconfitto() && game.haSoloUnPlayerAttivo()){game.setFinita();}
     }
-    private void assegnaOroTurno(Player player){
+    private void assegnaOroTurno(Player player, Game game){
         if(player == null){throw new IllegalArgumentException("Player is null");}
+        if(game == null){throw new IllegalArgumentException("Game is null");}
+
+        if(game.getNumeroTurno() <= game.getPlayers().size()){return;}
 
         Territory territory = player.getTerritorio();
         if(!ribellioneService.territorioProduceOro(territory)){
