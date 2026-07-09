@@ -122,9 +122,20 @@ public class BotTurnService {
         return null;
     }
 
+    //MOVIMENTO
     private String eseguiMovimento(Player bot, Location start, Location end){
         if(bot == null){throw new IllegalArgumentException("bot null");}
         if(start == null || end == null){return bot.getName() + " non può muoversi: partenza o destinazione assente";}
-        return bot.getName() + " prova a muoversi da posizione " +  start.getId();
+
+        Army army = trovaEsercitoInPosizione(bot, start);
+        if(army == null){return bot.getName()+ " non può muoversi: nessun esercito in posizione "+start.getId();}
+        if(!army.isPuoMuovere()){return bot.getName()+ " non può muoversi, ha già mosso";}
+
+        try{
+            movementService.muovi(army, end);
+            return bot.getName() + " muove l'esercito dalla posizione " +  start.getId()+ " alla posizione "+ end.getId();
+        }catch(IllegalArgumentException e){
+            return bot.getName() + " non può muoversi " +  e.getMessage();
+        }
     }
 }
