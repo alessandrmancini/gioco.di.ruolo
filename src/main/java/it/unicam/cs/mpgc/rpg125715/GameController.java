@@ -15,23 +15,27 @@ public class GameController {
     private final BotDecisionService botDecisionService;
     private final BotTurnService botTurnService;
     private final TurnService turnService;
+    private final RecruitmentService recruitmentService;
 
     public GameController() {
+
         IdGenerator idGenerator = new IdGenerator();
 
         GameSetUpService gameSetUpService = new GameSetUpService(idGenerator);
         MapSetupService mapSetupService = new MapSetupService(gameSetUpService);
         ArmyService armyService = new ArmyService(idGenerator);
         RibellioneService ribellioneService = new RibellioneService();
+        RecruitmentService recruitmentService = new RecruitmentService();
 
         this.gameInitializationService = new GameInitializationService(gameSetUpService, mapSetupService, armyService);
         this.turnService = new TurnService(ribellioneService);
         this.botDecisionService = new BotDecisionService();
-        this.botTurnService = new BotTurnService(botDecisionService, turnService);
+        this.botTurnService = new BotTurnService(botDecisionService, turnService, recruitmentService);
+        this.recruitmentService = recruitmentService;
     }
 
     @FXML
-    private void inizialize(){
+    private void initialize(){
         statusLabel.setText("Premi 'Nuova partita' per iniziare");
     }
 

@@ -9,4 +9,5 @@ public record Unit(UnitType type, int attacco, int difesa, int costo) {
             throw new IllegalArgumentException("le statistiche dell'unità non possono essere negative");
         }
     }
+    public UnitType getType() {return type;}
 }
