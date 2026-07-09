@@ -7,7 +7,15 @@ public class BotDecisionService {
         if(bot == null){throw new IllegalArgumentException("bot null");}
         if(bot.getKind() != PlayerKind.BOT){throw new IllegalArgumentException("il player non è un bot");}
 
-        if(bot.getOro() > 0 && bot.hasCapitale()){return new BotDecision(BotActionType.RECRUIT, bot.getCapitale());}
+        City capitale = bot.getCapitale();
+        Location locationCapitale = bot.getCapitale().getLocation();
+        if(bot.getOro() > 0 && bot.hasCapitale()){
+            if(capitale.getLevel() != CityLevel.ACCAMPAMENTO && locationCapitale.hasArmyPlayer(bot)){
+                return new BotDecision(BotActionType.RECRUIT, capitale);
+            }
+
+
+        }
         return new  BotDecision(BotActionType.PASS, null);
     }
 }

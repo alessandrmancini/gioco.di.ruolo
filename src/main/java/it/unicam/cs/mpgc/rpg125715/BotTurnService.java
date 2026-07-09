@@ -70,8 +70,8 @@ public class BotTurnService {
         }
         return null;
     }
-    private UnitType scegliTipoDaReclutare(Player bot, City city){
 
+    private UnitType scegliTipoDaReclutare(Player bot, City city){
         if(bot.getOro()<2){return null;}
         if(bot.getOro()<4){return UnitType.FANTERIA;}
         if(bot.getOro()<6){return UnitType.CAVALLERIA;}

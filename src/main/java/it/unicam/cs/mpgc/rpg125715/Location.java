@@ -74,6 +74,13 @@ public class Location {
         aggiornaContesa();
     }
     public boolean hasArmy(){return armies[0] != null || armies[1] != null;}
+    public boolean hasArmyPlayer(Player p){
+        if(p == null){throw new IllegalArgumentException("p null");}
+        for (Army army : armies) {
+            if(army != null && army.getOwner() == p){return true;}
+        }
+        return false;
+    }
     public int numeroArmy(){
         int count = 0;
         for(Army army : armies){
