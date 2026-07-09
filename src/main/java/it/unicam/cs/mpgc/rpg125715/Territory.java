@@ -7,7 +7,6 @@ public class Territory {
     private final int id;
     private final String name;
     private final List<City> cities;
-    private final List<Territory> confinanti;
     private Player owner;
     private City capitale;
     private Ribellione ribellione;
@@ -18,7 +17,6 @@ public class Territory {
         this.id = id;
         this.name = name;
         this.cities = new ArrayList<>();
-        this.confinanti = new ArrayList<>();
         this.owner = null;
         this.capitale = null;
         this.ribellione = null;
