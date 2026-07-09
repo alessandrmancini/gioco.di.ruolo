@@ -111,7 +111,7 @@ public class BotTurnService {
         try{
             movementService.muovi(army, end);
             return bot.getName() + " prova ad attaccare partendo da posizione " +  start.getId() + " verso "+end.getId();
-        }catch(IllegalArgumentException e){return bot.getName()+" non può attaccare: "+e.getMessage();}
+        }catch(IllegalArgumentException | IllegalStateException e){return bot.getName()+" non può attaccare: "+e.getMessage();}
 
     }
     private Army trovaEsercitoInPosizione(Player bot, Location start){
@@ -134,8 +134,8 @@ public class BotTurnService {
         try{
             movementService.muovi(army, end);
             return bot.getName() + " muove l'esercito dalla posizione " +  start.getId()+ " alla posizione "+ end.getId();
-        }catch(IllegalArgumentException e){
-            return bot.getName() + " non può muoversi " +  e.getMessage();
+        }catch(IllegalArgumentException | IllegalStateException e){
+            return bot.getName() + " non può muoversi: " + e.getMessage();
         }
     }
 }
