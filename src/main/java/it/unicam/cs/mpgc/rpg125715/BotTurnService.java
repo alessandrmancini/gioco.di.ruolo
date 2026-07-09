@@ -23,11 +23,28 @@ public class BotTurnService {
         if(currentPlayer == null){throw new IllegalArgumentException("currentPlayer null");}
         if(currentPlayer.getKind() != PlayerKind.BOT){throw new IllegalArgumentException("il giocatore corrente non è un bot");}
 
-        BotDecision decision = botDecisionService.decide(game, currentPlayer);
-        String esito = eseguiDecisione(game,currentPlayer,decision);
+        String esitoTotale = "";
+        int maxAzioni = 5;
+        int azioniEseguite = 0;
+
+        do{
+            BotDecision decision = botDecisionService.decide(game, currentPlayer);
+
+            if(decision.actionType() == BotActionType.PASS){
+                if(esitoTotale.isBlank()){esitoTotale = currentPlayer.getName()+" passa il turno";}
+                break;
+            }
+
+            String esito = eseguiDecisione(game, currentPlayer, decision);
+            if(!esitoTotale.isBlank()){esitoTotale += "\n";}
+            esitoTotale += esito;
+            azioniEseguite++;
+
+            if(game.isGameOver()){break;}
+        }while(azioniEseguite <= maxAzioni);
 
         if(!game.isGameOver()){turnService.fineTurno(game);}
-        return esito;
+        return esitoTotale;
     }
 
     private String eseguiDecisione(Game game, Player bot, BotDecision decision){
@@ -36,9 +53,9 @@ public class BotTurnService {
         if(decision == null){throw new IllegalArgumentException("decision null");}
 
         return switch (decision.actionType()){
-            case RECRUIT -> eseguiReclutamento(bot, decision.sourceCity());
-            case ATTACK -> eseguiAttacco(bot, decision.sourceCity());
-            case MOVE -> eseguiMovimento(bot, decision.sourceCity());
+            case RECRUIT -> eseguiReclutamento(bot, decision.city());
+            case ATTACK -> eseguiAttacco(bot, decision.sourceLocation(), decision.targetLocation());
+            case MOVE -> eseguiMovimento(bot, decision.sourceLocation(), decision.targetLocation());
             case PASS -> bot.getName() + " passa il turno.";
         };
     }
@@ -47,18 +64,18 @@ public class BotTurnService {
     private String eseguiReclutamento(Player bot, City sourceCity){
         if(sourceCity == null){return bot.getName() + " non può reclutare: città sorgente assente";}
         if(!bot.getTerritorio().getCities().contains(sourceCity)){return bot.getName() + " non può reclutare in "+ sourceCity.getName();}
-        
+
         Army armyInCity = trovaEsercitoNellaCitta(bot, sourceCity);
         if(armyInCity == null){return bot.getName() + " non ha un esercito nella città " + sourceCity.getName();}
 
-        UnitType tipoDaReclutare = scegliTipoDaReclutare(bot, sourceCity);
-        if(tipoDaReclutare == null){return bot.getName() + " non può reclutare in " + sourceCity.getName();}
-        try{
-            Unit unita = recruitmentService.reclutaUnita(bot, sourceCity, armyInCity, tipoDaReclutare);
-            return bot.getName() + " recluta " + unita.getType() + " in "+ sourceCity.getName();
-        } catch (IllegalArgumentException e){
-            return bot.getName() + " non riesce a reclutare in "+ sourceCity.getName()+": "+ e.getMessage();
+        UnitType[] tipoDaReclutare = scegliTipoDaReclutare();
+        for(UnitType unitType : tipoDaReclutare){
+            try{
+                Unit unita = recruitmentService.reclutaUnita(bot, sourceCity, armyInCity, unitType);
+                return bot.getName() + " recluta " + unita.getType() + " in "+ sourceCity.getName();
+            } catch (IllegalArgumentException e) {}
         }
+        return bot.getName() + " non può reclutare in "+ sourceCity.getName();
     }
 
     private Army trovaEsercitoNellaCitta(Player bot, City city){
@@ -71,22 +88,19 @@ public class BotTurnService {
         return null;
     }
 
-    private UnitType scegliTipoDaReclutare(Player bot, City city){
-        if(bot.getOro()<2){return null;}
-        if(bot.getOro()<4){return UnitType.FANTERIA;}
-        if(bot.getOro()<6){return UnitType.CAVALLERIA;}
-        if(bot.getOro()<7){return UnitType.ASSEDIO;}
-        if(bot.getOro()<=8){return UnitType.SPECIALI;}
-
-        return null;
+    private UnitType[] scegliTipoDaReclutare(){
+        return new UnitType[]{
+                UnitType.SPECIALI,UnitType.ELEFANTI,UnitType.ASSEDIO,
+                UnitType.CAVALLERIA, UnitType.FANTERIA
+        };
     }
 
-    private String eseguiAttacco(Player bot, City sourceCity){
-        if(sourceCity == null){return bot.getName() + " non può attaccare: città sorgente assente";}
-        return bot.getName() + " prova ad attaccare partendo da " +  sourceCity.getName();
+    private String eseguiAttacco(Player bot, Location start, Location end){
+        if(start == null || end == null){return bot.getName() + " non può attaccare: partenza o destinazione assente";}
+        return bot.getName() + " prova ad attaccare partendo da posizione " +  start.getId();
     }
-    private String eseguiMovimento(Player bot, City sourceCity){
-        if(sourceCity == null){return bot.getName() + " non può muoversi: città sorgente assente";}
-        return bot.getName() + " prova a muoversi da " +  sourceCity.getName();
+    private String eseguiMovimento(Player bot, Location start, Location end){
+        if(start == null || end == null){return bot.getName() + " non può muoversi: partenza o destinazione assente";}
+        return bot.getName() + " prova a muoversi da posizione " +  start.getId();
     }
 }
