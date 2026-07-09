@@ -74,7 +74,7 @@ public class BotDecisionService {
                             break;
                         }
                     }
-                    if(l2.hasCity() && l2.getCity() != null &&l2.getCity().getOwner()!=bot){
+                    if(l2.hasCity() && l2.getCity() != null && l2.getCity().getOwner()!=bot){
                         score = Math.max(score, 1);
                     }
                 }
