@@ -11,7 +11,10 @@ public class RpgApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader loader = new FXMLLoader(RpgApplication.class.getResource("game-view.fxml"));
-        Scene scene = new Scene(loader.load(), 800, 600);
+        Scene scene = new Scene(loader.load(), 1280, 780);
+        scene.getStylesheets().add(RpgApplication.class.getResource("game.css").toExternalForm());
+        stage.setMinWidth(900);
+        stage.setMinHeight(600);
         stage.setTitle("Conquest Game");
         stage.setScene(scene);
         stage.show();
