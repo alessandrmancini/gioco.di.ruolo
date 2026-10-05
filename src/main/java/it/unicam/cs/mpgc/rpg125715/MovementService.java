@@ -12,21 +12,32 @@ public class MovementService {
         this.conquestService = conquestService;
     }
 
-    public void muovi(Army army, Location destinazione) {
+    public BattleResult muovi(Army army, Location destinazione) {
         if(army == null || destinazione == null){throw new IllegalArgumentException("esercito o destinazione null");}
         if(!army.isPuoMuovere()){throw new IllegalArgumentException("l'esercito non può muovere");}
+        if(army.isVuoto()){throw new IllegalArgumentException("un esercito senza unità non può muovere");}
         Location partenza = army.getPosizione();
         if(partenza == null){throw new IllegalArgumentException("l'esercito non ha una posizione valida");}
         if(!partenza.isAdiacente(destinazione)){throw new IllegalArgumentException("posizioni non adiacenti");}
+        if(destinazione.hasArmyPlayer(army.getOwner())){throw new IllegalArgumentException("c'è già un esercito nella destinazione");}
 
         partenza.removeArmy(army);
         destinazione.addArmy(army);
         army.aggiornaPosizione(destinazione);
         army.bloccaMovimento();
 
-        if(!destinazione.isContesa()){return;}
+        if(!destinazione.isContesa()){
+            conquistaSePossibile(destinazione, army);
+            return null;
+        }
         Army nemico = destinazione.getEnemyArmyFor(army);
         if(nemico == null){throw new IllegalArgumentException("nemico null");}
+        if(nemico.isVuoto()){
+            destinazione.removeArmy(nemico);
+            conquistaSePossibile(destinazione, army);
+            armyService.distruggiERespawn(nemico);
+            return null;
+        }
         BattleResult result = battaglia.combatti(army, nemico, destinazione.getCity());
 
         Army sconfitto = result.sconfitto();
@@ -43,6 +54,7 @@ public class MovementService {
         if(army.isVuoto()){destinazione.removeArmy(army);}
         if(nemico.isVuoto()){destinazione.removeArmy(nemico);}
         if(result.haVintoAttaccante()){conquistaSePossibile(destinazione, army);}
+        return result;
     }
 
     public Location getRitirata(Location destinazione){
