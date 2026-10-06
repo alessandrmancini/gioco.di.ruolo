@@ -2,6 +2,14 @@ package it.unicam.cs.mpgc.rpg125715;
 
 public class BotDecisionService {
 
+    private static final int ORO_MINIMO_RECLUTAMENTO = 3;
+    private static final int UNITA_PER_SVILUPPO = 4;
+    private final ConstructionService constructionService;
+
+    public BotDecisionService(ConstructionService constructionService) {
+        if(constructionService == null){throw new IllegalArgumentException("constructionService null");}
+        this.constructionService = constructionService;
+    }
     public BotDecision decide(Game game, Player bot){
         if(game == null){throw new IllegalArgumentException("game null");}
         if(bot == null){throw new IllegalArgumentException("bot null");}
