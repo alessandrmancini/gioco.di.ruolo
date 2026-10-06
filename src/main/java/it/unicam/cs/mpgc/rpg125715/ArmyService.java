@@ -38,6 +38,28 @@ public class ArmyService {
         if(army == null){throw new IllegalArgumentException("army null");}
         Player owner = army.getOwner();
         distruggiEsercito(army);
-        return ricreaEsercitoInCapitale(owner);
+
+        if(owner.isSconfitto()){return null;}
+        Location destinazione = trovaLocationRespawn(owner);
+        if(destinazione == null){return null;}
+
+        for(Army esistente : destinazione.getArmies()){
+            if(esistente != null && esistente.getOwner() == owner){return esistente;}
+        }
+        return creaEsercito(owner, destinazione);
     }
+
+    private Location trovaLocationRespawn(Player owner){
+        City capitale = owner.getCapitale();
+        if(capitale != null && puoOspitare(capitale.getLocation(), owner)){return capitale.getLocation();}
+        for(City c : owner.getTerritorio().getCities()){
+            if(puoOspitare(c.getLocation(), owner)){return c.getLocation();}
+        }
+        return null;
+    }
+
+    private boolean puoOspitare(Location location, Player owner){
+        return location != null && !location.hasEnemyArmiesFor(owner);
+    }
+
 }
