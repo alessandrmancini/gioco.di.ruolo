@@ -7,6 +7,7 @@ public class BotTurnService {
     private final RecruitmentService recruitmentService;
     private final MovementService movementService;
 
+
     public BotTurnService(BotDecisionService botDecisionService, TurnService turnService, RecruitmentService recruitmentService, MovementService movementService) {
         if(botDecisionService == null){throw new IllegalArgumentException("botDecisionService null");}
         if(turnService == null){throw new IllegalArgumentException("turnService null");}
