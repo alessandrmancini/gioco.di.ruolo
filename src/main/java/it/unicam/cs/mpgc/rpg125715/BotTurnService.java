@@ -6,17 +6,19 @@ public class BotTurnService {
     private final TurnService turnService;
     private final RecruitmentService recruitmentService;
     private final MovementService movementService;
+    private final ConstructionService constructionService;
 
-
-    public BotTurnService(BotDecisionService botDecisionService, TurnService turnService, RecruitmentService recruitmentService, MovementService movementService) {
+    public BotTurnService(BotDecisionService botDecisionService, TurnService turnService, RecruitmentService recruitmentService, MovementService movementService, ConstructionService constructionService) {
         if(botDecisionService == null){throw new IllegalArgumentException("botDecisionService null");}
         if(turnService == null){throw new IllegalArgumentException("turnService null");}
         if(recruitmentService == null){throw new IllegalArgumentException("recruitmentService null");}
         if(movementService == null){throw new IllegalArgumentException("movementService null");}
+        if(constructionService == null){throw new IllegalArgumentException("constructionService null");}
         this.botDecisionService = botDecisionService;
         this.turnService = turnService;
         this.recruitmentService = recruitmentService;
         this.movementService = movementService;
+        this.constructionService = constructionService;
     }
 
     public String eseguiTurnoBot(Game game){
@@ -61,6 +63,8 @@ public class BotTurnService {
             case ATTACK -> eseguiAttacco(bot, decision.sourceLocation(), decision.targetLocation());
             case MOVE -> eseguiMovimento(bot, decision.sourceLocation(), decision.targetLocation());
             case PASS -> bot.getName() + " passa il turno.";
+            case BUILD -> eseguiMiglioramento(bot, decision.city());
+            case SPECIALIZE -> eseguiSpecializzazione(bot, decision.city(), decision.specialization());
         };
     }
 
@@ -137,6 +141,29 @@ public class BotTurnService {
             return bot.getName() + " muove l'esercito dalla posizione " +  start.getId()+ " alla posizione "+ end.getId();
         }catch(IllegalArgumentException | IllegalStateException e){
             return bot.getName() + " non può muoversi: " + e.getMessage();
+        }
+    }
+
+    //CITTA
+    private String eseguiMiglioramento(Player bot, City city){
+        if(bot == null){throw new IllegalArgumentException("bot null");}
+        if(city == null){throw new IllegalArgumentException("city null");}
+        try{
+            int costo = constructionService.costoMiglioramento(city);
+            constructionService.miglioraCitta(bot, city);
+            return bot.getName() + " migliora" + city.getName();
+        }catch (IllegalArgumentException | IllegalStateException e){
+            return bot.getName()+ " non può migliorare "+ city.getName()+ ": "+e.getMessage();
+        }
+    }
+    private String eseguiSpecializzazione(Player bot, City city, CitySpecialization specialization){
+        if(bot == null){throw new IllegalArgumentException("bot null");}
+        if(city == null || specialization == null){throw new IllegalArgumentException("città o specializzazione assente");}
+        try{
+            constructionService.impostaSpecializzazione(bot,city,specialization);
+            return bot.getName()+ " specializza "+ city.getName()+ " in "+ specialization;
+        }catch (IllegalArgumentException | IllegalStateException e){
+            return bot.getName() + " non può specializzare "+ city.getName()+ ": "+e.getMessage();
         }
     }
 }
