@@ -66,6 +66,18 @@ public class MovementService {
         return null;
     }
 
+    public void annullaMovimento(Army army, Location partenza){
+        if(army == null || partenza == null){throw new IllegalArgumentException("esercito o destinazione null");}
+        Location attuale = army.getPosizione();
+        if(attuale == partenza){throw new IllegalArgumentException("l'esercito non ha mosso");}
+        if(partenza.hasArmyPlayer(army.getOwner())){throw new IllegalArgumentException("nella posizione di partenza c'è già un tuo esercito");}
+        if(partenza.hasEnemyArmiesFor(army.getOwner())){throw new IllegalArgumentException("nella posizione di partenza ci sono eserciti nemici");}
+        attuale.removeArmy(army);
+        partenza.addArmy(army);
+        army.aggiornaPosizione(partenza);
+        army.bloccaMovimento();
+    }
+
     private void conquistaSePossibile(Location destinazione, Army army){
         if(destinazione == null || army == null){throw new IllegalArgumentException("esercito o destinazione e army null");}
         if(!destinazione.hasCity()){return;}
