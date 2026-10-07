@@ -25,6 +25,7 @@ public class GameController {
     private final GameSetUpService gameSetUpService;
     private final MapSetupService mapSetupService;
     private final GameInitializationService gameInitializationService;
+    private final ConstructionService constructionService;
 
     public GameController() {
         this.idGenerator = new IdGenerator();
@@ -38,12 +39,14 @@ public class GameController {
         this.ribellioneService = new RibellioneService();
         this.turnService = new TurnService(ribellioneService);
 
-        this.botDecisionService = new BotDecisionService();
+        this.constructionService = new ConstructionService();
+        this.botDecisionService = new BotDecisionService(constructionService);
         this.botTurnService = new BotTurnService(
                 botDecisionService,
                 turnService,
                 recruitmentService,
-                movementService
+                movementService,
+                constructionService
         );
 
         this.gameSetUpService = new GameSetUpService(idGenerator);
