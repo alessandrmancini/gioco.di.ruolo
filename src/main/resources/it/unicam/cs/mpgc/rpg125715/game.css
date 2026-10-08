@@ -1,0 +1,53 @@
+/* ===== struttura generale ===== */
+.root-pane { -fx-background-color: #1e2230; }
+
+.toolbar { -fx-background-color: #2a3042; }
+.title { -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #f2f2f2; }
+.turn-label { -fx-text-fill: #ffd479; -fx-font-size: 14px; -fx-font-weight: bold; }
+.hint { -fx-text-fill: #8f9ab3; -fx-font-size: 11px; }
+
+/* ===== mappa ===== */
+.map-view { -fx-background-color: #f5f4ec; }
+.map-scroll { -fx-background: #1e2230; -fx-background-color: #1e2230; }
+
+/* ===== pannello laterale ===== */
+.side-scroll { -fx-background: #262b3a; -fx-background-color: #262b3a; }
+.side-panel { -fx-background-color: #262b3a; }
+.side-panel .label { -fx-text-fill: #e6e6e6; }
+.side-panel .section-title { -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #ffd479; }
+.side-panel .player-name { -fx-text-fill: #e6e6e6; -fx-font-weight: bold; }
+.side-panel .player-current { -fx-text-fill: #ffd479; -fx-font-weight: bold; }
+.side-panel .player-stats { -fx-text-fill: #aeb6c8; -fx-font-size: 11px; }
+
+/* ===== bottoni ===== */
+.button {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+.button:hover { -fx-background-color: #2563eb; }
+.button:disabled { -fx-background-color: #4b5563; -fx-text-fill: #9ca3af; }
+
+/* ===== menu a tendina ===== */
+.combo-box { -fx-background-color: #3a4156; -fx-background-radius: 6; }
+.combo-box .list-cell { -fx-text-fill: #f2f2f2; }
+.combo-box-popup .list-view { -fx-background-color: #2f3548; }
+.combo-box-popup .list-cell { -fx-background-color: #2f3548; -fx-text-fill: #f2f2f2; }
+.combo-box-popup .list-cell:hover { -fx-background-color: #3b82f6; }
+
+/* ===== log ===== */
+.log-area { -fx-font-family: "Monospaced"; -fx-font-size: 12px; -fx-text-fill: #d1d5db; -fx-control-inner-background: #111827; }
+.log-area .content { -fx-background-color: #111827; }
+
+/* ===== schermata di impostazione partita ===== */
+.overlay { -fx-background-color: rgba(8, 12, 24, 0.85); }
+.setup-card {
+    -fx-background-color: #262b3a;
+    -fx-background-radius: 12;
+    -fx-border-color: #3b82f6;
+    -fx-border-radius: 12;
+    -fx-padding: 22;
+}
+.setup-card .label { -fx-text-fill: #e6e6e6; }
+.setup-card .title { -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #f2f2f2; }
