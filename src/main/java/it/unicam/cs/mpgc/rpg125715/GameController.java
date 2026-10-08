@@ -53,6 +53,7 @@ public class GameController {
     @FXML private VBox humansBox;
     @FXML private Button cancelSetupButton;
     @FXML private Button undoButton;
+    @FXML private Button newArmyButton;
 
     private MapView mapView;
 
@@ -66,6 +67,7 @@ public class GameController {
     private boolean aggiornandoCombo;
     private Army ultimoEsercitoMosso;
     private Location ultimaPartenza;
+    private ArmyService armyService;
 
     // ---- servizi del modello (ricreati a ogni nuova partita) ----
     private MovementService movementService;
@@ -83,7 +85,7 @@ public class GameController {
         IdGenerator idGenerator = new IdGenerator();
         DiceService diceService = new DiceService();
         BattleService battleService = new BattleService(diceService);
-        ArmyService armyService = new ArmyService(idGenerator);
+        this.armyService = new ArmyService(idGenerator);
         ConquestService conquestService = new ConquestService();
         this.movementService = new MovementService(battleService, armyService, conquestService);
         this.recruitmentService = new RecruitmentService();
@@ -322,6 +324,18 @@ public class GameController {
             resetSelezione();
         });
     }
+    @FXML
+    private void onNuovoEsercitoClick(){
+        if(!isTurnoUmano()){return;}
+        eseguiAzione(() -> {
+            Player p = game.getCurrentPlayer();
+            City city = cittaSelezionata();
+            int costo = armyService.costoNuovoEsercito(p);
+            armyService.creaNuovoEsercito(p,city);
+            log(p.getName()+ " crea nuovo esercito a "+ city.getName()+ " per "+ costo +" oro");
+
+        });
+    }
 
     /** Click su un nodo della mappa (callback di MapView). */
     private void onLocationClicked(Location l) {
@@ -513,6 +527,7 @@ public class GameController {
             upgradeButton.setDisable(true);
             specButton.setDisable(true);
             undoButton.setDisable(true);
+            newArmyButton.setDisable(true);
             return;
         }
 
@@ -533,7 +548,7 @@ public class GameController {
                     + (p.isSconfitto() ? " (sconfitto)" : "");
             Label nome = new Label(titolo);
             nome.getStyleClass().add(inTurno ? "player-current" : "player-name");
-            Label statistiche = new Label("Oro " + p.getOro() + "  |  Città " + p.numeroCitta() + "  |  Eserciti " + p.numeroEserciti());
+            Label statistiche = new Label("Oro " + p.getOro() + "  |  Città " + p.numeroCitta() + "  |  Eserciti " + p.numeroEserciti() + "/"+ ArmyService.MAX_ESERCITI);
             statistiche.getStyleClass().add("player-stats");
 
             HBox riga = new HBox(8, campione, new VBox(1, nome, statistiche));
@@ -555,6 +570,12 @@ public class GameController {
         recruitButton.setDisable(!miaCitta);
         upgradeButton.setDisable(!miaCitta || city.isMetropoli());
         specButton.setDisable(!miaCitta);
+
+
+        boolean maxEserciti = current.numeroEserciti() >= ArmyService.MAX_ESERCITI;
+        newArmyButton.setDisable(!miaCitta || !maxEserciti);
+        newArmyButton.setText(maxEserciti ? "Crea esercito(massimo "+ ArmyService.MAX_ESERCITI+ ")" : "Crea esercito ("+ armyService.costoNuovoEsercito(current) + " oro)");
+
         undoButton.setDisable(!umano || ultimoEsercitoMosso == null);
         upgradeButton.setText(miaCitta && !city.isMetropoli()
                 ? "Migliora città (" + constructionService.costoMiglioramento(city) + " oro)"

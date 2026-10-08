@@ -51,6 +51,10 @@
                         <Label fx:id="selectionLabel" wrapText="true" text="Nessuna selezione"/>
 
                         <Separator/>
+                        <Label text="Eserciti" styleClass="section-title"/>
+                        <Button fx:id="newArmyButton" text="Crea esercito" maxWidth="Infinity" onAction="#onNuovoEsercitoClick"/>
+
+                        <Separator/>
                         <Label text="Reclutamento" styleClass="section-title"/>
                         <ComboBox fx:id="unitCombo" maxWidth="Infinity"/>
                         <Button fx:id="recruitButton" text="Recluta unità" maxWidth="Infinity" onAction="#onReclutaClick"/>

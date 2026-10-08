@@ -12,6 +12,7 @@ public class Player {
     private final List<Army> eserciti;
     private boolean sconfitto;
     private final PlayerKind kind;
+    private int turniGiocatori;
 
     public Player(int id, String name, LeaderType leader, int oroIniziale, Territory territorio, PlayerKind kind) {
         if(id<0){throw new IllegalArgumentException("id negativo");}
@@ -73,4 +74,12 @@ public class Player {
 
     //Human o bot
     public PlayerKind getKind() {return kind;}
+
+    //turni
+    public int getTurniGiocatori(){
+        return turniGiocatori;
+    }
+    public void incrementaTurniGiocatori(){
+        turniGiocatori++;
+    }
 }
