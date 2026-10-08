@@ -2,24 +2,94 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="20"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="it.unicam.cs.mpgc.rpg125715.GameController">
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="it.unicam.cs.mpgc.rpg125715.GameController">
 
-    <padding>
-        <Insets top="30" right="30" bottom="30" left="30"/>
-    </padding>
+    <!-- ================= SCHERMATA DI GIOCO ================= -->
+    <BorderPane styleClass="root-pane">
 
-    <Label text="Conquest Game"
-           style="-fx-font-size: 26px; -fx-font-weight: bold;"/>
+        <top>
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+                <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
+                <Label text="Conquest Game" styleClass="title"/>
+                <Label text="Ctrl + rotella: zoom  |  trascina: sposta la mappa" styleClass="hint"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="turnLabel" styleClass="turn-label"/>
+                <Button text="Nuova partita" onAction="#onNuovaPartitaClick"/>
+                <Button fx:id="endTurnButton" text="Fine turno" onAction="#onFineTurnoClick"/>
+                <Button fx:id="undoButton" text="Annulla spostamento" onAction="#onAnnullaSpostamentoClick"/>
+            </HBox>
+        </top>
 
-    <Button text="Nuova partita" onAction="#onNuovaPartitaClick" />
-    <Button text="Fine turno" onAction="#onFineTurnoClick" />
-    <Button text="Turno bot" onAction="#onTurnoBotClick" />
+        <center>
+            <ScrollPane fx:id="mapScroll" pannable="true" styleClass="map-scroll"/>
+        </center>
 
-    <Label fx:id="statusLabel"
-           text="Premi il bottone per iniziare"/>
-</VBox>
+        <right>
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="340" styleClass="side-scroll">
+                <content>
+                    <VBox spacing="8" styleClass="side-panel">
+                        <padding><Insets top="12" right="14" bottom="12" left="14"/></padding>
+
+                        <Label text="Giocatori" styleClass="section-title"/>
+                        <VBox fx:id="playersBox" spacing="6"/>
+
+                        <Separator/>
+                        <Label text="Selezione" styleClass="section-title"/>
+                        <Label fx:id="selectionLabel" wrapText="true" text="Nessuna selezione"/>
+
+                        <Separator/>
+                        <Label text="Reclutamento" styleClass="section-title"/>
+                        <ComboBox fx:id="unitCombo" maxWidth="Infinity"/>
+                        <Button fx:id="recruitButton" text="Recluta unità" maxWidth="Infinity" onAction="#onReclutaClick"/>
+
+                        <Separator/>
+                        <Label text="Costruzione" styleClass="section-title"/>
+                        <Button fx:id="upgradeButton" text="Migliora città" maxWidth="Infinity" onAction="#onMigliorarClick"/>
+                        <ComboBox fx:id="specCombo" maxWidth="Infinity"/>
+                        <Button fx:id="specButton" text="Imposta specializzazione (2 oro)" maxWidth="Infinity" onAction="#onSpecializzaClick"/>
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </right>
+
+        <bottom>
+            <TextArea fx:id="logArea" editable="false" wrapText="true" prefRowCount="6" styleClass="log-area"/>
+        </bottom>
+    </BorderPane>
+
+    <!-- ================= IMPOSTAZIONE PARTITA (sopra a tutto) ================= -->
+    <VBox fx:id="setupOverlay" alignment="CENTER" styleClass="overlay">
+        <VBox spacing="12" maxWidth="480" maxHeight="-Infinity" styleClass="setup-card">
+            <Label text="Nuova partita" styleClass="title"/>
+            <Label wrapText="true"
+                   text="Partecipano tutti gli 8 leader. Scegli quanti sono controllati da giocatori umani (a turno, sullo stesso computer) e con quali leader giocano: gli altri sono bot."/>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Giocatori umani"/>
+                <Spinner fx:id="humanSpinner" prefWidth="80"/>
+            </HBox>
+
+            <Separator/>
+            <VBox fx:id="humansBox" spacing="8"/>
+            <Separator/>
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button fx:id="cancelSetupButton" text="Annulla" onAction="#onAnnullaSetupClick"/>
+                <Button text="Avvia partita" onAction="#onAvviaPartitaClick"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</StackPane>
