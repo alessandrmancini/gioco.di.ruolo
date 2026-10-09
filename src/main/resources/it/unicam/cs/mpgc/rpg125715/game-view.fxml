@@ -27,6 +27,7 @@
                 <Label text="Ctrl + rotella: zoom  |  trascina: sposta la mappa" styleClass="hint"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="turnLabel" styleClass="turn-label"/>
+                <Button text = "Legenda" onAction="#onLegendaClick"/>
                 <Button text="Nuova partita" onAction="#onNuovaPartitaClick"/>
                 <Button fx:id="endTurnButton" text="Fine turno" onAction="#onFineTurnoClick"/>
                 <Button fx:id="undoButton" text="Annulla spostamento" onAction="#onAnnullaSpostamentoClick"/>
@@ -91,6 +92,7 @@
             <Separator/>
 
             <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text "Legenda" onAction = "#onLegendaClick"/>
                 <Button fx:id="cancelSetupButton" text="Annulla" onAction="#onAnnullaSetupClick"/>
                 <Button text="Avvia partita" onAction="#onAvviaPartitaClick"/>
             </HBox>

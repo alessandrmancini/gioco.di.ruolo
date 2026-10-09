@@ -584,6 +584,19 @@ public class GameController {
                 ? "Migliora città (" + constructionService.costoMiglioramento(city) + " oro)"
                 : "Migliora città");
     }
+    private void onLegendaClick() {
+        TextArea testo = new TextArea(GameInfo.legenda());
+        testo.setEditable(false);
+        testo.setWrapText(true);
+        testo.setPrefSize(660,500);
+
+        Alert finestra = new Alert(Alert.AlertType.INFORMATION);
+        finestra.setTitle("Legenda");
+        finestra.setHeaderText("Costi, regole e leader");
+        finestra.getDialogPane().setContent(testo);
+        finestra.setResizable(true);
+        finestra.show();
+    }
 
     public Game getGame() {
         return game;
