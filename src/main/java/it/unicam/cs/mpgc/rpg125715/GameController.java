@@ -352,8 +352,11 @@ public class GameController {
         selectedArmy = trovaEsercito(current, l);
         targets.clear();
         if (selectedArmy != null && selectedArmy.isPuoMuovere() && !selectedArmy.isVuoto()) {
+            boolean primoTurno = current.getTurniGiocati() == 0;
             for (Location n : l.getAdiacenti()) {
-                if (!n.hasArmyPlayer(current)) {targets.add(n);}
+                if (!n.hasArmyPlayer(current)) {continue;}
+                if(primoTurno && movementService.isAttacco(n, current)){continue;}
+                targets.add(n);
             }
         }
         refresh();
@@ -534,7 +537,7 @@ public class GameController {
         Player current = game.getCurrentPlayer();
         turnLabel.setText(game.isGameOver()
                 ? "Partita finita"
-                : "Turno " + game.getNumeroTurno() + " - " + current.getName());
+                : "Turno " + game.getNumeroTurno() + " - " + (current.getName())+ (current.getTurniGiocati() == 0 ? " (primo turno: non si può attaccare)" : ""));
 
         for (Player p : game.getPlayers()) {
             boolean inTurno = (p == current && !game.isGameOver());
