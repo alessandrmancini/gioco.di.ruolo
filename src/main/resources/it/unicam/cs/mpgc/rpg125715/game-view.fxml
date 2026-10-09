@@ -88,7 +88,13 @@
             </HBox>
 
             <Separator/>
-            <VBox fx:id="humansBox" spacing="8"/>
+
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefViewportHeight="300" styleClass="setup-scroll">
+                <content>
+                    <VBox fx:id="humansBox" spacing="10"/>
+                </content>
+            </ScrollPane>
+
             <Separator/>
 
             <HBox spacing="10" alignment="CENTER_RIGHT">
