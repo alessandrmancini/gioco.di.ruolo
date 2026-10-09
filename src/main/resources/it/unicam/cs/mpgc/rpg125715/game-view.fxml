@@ -92,7 +92,7 @@
             <Separator/>
 
             <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button text "Legenda" onAction = "#onLegendaClick"/>
+                <Button text = "Legenda" onAction = "#onLegendaClick"/>
                 <Button fx:id="cancelSetupButton" text="Annulla" onAction="#onAnnullaSetupClick"/>
                 <Button text="Avvia partita" onAction="#onAvviaPartitaClick"/>
             </HBox>

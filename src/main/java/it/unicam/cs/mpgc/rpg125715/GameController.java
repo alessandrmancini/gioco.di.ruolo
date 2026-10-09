@@ -589,6 +589,7 @@ public class GameController {
                 ? "Migliora città (" + constructionService.costoMiglioramento(city) + " oro)"
                 : "Migliora città");
     }
+    @FXML
     private void onLegendaClick() {
         TextArea testo = new TextArea(GameInfo.legenda());
         testo.setEditable(false);
