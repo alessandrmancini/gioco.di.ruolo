@@ -22,14 +22,13 @@ public class GameInfo {
             case ATTILA -> 2;
             case REGINA_ELISABETTA -> 3;
             case ALESSANDRO_MAGNO, ANNIBALE -> 4;
-            case GIOVANNA_D_ARCO, FEDERICO_BARBAROSSA -> 5;
-            case GIULIO_CESARE ->  6;
+            case GIOVANNA_D_ARCO, FEDERICO_BARBAROSSA, GIULIO_CESARE -> 5;
         };
     }
     public static String testoDifficolta(LeaderType leader){
         int d = difficolta(leader);
         String stelle = "";
-        for (int i= 1; i <=6; i++){
+        for (int i= 1; i <=5; i++){
             stelle += (i<=d) ? "★" : "☆";
         }
         String parola = switch (d){
@@ -37,8 +36,7 @@ public class GameInfo {
             case 2 -> "facile";
             case 3 -> "media";
             case 4 -> "difficile";
-            case 5 -> "molto difficile";
-            default -> "estremo";
+            default -> "molto difficile";
         };
         return "Difficoltà: "+ stelle + " ("+ parola + ")";
     }

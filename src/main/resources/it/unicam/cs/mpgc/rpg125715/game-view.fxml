@@ -77,7 +77,7 @@
 
     <!-- ================= IMPOSTAZIONE PARTITA (sopra a tutto) ================= -->
     <VBox fx:id="setupOverlay" alignment="CENTER" styleClass="overlay">
-        <VBox spacing="12" maxWidth="480" maxHeight="-Infinity" styleClass="setup-card">
+        <VBox spacing="12" maxWidth="600" maxHeight="-Infinity" styleClass="setup-card">
             <Label text="Nuova partita" styleClass="title"/>
             <Label wrapText="true"
                    text="Partecipano tutti gli 8 leader. Scegli quanti sono controllati da giocatori umani (a turno, sullo stesso computer) e con quali leader giocano: gli altri sono bot."/>

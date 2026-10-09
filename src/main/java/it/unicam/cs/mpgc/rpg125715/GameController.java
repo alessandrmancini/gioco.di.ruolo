@@ -172,10 +172,15 @@ public class GameController {
             Label etichetta = new Label("Giocatore " + (i + 1));
             etichetta.setMinWidth(90);
 
+            Label info = new Label(GameInfo.riassuntoLeader(iniziale));
+            info.setWrapText(true);
+            info.getStyleClass().add("leader-info");
+
             humanLeaderCombos.add(combo);
             combo.valueProperty().addListener((obs, vecchio, nuovo) -> {
                 if (nuovo == null) {return;}
                 campione.setFill(MapView.colorOf(nuovo));
+                info.setText(GameInfo.riassuntoLeader(nuovo));
                 if (aggiornandoCombo) {return;}
                 // se il leader era già di un altro umano, i due si scambiano
                 for (ComboBox<LeaderType> altro : humanLeaderCombos) {
@@ -190,7 +195,7 @@ public class GameController {
 
             HBox riga = new HBox(10, campione, etichetta, combo);
             riga.setAlignment(Pos.CENTER_LEFT);
-            humansBox.getChildren().add(riga);
+            humansBox.getChildren().add(new VBox(4, riga, info));
         }
     }
     private void azzeraUndo(){
