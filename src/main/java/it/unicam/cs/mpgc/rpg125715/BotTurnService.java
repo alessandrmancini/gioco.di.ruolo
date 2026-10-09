@@ -110,12 +110,14 @@ public class BotTurnService {
         if(!start.isAdiacente(end)){return bot.getName() + " non può attaccare: posizioni non adiacenti";}
 
         Army army = trovaEsercitoInPosizione(bot, start);
-        if(army == null){return bot.getName() + " non può attaccare: nessun esercito trovato in posizione "+start.getId();}
+        if(army == null){return bot.getName() + " non può attaccare: nessun esercito trovato a "+nomeLuogo(start);}
         if(!army.isPuoMuovere()){return bot.getName() + " non può attaccare: l'esercito ha già mosso";}
 
         try{
-            movementService.muovi(army, end);
-            return bot.getName() + " prova ad attaccare partendo da posizione " +  start.getId() + " verso "+end.getId();
+            BattleResult r = movementService.muovi(army,end);
+            String testo = bot.getName()+ " attacca "+ nomeLuogo(end)+ " partendo da "+ nomeLuogo(start);
+            if(r!= null){testo += r.haVintoAttaccante() ? " e vince la battaglia" : " e perde la battaglia";}
+            return testo;
         }catch(IllegalArgumentException | IllegalStateException e){return bot.getName()+" non può attaccare: "+e.getMessage();}
 
     }
@@ -133,12 +135,12 @@ public class BotTurnService {
         if(start == null || end == null){return bot.getName() + " non può muoversi: partenza o destinazione assente";}
 
         Army army = trovaEsercitoInPosizione(bot, start);
-        if(army == null){return bot.getName()+ " non può muoversi: nessun esercito in posizione "+start.getId();}
+        if(army == null){return bot.getName()+ " non può muoversi: nessun esercito a "+nomeLuogo(start);}
         if(!army.isPuoMuovere()){return bot.getName()+ " non può muoversi, ha già mosso";}
 
         try{
             movementService.muovi(army, end);
-            return bot.getName() + " muove l'esercito dalla posizione " +  start.getId()+ " alla posizione "+ end.getId();
+            return bot.getName() + " muove l'esercito da " +  nomeLuogo(start)+ " a "+ nomeLuogo(end);
         }catch(IllegalArgumentException | IllegalStateException e){
             return bot.getName() + " non può muoversi: " + e.getMessage();
         }
@@ -165,5 +167,9 @@ public class BotTurnService {
         }catch (IllegalArgumentException | IllegalStateException e){
             return bot.getName() + " non può specializzare "+ city.getName()+ ": "+e.getMessage();
         }
+    }
+    private String nomeLuogo(Location l){
+        if(l != null && l.hasCity()){return l.getCity().getName();}
+        return "un territorio senza città";
     }
 }
