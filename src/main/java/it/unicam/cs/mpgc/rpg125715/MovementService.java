@@ -16,10 +16,15 @@ public class MovementService {
         if(army == null || destinazione == null){throw new IllegalArgumentException("esercito o destinazione null");}
         if(!army.isPuoMuovere()){throw new IllegalArgumentException("l'esercito non può muovere");}
         if(army.isVuoto()){throw new IllegalArgumentException("un esercito senza unità non può muovere");}
+
         Location partenza = army.getPosizione();
+
         if(partenza == null){throw new IllegalArgumentException("l'esercito non ha una posizione valida");}
         if(!partenza.isAdiacente(destinazione)){throw new IllegalArgumentException("posizioni non adiacenti");}
         if(destinazione.hasArmyPlayer(army.getOwner())){throw new IllegalArgumentException("c'è già un esercito nella destinazione");}
+        if(army.getOwner().getTurniGiocati() == 0 && isAttacco(destinazione, army.getOwner())){
+            throw new IllegalArgumentException("nel primo turno non si può attaccare");
+        }
 
         partenza.removeArmy(army);
         destinazione.addArmy(army);
@@ -89,5 +94,15 @@ public class MovementService {
         if(city.getOwner() != conquistatore && destinazione.hasArmyPlayer(conquistatore)){
             conquestService.conquista(city, conquistatore);
         }
+    }
+
+    public boolean isAttacco(Location destinazione, Player player){
+        if(destinazione == null || player == null){throw new IllegalArgumentException("destinazione o army null");}
+        if(destinazione.hasEnemyArmiesFor(player)){return false;}
+        if(destinazione.hasCity()){
+            Player proprietario = destinazione.getCity().getOwner();
+            return proprietario != null && proprietario != player;
+        }
+        return false;
     }
 }

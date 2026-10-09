@@ -15,6 +15,7 @@ public class TurnService {
         if(game.isGameOver()){return;}
         if(game.haSoloUnPlayerAttivo()){game.setFinita();return;}
 
+        game.getCurrentPlayer().incrementaTurniGiocati();
         game.incrementaNumeroTurno();
 
         prossimoPlayer(game);

@@ -12,7 +12,7 @@ public class Player {
     private final List<Army> eserciti;
     private boolean sconfitto;
     private final PlayerKind kind;
-    private int turniGiocatori;
+    private int turniGiocati;
 
     public Player(int id, String name, LeaderType leader, int oroIniziale, Territory territorio, PlayerKind kind) {
         if(id<0){throw new IllegalArgumentException("id negativo");}
@@ -29,6 +29,7 @@ public class Player {
         this.eserciti = new ArrayList<>();
         this.sconfitto = false;
         this.kind = kind;
+        this.turniGiocati = 0;
     }
 
     public int getId() {return id;}
@@ -76,10 +77,10 @@ public class Player {
     public PlayerKind getKind() {return kind;}
 
     //turni
-    public int getTurniGiocatori(){
-        return turniGiocatori;
+    public int getTurniGiocati(){
+        return turniGiocati;
     }
-    public void incrementaTurniGiocatori(){
-        turniGiocatori++;
+    public void incrementaTurniGiocati(){
+        turniGiocati++;
     }
 }
