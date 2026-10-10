@@ -10,6 +10,7 @@ public class Game {
     private boolean iniziato;
     private boolean finita;
     private int numeroTurno;
+    private int round;
 
     public Game(List<Player> players, List<Location> locations){
         if(players == null ||players.isEmpty()){throw new IllegalArgumentException("players null o vuota");}
@@ -20,6 +21,7 @@ public class Game {
         this.iniziato = false;
         this.finita = false;
         this.numeroTurno = 1;
+        this.round = 1;
     }
     //PLAYER
     public List<Player> getActivePlayers(){
@@ -38,6 +40,7 @@ public class Game {
         do{
             turno = (turno+1)%players.size();
         }while(players.get(turno).isSconfitto() && turno != start);
+        if(turno <= start){round++;}
     }
     public List<Player> getPlayers(){return new ArrayList<>(players);}
     public int numeroPlayerAttivi(){return getActivePlayers().size();}
@@ -65,6 +68,7 @@ public class Game {
     public int getTurno(){return turno;}
     public int getNumeroTurno(){return numeroTurno;}
     public void incrementaNumeroTurno(){this.numeroTurno++;}
+    public int getRound(){return round;}
 
 
     //GAME INIZIATO

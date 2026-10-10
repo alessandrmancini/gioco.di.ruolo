@@ -2,6 +2,7 @@ package it.unicam.cs.mpgc.rpg125715;
 
 public class TurnService {
 
+    public static final int MAX_ROUND = 10;
     private static final int ORO_BASE = 5;
     private static final int BONUS_COMMERCIALE = 2;
     private final RibellioneService ribellioneService;

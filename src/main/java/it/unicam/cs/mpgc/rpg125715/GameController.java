@@ -68,6 +68,7 @@ public class GameController {
     private Army ultimoEsercitoMosso;
     private Location ultimaPartenza;
     private ArmyService armyService;
+    private int roundMostrato;
 
     // ---- servizi del modello (ricreati a ogni nuova partita) ----
     private MovementService movementService;
@@ -202,6 +203,11 @@ public class GameController {
         ultimoEsercitoMosso = null;
         ultimaPartenza = null;
     }
+    private void logNuovoRound(){
+        if(game.getRound() != roundMostrato && !game.isGameOver()){
+            log("===== ROUND "+ roundMostrato + " di "+ TurnService.MAX_ROUND+" ======");
+        }
+    }
 
     private LeaderType primoLeaderLibero(List<LeaderType> usati) {
         for (LeaderType l : LeaderType.values()) {
@@ -250,6 +256,8 @@ public class GameController {
             resetSelezione();
             logArea.clear();
             log("Nuova partita: " + game.getPlayers().size() + " leader in gioco, " + umani.size() + " controllati da umani.");
+            roundMostrato = 0;
+            logNuovoRound();
             log("Inizia " + game.getCurrentPlayer().getName() + " (" + leaderName(game.getCurrentPlayer().getLeader()) + ").");
             setupOverlay.setVisible(false);
         } catch (RuntimeException e) {
@@ -266,6 +274,7 @@ public class GameController {
             Player finito = game.getCurrentPlayer();
             turnService.fineTurno(game);
             log("--- " + finito.getName() + " finisce il turno ---");
+            logNuovoRound();
 
             // i bot giocano finché non tocca di nuovo a un umano
             int guardia = 0;
@@ -274,6 +283,7 @@ public class GameController {
                     && game.getCurrentPlayer().getKind() == PlayerKind.BOT
                     && guardia++ < limite) {
                 log(botTurnService.eseguiTurnoBot(game));
+                logNuovoRound();
             }
             if (!game.isGameOver()) {
                 Player prossimo = game.getCurrentPlayer();
@@ -545,7 +555,9 @@ public class GameController {
         Player current = game.getCurrentPlayer();
         turnLabel.setText(game.isGameOver()
                 ? "Partita finita"
-                : "Turno " + game.getNumeroTurno() + " - " + (current.getName())+ (current.getTurniGiocati() == 0 ? " (primo turno: non si può attaccare)" : ""));
+                : "Round " + game.getRound() + " / " + TurnService.MAX_ROUND
+                + " (turno " + (game.getTurno() + 1) + "/" + game.getPlayers().size() + ") - " + current.getName()
+                + (current.getTurniGiocati() == 0 ? " (primo turno: non si può attaccare)" : ""));
 
         for (Player p : game.getPlayers()) {
             boolean inTurno = (p == current && !game.isGameOver());
