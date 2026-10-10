@@ -54,6 +54,7 @@
                         <Separator/>
                         <Label text="Eserciti" styleClass="section-title"/>
                         <Button fx:id="newArmyButton" text="Crea esercito" maxWidth="Infinity" onAction="#onNuovoEsercitoClick"/>
+                        <Button fx:id="foundCityButton" text="Fonda città" maxWidth="Infinity" onAction="#onFondaCittaClick"/>
 
                         <Separator/>
                         <Label text="Reclutamento" styleClass="section-title"/>

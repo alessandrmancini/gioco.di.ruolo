@@ -72,6 +72,7 @@ public class GameInfo {
     public static String riassuntoLeader(LeaderType leader){
         return testoDifficolta(leader)+ "\n" + abilita(leader);
     }
+
     public static String legenda(){
         String t = "";
         t+="Costruzione (costo in oro)\n";
@@ -85,6 +86,12 @@ public class GameInfo {
         t += "            per mancanza di città militari; serve per reclutare gli Elefanti (Annibale).\n";
         t += "  Commerciale: +2 oro a ogni turno.\n";
         t += "  Agricola: nessun effetto per ora (riservata ai rifornimenti, non ancora attivi).\n\n";
+
+        t += "BATTAGLIE\n";
+        t += "  Perdite: chi perde lascia il 40% delle unità (almeno 1), chi vince il 15%.\n";
+        t += "  L'esercito sconfitto si ritira in una tua città vicina o in un nodo libero;\n";
+        t += "  se non può, viene distrutto e ricompare in una tua città libera con una sola fanteria.\n\n";
+
 
         t += "TRUPPE (costo base; attacco/difesa)\n";
         t += "  Fanteria: 2 oro (2/2)\n";
@@ -115,6 +122,11 @@ public class GameInfo {
         t += "  Con la ribellione non si guadagna oro e non si recluta. Si risolve portando un\n";
         t += "  esercito di almeno 4 unità in una tua città; dopo 2 turni si perde 1 oro a turno\n";
         t += "  e dopo 7 turni si perde la partita.\n\n";
+
+        t += "SENZA CITTA'\n";
+        t += "  Se perdi l'ultima città ma hai ancora un esercito, resti in gioco e puoi fondare\n";
+        t += "  una nuova città (con il nome che vuoi) nel nodo senza città dove si trova l'esercito.\n\n";
+
 
         t += "LEADER (+ passiva, - debolezza)\n";
         for (LeaderType l : LeaderType.values()) {

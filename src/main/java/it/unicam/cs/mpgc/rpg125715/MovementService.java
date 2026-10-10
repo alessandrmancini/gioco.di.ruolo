@@ -46,7 +46,7 @@ public class MovementService {
         BattleResult result = battaglia.combatti(army, nemico, destinazione.getCity());
 
         Army sconfitto = result.sconfitto();
-        Location ritirata = getRitirata(destinazione);
+        Location ritirata = getRitirata(destinazione, sconfitto.getOwner());
 
         destinazione.removeArmy(sconfitto);
         if(sconfitto.isVuoto() || ritirata == null){
@@ -62,12 +62,18 @@ public class MovementService {
         return result;
     }
 
-    public Location getRitirata(Location destinazione){
+    public Location getRitirata(Location destinazione, Player proprietario){
+        //una città propria vicina senza eserciti
         for (Location l : destinazione.getAdiacenti()){
-            if(!l.hasArmy()){
+            if(!l.hasArmy() && l.hasCity() && l.getCity().getOwner() == proprietario){
                 return l;
             }
         }
+        //un nodo vicino senza città e senza eserciti
+        for(Location l :destinazione.getAdiacenti()){
+            if(!l.hasArmy() && !l.hasCity()){return l;}
+        }
+        //esercito distrutto
         return null;
     }
 
@@ -88,10 +94,12 @@ public class MovementService {
         if(!destinazione.hasCity()){return;}
 
         City city = destinazione.getCity();
-        if(city == null || city.getOwner() == null){return;}
+        if(city == null){return;}
 
         Player conquistatore = army.getOwner();
-        if(city.getOwner() != conquistatore && destinazione.hasArmyPlayer(conquistatore)){
+        if(city.getOwner() == conquistatore){return;}
+
+        if(destinazione.hasArmyPlayer(conquistatore)){
             conquestService.conquista(city, conquistatore);
         }
     }

@@ -11,6 +11,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -54,6 +55,7 @@ public class GameController {
     @FXML private Button cancelSetupButton;
     @FXML private Button undoButton;
     @FXML private Button newArmyButton;
+    @FXML private Button foundCityButton;
 
     private MapView mapView;
 
@@ -76,6 +78,7 @@ public class GameController {
     private ConstructionService constructionService;
     private TurnService turnService;
     private BotTurnService botTurnService;
+    private ConquestService conquestService;
     private GameInitializationService gameInitializationService;
 
     public GameController() {
@@ -87,7 +90,7 @@ public class GameController {
         DiceService diceService = new DiceService();
         BattleService battleService = new BattleService(diceService);
         this.armyService = new ArmyService(idGenerator);
-        ConquestService conquestService = new ConquestService();
+        this.conquestService = new ConquestService();
         this.movementService = new MovementService(battleService, armyService, conquestService);
         this.recruitmentService = new RecruitmentService();
         this.constructionService = new ConstructionService();
@@ -289,12 +292,35 @@ public class GameController {
             if (!game.isGameOver()) {
                 Player prossimo = game.getCurrentPlayer();
                 log("Tocca a " + prossimo.getName() + " (" + leaderName(prossimo.getLeader()) + ").");
+                if(prossimo.numeroCitta() == 0 && conquestService.trovaLocationPerFondazione(prossimo) != null){
+                    log("Non hai più insediamenti: usa 'Fonda città' per trasformare in nodo dove si trova il tuo esercito in una nuova città");
+                }
                 if(prossimo.getTerritorio().hasRibellione()){
                     log("Attenzione: il territorio di "+ prossimo.getName()+ " è in ribellione!");
                 }
             }
             azzeraUndo();
             resetSelezione();
+        });
+    }
+
+    @FXML
+    private void onFondaCittaClick(){
+        if(!isTurnoUmano()){return;}
+        eseguiAzione(() -> {
+            Player p = game.getCurrentPlayer();
+            Location posto = conquestService.trovaLocationPerFondazione(p);
+            if(posto == null){throw new IllegalArgumentException("serve un tuo esercito in un nodo libero per fondare la città");}
+
+            TextInputDialog dialogo = new TextInputDialog("Nuova città");
+            dialogo.setTitle("Fonda una città");
+            dialogo.setHeaderText("Hai perso tutte le città: il nodo dove si trova il tuo esercito diventa una città");
+            dialogo.setContentText("Nome della nuova città:");
+            String nome = dialogo.showAndWait().orElse(null);
+            if(nome == null){return;}
+
+            City nuova = conquestService.fondaCitta(p, posto, nome);
+            log(p.getName()+ " fonda la città "+ nuova.getName()+ "!");
         });
     }
 
@@ -402,6 +428,7 @@ public class GameController {
                     r.haVintoAttaccante() ? "l'attaccante" : "il difensore",
                     r.perditeAttaccante(), r.perditeDifensore()));
         }
+        if(r != null){logDopoBattaglia(r);}
         boolean conquista = destinazione.hasCity() && vecchioOwner != null && vecchioOwner != p && destinazione.getCity().getOwner() == p;
         if(conquista){
             log(p.getName() + " conquista " + destinazione.getCity().getName()+ "!");
@@ -413,6 +440,18 @@ public class GameController {
         else {azzeraUndo();}
         resetSelezione();
         selectedLocation = destinazione;
+    }
+
+    private void logDopoBattaglia(BattleResult r){
+        Army sconfitto = r.sconfitto();
+        Player proprietario = sconfitto.getOwner();
+        if(proprietario.getEserciti().contains(sconfitto)){
+            log("L'esercito di "+ proprietario.getName()+ " si ritira a "+ nomeLuogo(sconfitto.getPosizione())+ ".");
+        }
+        else{
+            log("L'esercito di " + proprietario.getName() + " è distrutto"
+                    + (proprietario.isSconfitto() ? "." : " e ricompare in una sua città con una sola fanteria."));
+        }
     }
 
     /** Esegue un'azione dell'utente gestendo errori di regole, fine partita e aggiornamento vista. */
@@ -550,6 +589,8 @@ public class GameController {
             specButton.setDisable(true);
             undoButton.setDisable(true);
             newArmyButton.setDisable(true);
+            foundCityButton.setVisible(false);
+            foundCityButton.setManaged(false);
             return;
         }
 
@@ -605,6 +646,10 @@ public class GameController {
         newArmyButton.setText(maxEserciti ? "Crea esercito(massimo "+ ArmyService.MAX_ESERCITI+ ")" : "Crea esercito ("+ armyService.costoNuovoEsercito(current) + " oro)");
 
         undoButton.setDisable(!umano || ultimoEsercitoMosso == null);
+
+        boolean puoFondare = umano && conquestService.trovaLocationPerFondazione(current) != null;
+        foundCityButton.setVisible(puoFondare);
+        foundCityButton.setManaged(puoFondare);
         upgradeButton.setText(miaCitta && !city.isMetropoli()
                 ? "Migliora città (" + constructionService.costoMiglioramento(city) + " oro)"
                 : "Migliora città");
