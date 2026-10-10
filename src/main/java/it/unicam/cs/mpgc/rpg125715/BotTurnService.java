@@ -153,7 +153,7 @@ public class BotTurnService {
         try{
             int costo = constructionService.costoMiglioramento(city);
             constructionService.miglioraCitta(bot, city);
-            return bot.getName() + " migliora" + city.getName();
+            return bot.getName() + " migliora " + city.getName();
         }catch (IllegalArgumentException | IllegalStateException e){
             return bot.getName()+ " non può migliorare "+ city.getName()+ ": "+e.getMessage();
         }
