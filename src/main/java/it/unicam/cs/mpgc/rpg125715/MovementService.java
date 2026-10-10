@@ -80,7 +80,7 @@ public class MovementService {
         attuale.removeArmy(army);
         partenza.addArmy(army);
         army.aggiornaPosizione(partenza);
-        army.bloccaMovimento();
+        army.sbloccaMovimento();
     }
 
     private void conquistaSePossibile(Location destinazione, Army army){
