@@ -44,13 +44,32 @@ public class TurnService {
             a.sbloccaMovimento();
         }
     }
+
+    //RIBELLIONI
     private void aggiornaRibellioni(Player player, Game game){
         if(player == null){throw new IllegalArgumentException("Player is null");}
         if(game == null){throw new IllegalArgumentException("Game is null");}
 
+        boolean giaInRibellione = player.getTerritorio().hasRibellione();
         ribellioneService.aggiornaRibellioneTurno(player.getTerritorio());
+        if(!giaInRibellione && !player.isSconfitto() && player.getTurniGiocati()>0){
+            ribellioneService.verificaNuovaRibellione(player.getTerritorio(), subisceEffettoLeaderNemico(player, game));
+        }
         if(player.isSconfitto() && game.haSoloUnPlayerAttivo()){game.setFinita();}
     }
+    private boolean subisceEffettoLeaderNemico(Player player, Game game){
+        for(Player altro : game.getPlayers()){
+            if(altro == player || altro.isSconfitto() || !altro.getLeader().aumentaProbabilitaInsurrezioniNemiche()){continue;}
+            for(Army army: altro.getEserciti()){
+                for(City city : player.getTerritorio().getCities()){
+                    Location l = city.getLocation();
+                    if(l != null && army.getPosizione() != null && l.isAdiacente(army.getPosizione())){return true;}
+                }
+            }
+        }
+        return false;
+    }
+
     private void assegnaOroTurno(Player player, Game game){
         if(player == null){throw new IllegalArgumentException("Player is null");}
         if(game == null){throw new IllegalArgumentException("Game is null");}

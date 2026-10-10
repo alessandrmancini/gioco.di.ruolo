@@ -278,6 +278,9 @@ public class GameController {
             if (!game.isGameOver()) {
                 Player prossimo = game.getCurrentPlayer();
                 log("Tocca a " + prossimo.getName() + " (" + leaderName(prossimo.getLeader()) + ").");
+                if(prossimo.getTerritorio().hasRibellione()){
+                    log("Attenzione: il territorio di "+ prossimo.getName()+ " è in ribellione!");
+                }
             }
             azzeraUndo();
             resetSelezione();
@@ -556,7 +559,11 @@ public class GameController {
                     + (p.isSconfitto() ? " (sconfitto)" : "");
             Label nome = new Label(titolo);
             nome.getStyleClass().add(inTurno ? "player-current" : "player-name");
-            Label statistiche = new Label("Oro " + p.getOro() + "  |  Città " + p.numeroCitta() + "  |  Eserciti " + p.numeroEserciti() + "/"+ ArmyService.MAX_ESERCITI);
+
+            Label statistiche = new Label("Oro " + p.getOro() + "  |  Città " + p.numeroCitta() +
+                    "  |  Eserciti " + p.numeroEserciti() + "/"+ ArmyService.MAX_ESERCITI +
+                    (p.getTerritorio().hasRibellione() ? " | Ribellione" : ""));
+
             statistiche.getStyleClass().add("player-stats");
 
             HBox riga = new HBox(8, campione, new VBox(1, nome, statistiche));

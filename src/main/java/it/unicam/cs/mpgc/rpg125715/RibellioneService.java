@@ -17,7 +17,7 @@ public class RibellioneService {
         if(territory.hasRibellione()){return;}
 
         int probabilita = calcolaProbabilitaRibellione(territory, effettoLeaderNemico);
-        if(probabilita <= 0){return;}
+        if(probabilita <= 40){return;}
 
         int tiro = random.nextInt(100)+1;
         if(tiro <= probabilita){
