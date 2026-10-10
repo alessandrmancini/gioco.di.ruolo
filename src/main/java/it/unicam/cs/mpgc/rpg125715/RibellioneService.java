@@ -17,7 +17,7 @@ public class RibellioneService {
         if(territory.hasRibellione()){return;}
 
         int probabilita = calcolaProbabilitaRibellione(territory, effettoLeaderNemico);
-        if(probabilita <= 40){return;}
+        if(probabilita <= 0){return;}
 
         int tiro = random.nextInt(100)+1;
         if(tiro <= probabilita){
@@ -61,9 +61,9 @@ public class RibellioneService {
 
     private int calcolaProbabilitaRibellione(Territory territory, boolean effettoLeaderNemico){
         int probabilita = 0;
-        if(tutteCittaSenzaGuarnigione(territory)){probabilita += 35;}
-        if(tutteCittaNonSviluppate(territory)){probabilita += 20;}
-        if(!haCittaMilitare(territory)){probabilita +=25;}
+        if(tutteCittaSenzaGuarnigione(territory)){probabilita += 20;}
+        if(tutteCittaNonSviluppate(territory)){probabilita += 10;}
+        if(!haCittaMilitare(territory)){probabilita +=15;}
         if(effettoLeaderNemico){probabilita += 20;}
         return probabilita;
     }
