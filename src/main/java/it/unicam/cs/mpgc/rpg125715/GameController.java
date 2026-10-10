@@ -205,6 +205,7 @@ public class GameController {
     }
     private void logNuovoRound(){
         if(game.getRound() != roundMostrato && !game.isGameOver()){
+            roundMostrato = game.getRound();
             log("===== ROUND "+ roundMostrato + " di "+ TurnService.MAX_ROUND+" ======");
         }
     }
@@ -556,8 +557,8 @@ public class GameController {
         turnLabel.setText(game.isGameOver()
                 ? "Partita finita"
                 : "Round " + game.getRound() + " / " + TurnService.MAX_ROUND
-                + " (turno " + (game.getTurno() + 1) + "/" + game.getPlayers().size() + ") - " + current.getName()
-                + (current.getTurniGiocati() == 0 ? " (primo turno: non si può attaccare)" : ""));
+                + " (turno " + (game.getTurno() + 1) + "/" + game.getPlayers().size()
+                + ") - " + current.getName());
 
         for (Player p : game.getPlayers()) {
             boolean inTurno = (p == current && !game.isGameOver());
