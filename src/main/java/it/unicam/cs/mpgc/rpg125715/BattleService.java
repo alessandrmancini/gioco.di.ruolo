@@ -35,8 +35,8 @@ public class BattleService {
             sconfitto = attaccante;
         }
 
-        int perditeAttaccante = calcolaPerdite(attaccante, totaleAttaccante, totaleDifensore);
-        int perditeDifensore = calcolaPerdite(difensore, totaleDifensore, totaleAttaccante);
+        int perditeAttaccante = calcolaPerdite(attaccante, sconfitto == attaccante);
+        int perditeDifensore = calcolaPerdite(difensore, sconfitto == difensore);
 
         attaccante.rimuoviUnitaPerPriorita(perditeAttaccante);
         difensore.rimuoviUnitaPerPriorita(perditeDifensore);
@@ -45,7 +45,7 @@ public class BattleService {
     }
 
 
-    private int calcolaBonusDifesaTerritorio(City city) {
+    public static int calcolaBonusDifesaTerritorio(City city) {
         if (city == null) {return 0;}
         int bonus = 0;
         if (city.isAvamposto()) {
@@ -79,23 +79,20 @@ public class BattleService {
         return bonus;
     }
 
-    private int calcolaPerdite(Army esercito, int totaleEsercito, int totaleNemico) {
+    private int calcolaPerdite(Army esercito,boolean haPerso) {
         if (esercito.isVuoto()) {
             return 0;
         }
-        int perdite = 1;
+        int unita = esercito.getNumeroUnita();
+        int perdite;
 
-        if (totaleEsercito < totaleNemico) {
-            int differenza = totaleNemico - totaleEsercito;
-
-            if (differenza >= 10) {
-                perdite = 3;
-            } else if (differenza >= 5) {
-                perdite = 2;
-            }
+        if(haPerso) {
+            perdite = Math.max(1,(int)Math.round(unita*0.40));
         }
-
-        return Math.min(perdite, esercito.getNumeroUnita());
+        else {
+            perdite = (int) Math.round(unita*0.15);
+        }
+        return Math.min(perdite, unita);
     }
 
     private int calcolaBonusLeaderAttacco(Army army) {
