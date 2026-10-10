@@ -10,10 +10,10 @@ public class GameInfo {
             case ANNIBALE -> "Annibale";
             case ATTILA -> "Attila";
             case GIULIO_CESARE -> "Giulio Cesare";
-            case REGINA_ELISABETTA -> "Regina de elisabetta";
-            case GIOVANNA_D_ARCO ->  "Giovanna D Arco";
+            case REGINA_ELISABETTA -> "Regina Elisabetta";
+            case GIOVANNA_D_ARCO ->  "Giovanna d'Arco";
             case FEDERICO_BARBAROSSA -> "Federico Barbarossa";
-            case QIN_SHI_HUANG ->  "Qinshi Huang";
+            case QIN_SHI_HUANG ->  "Qin Shi Huang";
         };
     }
     public static int difficolta(LeaderType leader){
