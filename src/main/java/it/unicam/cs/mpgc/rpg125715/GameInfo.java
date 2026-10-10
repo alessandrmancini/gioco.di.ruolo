@@ -50,7 +50,7 @@ public class GameInfo {
                     "+ +2 all'attacco in tutte le battaglie offensive.\n"
                             + "- Può migliorare a Metropoli solo la capitale.";
             case REGINA_ELISABETTA ->
-                    "+ Le città commerciali producono +3 oro (invece di +2).\n"
+                    "+ Le città commerciali producono +1 oro in più.\n"
                             + "- -1 all'attacco in tutte le battaglie.";
             case ALESSANDRO_MAGNO ->
                     "+ Eserciti più mobili: +1 movimento (non ancora attivo).\n"
@@ -60,7 +60,7 @@ public class GameInfo {
                             + "- Mobilità ridotta con gli elefanti (non ancora attiva).";
             case GIOVANNA_D_ARCO ->
                     "+ Se un suo esercito confina con una città nemica, quella città rischia una ribellione (+20%).\n"
-                            + "- Le città commerciali producono 1 oro in meno (+1 invece di +2).";
+                            + "- Le città commerciali producono 1 oro in meno.";
             case GIULIO_CESARE ->
                     "+ Dadi migliorati: x1.0 / x1.1 / x1.2 / x1.3 / x1.5.\n"
                             + "- Tutte le unità costano +1 oro (escluse le speciali).";
@@ -84,8 +84,10 @@ public class GameInfo {
         t += "SPECIALIZZAZIONI\n";
         t += "  Militare: +2 difesa nelle battaglie in città, unità -1 oro, evita il rischio ribellione\n";
         t += "            per mancanza di città militari; serve per reclutare gli Elefanti (Annibale).\n";
-        t += "  Commerciale: +2 oro a ogni turno.\n";
-        t += "  Agricola: nessun effetto per ora (riservata ai rifornimenti, non ancora attivi).\n\n";
+        t += "  Commerciale: oro in più a ogni turno secondo il livello\n";
+        t += "            (Accampamento +1, Avamposto +2, Città +2, Metropoli +3).\n";
+        t += "  Agricola: oro in più a ogni turno secondo il livello\n";
+        t += "            (Accampamento +1, Avamposto +1, Città +2, Metropoli +2).\n\n";
 
         t += "BATTAGLIE\n";
         t += "  Perdite: chi perde lascia il 40% delle unità (almeno 1), chi vince il 15%.\n";
@@ -115,7 +117,7 @@ public class GameInfo {
         t += "  Nel primo turno di ogni giocatore non si può attaccare.\n\n";
 
         t += "ENTRATE E RIBELLIONI\n";
-        t += "  Ogni turno (dal secondo): 5 oro + 2 per ogni città commerciale.\n";
+        t += "  Ogni turno (dal secondo): 5 oro + i bonus delle città commerciali e agricole.\n";
         t += "  Rischio di ribellione a inizio turno: 35% nessuna città con guarnigione,\n";
         t += "  20% tutte le città sono accampamenti, 25% nessuna città militare,\n";
         t += "  20% leader nemico vicino (Giovanna d'Arco).\n";

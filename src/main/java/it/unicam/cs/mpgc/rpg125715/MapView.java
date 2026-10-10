@@ -274,6 +274,11 @@ public class MapView extends Pane {
             testo+= "\nLivello: "+ bello(c.getLevel().name());
             testo+= "\nSpecializzazione: "+ bello(c.getSpecialization().name());
             testo+= "\nProprietario: " + (proprietario != null ? proprietario.getName() : "nessuno");
+
+            if(proprietario != null){
+                int oro = TurnService.bonusOroCittaConLeader(c, proprietario.getLeader());
+                if(oro>0){testo += "\nProduce: +"+ oro + " oro a turno";}
+            }
         }
         else {
             testo += "Territorio libero (posizione "+l.getId()+")";

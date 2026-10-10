@@ -4,7 +4,6 @@ public class TurnService {
 
     public static final int MAX_ROUND = 30;
     private static final int ORO_BASE = 5;
-    private static final int BONUS_COMMERCIALE = 2;
     private final RibellioneService ribellioneService;
 
     public TurnService(RibellioneService ribellioneService) {
@@ -84,15 +83,35 @@ public class TurnService {
             }
             return;
         }
-        player.aggiungiOro(ORO_BASE+bonusCittaCommerciale(player));
+        player.aggiungiOro(ORO_BASE+bonusOroCities(player));
     }
 
-    private int bonusCittaCommerciale(Player player){
+    private int bonusOroCities(Player player){
         int bonus = 0;
         for(City city : player.getTerritorio().getCities()){
-            if(city.getSpecialization() == CitySpecialization.COMMERCIALE){
-                bonus += Math.max(0, BONUS_COMMERCIALE+player.getLeader().getBonusCommercio());
-            }
+            bonus += bonusOroCittaConLeader(city, player.getLeader());
+        }
+        return bonus;
+    }
+
+    public static int bonusOroCitta(City city){
+        return switch (city.getSpecialization()){
+            case COMMERCIALE -> switch (city.getLevel()){
+                case ACCAMPAMENTO -> 1;
+                case AVAMPOSTO, CITTA -> 2;
+                case METROPOLI -> 3;
+            };
+            case AGRICOLA -> switch (city.getLevel()){
+                case ACCAMPAMENTO, AVAMPOSTO -> 1;
+                case CITTA, METROPOLI -> 2;
+            };
+            default -> 0;
+        };
+    }
+    public static int bonusOroCittaConLeader(City city, LeaderType leader){
+        int bonus = bonusOroCitta(city);
+        if(city.getSpecialization() == CitySpecialization.COMMERCIALE){
+            bonus = Math.max(0, bonus + leader.getBonusCommercio());
         }
         return bonus;
     }
