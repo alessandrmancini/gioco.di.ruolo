@@ -362,7 +362,7 @@ public class GameController {
         if (selectedArmy != null && selectedArmy.isPuoMuovere() && !selectedArmy.isVuoto()) {
             boolean primoTurno = current.getTurniGiocati() == 0;
             for (Location n : l.getAdiacenti()) {
-                if (!n.hasArmyPlayer(current)) {continue;}
+                if (n.hasArmyPlayer(current)) {continue;}
                 if(primoTurno && movementService.isAttacco(n, current)){continue;}
                 targets.add(n);
             }
@@ -588,7 +588,7 @@ public class GameController {
 
 
         boolean maxEserciti = current.numeroEserciti() >= ArmyService.MAX_ESERCITI;
-        newArmyButton.setDisable(!miaCitta || !maxEserciti);
+        newArmyButton.setDisable(!miaCitta || maxEserciti);
         newArmyButton.setText(maxEserciti ? "Crea esercito(massimo "+ ArmyService.MAX_ESERCITI+ ")" : "Crea esercito ("+ armyService.costoNuovoEsercito(current) + " oro)");
 
         undoButton.setDisable(!umano || ultimoEsercitoMosso == null);
