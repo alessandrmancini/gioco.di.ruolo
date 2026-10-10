@@ -43,12 +43,15 @@ public class ArmyService {
 
         if(owner.isSconfitto()){return null;}
         Location destinazione = trovaLocationRespawn(owner);
-        if(destinazione == null){return null;}
-
-        for(Army esistente : destinazione.getArmies()){
-            if(esistente != null && esistente.getOwner() == owner){return esistente;}
+        if(destinazione == null){
+            if(owner.numeroCitta() == 0 && owner.numeroEserciti() == 0){owner.setSconfitto();}
+            return null;
         }
-        return creaEsercito(owner, destinazione);
+
+        Army nuovo = creaEsercito(owner, destinazione);
+        nuovo.addUnit(UnitFactory.creaUnita(UnitType.FANTERIA, owner.getLeader()));
+        nuovo.addUnit(UnitFactory.creaUnita(UnitType.SPECIALI, owner.getLeader()));
+        return nuovo;
     }
 
     public int costoNuovoEsercito(Player player){
@@ -89,6 +92,6 @@ public class ArmyService {
     }
 
     private boolean puoOspitare(Location location, Player owner){
-        return location != null && !location.hasEnemyArmiesFor(owner);
+        return location != null && !location.hasEnemyArmiesFor(owner) && !location.hasArmyPlayer(owner);
     }
 }
