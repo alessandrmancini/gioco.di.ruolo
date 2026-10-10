@@ -50,7 +50,7 @@ public enum LeaderType {
     public boolean aumentaProbabilitaInsurrezioniNemiche(){return this == GIOVANNA_D_ARCO;}
     public int getBonusCommercio(){
         return switch (this){
-            case REGINA_ELISABETTA -> 2;
+            case REGINA_ELISABETTA -> 1;
             case GIOVANNA_D_ARCO -> -1;
             default -> 0;
         };

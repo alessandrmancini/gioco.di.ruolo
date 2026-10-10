@@ -2,6 +2,8 @@ package it.unicam.cs.mpgc.rpg125715;
 
 public class TurnService {
 
+    private static final int ORO_BASE = 5;
+    private static final int BONUS_COMMERCIALE = 2;
     private final RibellioneService ribellioneService;
 
     public TurnService(RibellioneService ribellioneService) {
@@ -62,7 +64,17 @@ public class TurnService {
             }
             return;
         }
-        player.aggiungiOro(5);
+        player.aggiungiOro(ORO_BASE+bonusCittaCommerciale(player));
+    }
+
+    private int bonusCittaCommerciale(Player player){
+        int bonus = 0;
+        for(City city : player.getTerritorio().getCities()){
+            if(city.getSpecialization() == CitySpecialization.COMMERCIALE){
+                bonus += Math.max(0, BONUS_COMMERCIALE+player.getLeader().getBonusCommercio());
+            }
+        }
+        return bonus;
     }
 
 }
