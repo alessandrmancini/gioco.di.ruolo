@@ -98,7 +98,7 @@ public class MovementService {
 
     public boolean isAttacco(Location destinazione, Player player){
         if(destinazione == null || player == null){throw new IllegalArgumentException("destinazione o army null");}
-        if(destinazione.hasEnemyArmiesFor(player)){return false;}
+        if(destinazione.hasEnemyArmiesFor(player)){return true;}
         if(destinazione.hasCity()){
             Player proprietario = destinazione.getCity().getOwner();
             return proprietario != null && proprietario != player;
