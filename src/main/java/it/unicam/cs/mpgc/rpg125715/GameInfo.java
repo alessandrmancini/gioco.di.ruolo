@@ -105,7 +105,7 @@ public class GameInfo {
         t += "  Giulio Cesare paga +1 su tutte le unità tranne le speciali.\n\n";
 
         t += "QUANDO SI RECLUTA\n";
-        t += "  Solo in una tua città dove c'è un tuo esercito e che nonn è in ribellione.\n";
+        t += "  Solo in una tua città dove c'è un tuo esercito e che non è in ribellione.\n";
         t += "  Fanteria, Cavalleria, Assedio: da Avamposto in su.\n";
         t += "  Unità speciali: solo da Città o Metropoli.\n";
         t += "  Elefanti: solo Annibale, in una città militare.\n\n";
@@ -118,12 +118,14 @@ public class GameInfo {
 
         t += "ENTRATE E RIBELLIONI\n";
         t += "  Ogni turno (dal secondo): 5 oro + i bonus delle città commerciali e agricole.\n";
-        t += "  Rischio di ribellione a inizio turno: 35% nessuna città con guarnigione,\n";
-        t += "  20% tutte le città sono accampamenti, 25% nessuna città militare,\n";
+        t += "  Rischio di ribellione a inizio turno: 20% nessuna città con un tuo esercito,\n";
+        t += "  10% tutte le città sono accampamenti, 15% nessuna città militare,\n";
         t += "  20% leader nemico vicino (Giovanna d'Arco).\n";
-        t += "  Con la ribellione non si guadagna oro e non si recluta. Si risolve portando un\n";
-        t += "  esercito di almeno 4 unità in una tua città; dopo 2 turni si perde 1 oro a turno\n";
-        t += "  e dopo 7 turni si perde la partita.\n\n";
+        t += "  La ribellione colpisce una città senza esercito (o con l'esercito più piccolo) e si\n";
+        t += "  vede dal '!!!' dopo il nome. Una città in ribellione non dà oro e non recluta.\n";
+        t += "  Si risolve con un esercito di almeno 4 unità sulla città. Dopo 2 turni costa 1 oro\n";
+        t += "  a turno; dopo 4 turni la città diventa indipendente e chiunque può conquistarla\n";
+        t += "  (tu non puoi riprenderla nello stesso turno).\n\n";
 
         t += "SENZA CITTA'\n";
         t += "  Se perdi l'ultima città ma hai ancora un esercito, resti in gioco e puoi fondare\n";
