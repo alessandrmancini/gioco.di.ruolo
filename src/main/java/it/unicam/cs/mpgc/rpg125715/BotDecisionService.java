@@ -120,6 +120,7 @@ public class BotDecisionService {
         return new BotDecision(BotActionType.RECRUIT, null, null, scelta);
     }
 
+
     //NUOVO ESERCITO
     private BotDecision decidiNuovoEsercito(Player bot){
         if(bot.numeroEserciti() >= ArmyService.MAX_ESERCITI){return null;}
