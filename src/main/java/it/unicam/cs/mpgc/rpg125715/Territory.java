@@ -105,6 +105,4 @@ public class Territory {
 
     public List<City> getCities() {return new ArrayList<>(cities);}
     public boolean cercaCity(City c){return c!=null && cities.contains(c);}
-
-
 }
