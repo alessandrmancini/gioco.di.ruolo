@@ -54,7 +54,7 @@ public class ArmyService {
         return nuovo;
     }
 
-    public int costoNuovoEsercito(Player player){
+    public static int costoNuovoEsercito(Player player){
         if(player == null){throw new IllegalArgumentException("player null");}
         if(player.numeroEserciti()==0){return 0;}
         return 1 << player.numeroEserciti();    //moltiplicazione dell'1 per 2^numeroEserciti()
