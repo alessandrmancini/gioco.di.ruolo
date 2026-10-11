@@ -56,6 +56,7 @@ public class GameController {
     @FXML private Button undoButton;
     @FXML private Button newArmyButton;
     @FXML private Button foundCityButton;
+    @FXML private Label rebellionLabel;
 
     private MapView mapView;
 
@@ -79,6 +80,7 @@ public class GameController {
     private TurnService turnService;
     private BotTurnService botTurnService;
     private ConquestService conquestService;
+    private RibellioneService ribellioneService;
     private GameInitializationService gameInitializationService;
 
     public GameController() {
@@ -94,7 +96,7 @@ public class GameController {
         this.movementService = new MovementService(battleService, armyService, conquestService);
         this.recruitmentService = new RecruitmentService();
         this.constructionService = new ConstructionService();
-        RibellioneService ribellioneService = new RibellioneService();
+        this.ribellioneService = new RibellioneService();
         this.turnService = new TurnService(ribellioneService);
         BotDecisionService botDecisionService = new BotDecisionService(constructionService);
         this.botTurnService = new BotTurnService(botDecisionService, turnService, recruitmentService, movementService, constructionService);
@@ -279,6 +281,7 @@ public class GameController {
             turnService.fineTurno(game);
             log("--- " + finito.getName() + " finisce il turno ---");
             logNuovoRound();
+            logEventi();
 
             // i bot giocano finché non tocca di nuovo a un umano
             int guardia = 0;
@@ -288,6 +291,7 @@ public class GameController {
                     && guardia++ < limite) {
                 log(botTurnService.eseguiTurnoBot(game));
                 logNuovoRound();
+                logEventi();
             }
             if (!game.isGameOver()) {
                 Player prossimo = game.getCurrentPlayer();
@@ -295,7 +299,7 @@ public class GameController {
                 if(prossimo.numeroCitta() == 0 && conquestService.trovaLocationPerFondazione(prossimo) != null){
                     log("Non hai più insediamenti: usa 'Fonda città' per trasformare in nodo dove si trova il tuo esercito in una nuova città");
                 }
-                if(prossimo.getTerritorio().hasRibellione()){
+                if(numeroCittaRibellione(prossimo)>0){
                     log("Attenzione: il territorio di "+ prossimo.getName()+ " è in ribellione!");
                 }
             }
@@ -491,6 +495,19 @@ public class GameController {
         }
     }
 
+    private int numeroCittaRibellione(Player p){
+        int n= 0;
+        for (City c : p.getTerritorio().getCities()){
+            if(c.hasRibellione()){n++;}
+        }
+        return n;
+    }
+    private void logEventi(){
+        for(String evento : game.prelevaEventi()){
+            log("! "+ evento);
+        }
+    }
+
     private boolean esisteUmanoAttivo() {
         for (Player p : game.getPlayers()) {
             if (p.getKind() == PlayerKind.HUMAN && !p.isSconfitto()) {return true;}
@@ -591,6 +608,7 @@ public class GameController {
             newArmyButton.setDisable(true);
             foundCityButton.setVisible(false);
             foundCityButton.setManaged(false);
+            rebellionLabel.setText("");
             return;
         }
 
@@ -616,7 +634,7 @@ public class GameController {
 
             Label statistiche = new Label("Oro " + p.getOro() + "  |  Città " + p.numeroCitta() +
                     "  |  Eserciti " + p.numeroEserciti() + "/"+ ArmyService.MAX_ESERCITI +
-                    (p.getTerritorio().hasRibellione() ? " | Ribellione" : ""));
+                    (numeroCittaRibellione(p)>0 ? " | Ribellione" + numeroCittaRibellione(p) : ""));
 
             statistiche.getStyleClass().add("player-stats");
 
@@ -650,6 +668,16 @@ public class GameController {
         boolean puoFondare = umano && conquestService.trovaLocationPerFondazione(current) != null;
         foundCityButton.setVisible(puoFondare);
         foundCityButton.setManaged(puoFondare);
+
+        if(umano){
+            String testoRibellione = "Rischio a inizio prossimo turno: "+ ribellioneService.calcolaProbabilita(current, game) + "%";
+            for(String causa : ribellioneService.causeAttive(current, game)){
+                testoRibellione+= "\n " + causa;
+            }
+            rebellionLabel.setText(testoRibellione);
+        }
+        else{rebellionLabel.setText("");}
+
         upgradeButton.setText(miaCitta && !city.isMetropoli()
                 ? "Migliora città (" + constructionService.costoMiglioramento(city) + " oro)"
                 : "Migliora città");

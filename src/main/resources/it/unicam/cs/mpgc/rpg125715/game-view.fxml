@@ -66,6 +66,11 @@
                         <Button fx:id="upgradeButton" text="Migliora città" maxWidth="Infinity" onAction="#onMigliorarClick"/>
                         <ComboBox fx:id="specCombo" maxWidth="Infinity"/>
                         <Button fx:id="specButton" text="Imposta specializzazione (2 oro)" maxWidth="Infinity" onAction="#onSpecializzaClick"/>
+
+                        <Separator/>
+                        <Label text="Ribellioni" styleClass="section-title"/>
+                        <Label fx:id="rebellionLabel" wrapText="true"/>
+
                     </VBox>
                 </content>
             </ScrollPane>

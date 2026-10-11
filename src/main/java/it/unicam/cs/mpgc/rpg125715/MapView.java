@@ -207,7 +207,7 @@ public class MapView extends Pane {
 
             boolean capitale = c.getOwner() != null && c.getOwner().getCapitale() == c;
             lato = LATO_NOME.getOrDefault(c.getName(), 'B');
-            String etichetta = c.getName() + (capitale ? " ★" : "");
+            String etichetta = c.getName() + (capitale ? " ★" : "") + (c.hasRibellione() ? " !!!" : "");
             Text nome = testo(etichetta, 0, 0, Math.max(10, 11 * k), Color.WHITE, true, true);
             double w = nome.getLayoutBounds().getWidth();
             double tx;
@@ -277,8 +277,19 @@ public class MapView extends Pane {
 
             if(proprietario != null){
                 int oro = TurnService.bonusOroCittaConLeader(c, proprietario.getLeader());
-                if(oro>0){testo += "\nProduce: +"+ oro + " oro a turno";}
+                if(oro>0 && !c.hasRibellione()){testo += "\nProduce: +"+ oro + " oro a turno";}
             }
+            if(c.hasRibellione()){
+                testo += "\nRIBELLIONE da " + c.getRibellione().getTurniAttiva() + " turni (serve un esercito di "
+                        + Ribellione.UNITA_PER_PACIFICARE + "+ unità)";
+                if(c.getRibellione().applicaMalusOro()){testo += "\n-1 oro a turno finché dura";}
+                int mancano = Ribellione.TURNI_PER_PERDITA - c.getRibellione().getTurniAttiva();
+                testo += "\nSe non viene sedata la città è persa tra " + mancano + " turni";
+            }
+            if(proprietario == null && c.getExProprietario() != null){
+                testo += "\n(indipendente: " + c.getExProprietario().getName() + " non può riprenderla in questo turno)";
+            }
+
         }
         else {
             testo += "Territorio libero (posizione "+l.getId()+")";

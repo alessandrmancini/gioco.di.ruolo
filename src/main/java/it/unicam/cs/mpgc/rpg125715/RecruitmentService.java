@@ -5,7 +5,7 @@ public class RecruitmentService {
     public Unit reclutaUnita(Player player, City city,Army army, UnitType type) {
         if(player == null || city == null || army == null || type == null){throw new IllegalArgumentException("non possono esserci argomenti null");}
         if(city.getOwner() != player || !player.getTerritorio().cercaCity(city)){throw new IllegalArgumentException("la città non è presente nel territorio del giocatore");}
-        if(city.getOwner().getTerritorio().hasRibellione()){throw new IllegalArgumentException("ribellione in corso");}
+        if(city.hasRibellione()){throw new IllegalArgumentException("la città è in ribellione");}
         if(army.getOwner() != player){throw new IllegalArgumentException("posizione esercito errata o esercito non del player");}
         Location posizione = army.getPosizione();
         if(posizione == null || !posizione.hasCity() || posizione.getCity() != city){throw new IllegalArgumentException("l'esercito non si trova nella location della città");}

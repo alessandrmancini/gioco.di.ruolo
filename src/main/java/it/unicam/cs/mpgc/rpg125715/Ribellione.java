@@ -1,41 +1,23 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/**
+ * Ribellione di una singola città.
+ * Conta i turni del proprietario passati senza che la città sia stata riappacificata.
+ */
 public class Ribellione {
-    private boolean attiva;
+    public static final int TURNI_PER_MALUS = 2;     //da qui in poi -1 oro a turno
+    public static final int TURNI_PER_PERDITA = 4;   //da qui in poi la città è persa
+    public static final int UNITA_PER_PACIFICARE = 4;
+
     private int turniAttiva;
-    private boolean pacificazione;
 
     public Ribellione() {
-        this.attiva = true;
         this.turniAttiva = 0;
-        pacificazione = false;
     }
 
-    public boolean isAttiva() {return attiva;}
     public int getTurniAttiva() {return turniAttiva;}
+    public void nextTurn() {turniAttiva++;}
 
-    //PACIFICAZIONE (NECESSARIO UN TURNO)
-    public boolean isPacificazioneProgrammata(){return pacificazione;}
-    public void programmaPacificazione(){
-        if(attiva){
-            pacificazione = true;
-        }
-    }
-    public void annullaPacificazione(){pacificazione = false;}
-
-    public void setAttiva(){
-        if(!attiva){
-            attiva = true;
-            turniAttiva = 0;
-            pacificazione = false;
-        }
-    }
-    public void nextTurn(){if(attiva){turniAttiva++;}}
-
-    public void pacifica(){
-        attiva = false;
-        turniAttiva = 0;
-    }
-
-    public boolean applicaMalusOro(){return attiva && turniAttiva >= 2;}
+    public boolean applicaMalusOro() {return turniAttiva >= TURNI_PER_MALUS;}
+    public boolean cittaPersa() {return turniAttiva >= TURNI_PER_PERDITA;}
 }

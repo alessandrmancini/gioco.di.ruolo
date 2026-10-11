@@ -99,6 +99,8 @@ public class MovementService {
         Player conquistatore = army.getOwner();
         if(city.getOwner() == conquistatore){return;}
 
+        if(city.getOwner() == null && city.getExProprietario() == conquistatore){return;}
+
         if(destinazione.hasArmyPlayer(conquistatore)){
             conquestService.conquista(city, conquistatore);
         }

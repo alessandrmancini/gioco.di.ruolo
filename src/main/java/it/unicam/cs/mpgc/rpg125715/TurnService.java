@@ -17,7 +17,9 @@ public class TurnService {
         if(game.isGameOver()){return;}
         if(game.haSoloUnPlayerAttivo()){game.setFinita();return;}
 
-        game.getCurrentPlayer().incrementaTurniGiocati();
+        Player finito = game.getCurrentPlayer();
+        liberaCittaPerse(finito, game);
+        finito.incrementaTurniGiocati();
         game.incrementaNumeroTurno();
 
         prossimoPlayer(game);
@@ -50,40 +52,36 @@ public class TurnService {
         if(player == null){throw new IllegalArgumentException("Player is null");}
         if(game == null){throw new IllegalArgumentException("Game is null");}
 
-        boolean giaInRibellione = player.getTerritorio().hasRibellione();
-        ribellioneService.aggiornaRibellioneTurno(player.getTerritorio());
-        if(!giaInRibellione && !player.isSconfitto() && player.getTurniGiocati()>0){
-            ribellioneService.verificaNuovaRibellione(player.getTerritorio(), subisceEffettoLeaderNemico(player, game));
-        }
+        ribellioneService.aggiornaRibellioni(player, game);
         if(player.isSconfitto() && game.haSoloUnPlayerAttivo()){game.setFinita();}
     }
-    private boolean subisceEffettoLeaderNemico(Player player, Game game){
-        for(Player altro : game.getPlayers()){
-            if(altro == player || altro.isSconfitto() || !altro.getLeader().aumentaProbabilitaInsurrezioniNemiche()){continue;}
-            for(Army army: altro.getEserciti()){
-                for(City city : player.getTerritorio().getCities()){
-                    Location l = city.getLocation();
-                    if(l != null && army.getPosizione() != null && l.isAdiacente(army.getPosizione())){return true;}
-                }
+
+    private void liberaCittaPerse(Player finito, Game game){
+        for(Location l : game.getLocations()){
+            if(l.hasCity() && l.getCity().getExProprietario() == finito){
+                l.getCity().setExProprietario(null);
             }
         }
-        return false;
     }
 
+    //ORO
     private void assegnaOroTurno(Player player, Game game){
         if(player == null){throw new IllegalArgumentException("Player is null");}
         if(game == null){throw new IllegalArgumentException("Game is null");}
 
         if(game.getNumeroTurno() <= game.getPlayers().size()){return;}
 
-        Territory territory = player.getTerritorio();
-        if(!ribellioneService.territorioProduceOro(territory)){
-            if(ribellioneService.applicaMalusOro(territory) && player.getOro()>0){
-                player.spendiOro(1);
+        int oro = ORO_BASE;
+        int cittaConMalus = 0;
+        for(City city : player.getTerritorio().getCities()){
+            if(city.hasRibellione()){
+                if(city.getRibellione().applicaMalusOro()){cittaConMalus++;}
+                continue;
             }
-            return;
+            oro += bonusOroCittaConLeader(city, player.getLeader());
         }
-        player.aggiungiOro(ORO_BASE+bonusOroCities(player));
+        player.aggiungiOro(oro);
+        player.spendiOro(Math.min(cittaConMalus, player.getOro()));
     }
 
     private int bonusOroCities(Player player){

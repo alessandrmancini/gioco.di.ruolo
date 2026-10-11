@@ -1,115 +1,155 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class RibellioneService {
 
     private final Random random;
+    private final ConquestService conquestService;
 
     public RibellioneService() {
-        this.random = new Random();
+        this(new ConquestService());
     }
 
-    public void verificaNuovaRibellione(Territory territory, boolean effettoLeaderNemico){
-        if(territory == null){throw new IllegalArgumentException("territory null");}
+    public RibellioneService(ConquestService conquestService) {
+        if(conquestService == null){throw new IllegalArgumentException("conquestService null");}
+        this.random = new Random();
+        this.conquestService = conquestService;
+    }
 
-        //non può esserci più di una ribellione per territorio
-        if(territory.hasRibellione()){return;}
+    //chiamato all'inizio del turno del giocatore
+    public void aggiornaRibellioni(Player player, Game game){
+        if(player == null || game == null){throw new IllegalArgumentException("player o game null");}
 
-        int probabilita = calcolaProbabilitaRibellione(territory, effettoLeaderNemico);
+        //1) città già in ribellione
+        for(City city : player.getTerritorio().getCities()){
+            Ribellione ribellione = city.getRibellione();
+            if(ribellione == null){continue;}
+
+            if(puoEssereRiappacificata(city, player)){
+                city.rimuoviRibellione();
+                game.aggiungiEvento("La ribellione di " + city.getName() + " è stata sedata");
+                continue;
+            }
+            ribellione.nextTurn();
+            if(ribellione.cittaPersa()){
+                conquestService.abbandona(city);
+                game.aggiungiEvento(player.getName() + " perde " + city.getName() + ": la ribellione l'ha resa indipendente");
+            }
+        }
+
+        //2) possibile nuova ribellione (non nel primo turno del giocatore)
+        if(player.isSconfitto() || player.getTurniGiocati() == 0){return;}
+        verificaNuovaRibellione(player, game);
+    }
+
+    private void verificaNuovaRibellione(Player player, Game game){
+        int probabilita = calcolaProbabilita(player, game);
         if(probabilita <= 0){return;}
 
-        int tiro = random.nextInt(100)+1;
+        City bersaglio = scegliCittaBersaglio(player);
+        if(bersaglio == null){return;}
+
+        int tiro = random.nextInt(100) + 1;
         if(tiro <= probabilita){
-            territory.attivaRibellione();
+            bersaglio.attivaRibellione();
+            game.aggiungiEvento("Ribellione a " + bersaglio.getName() + " (" + player.getName() + ")!");
         }
     }
 
-    public void aggiornaRibellioneTurno(Territory territory){
-        if(territory == null){throw new IllegalArgumentException("territory null");}
-        if(!territory.hasRibellione()){return;}
+    //la ribellione colpisce una città senza esercito, altrimenti quella con l'esercito più piccolo
+    private City scegliCittaBersaglio(Player player){
+        List<City> senzaEsercito = new ArrayList<>();
+        City piuDebole = null;
+        int minimo = Integer.MAX_VALUE;
 
-        Ribellione ribellione = territory.getRibellione();
-        if(ribellione.isPacificazioneProgrammata()){
-            ribellione.pacifica();
-            territory.rimuoviRibellione();
-            return;
+        for(City city : player.getTerritorio().getCities()){
+            if(city.hasRibellione()){continue;}
+            Army presidio = esercitoInCitta(city, player);
+            if(presidio == null){
+                senzaEsercito.add(city);
+            }
+            else if(presidio.getNumeroUnita() < minimo){
+                minimo = presidio.getNumeroUnita();
+                piuDebole = city;
+            }
         }
-        if(puoEsserePacificato(territory)){
-            ribellione.programmaPacificazione();
+        if(!senzaEsercito.isEmpty()){
+            return senzaEsercito.get(random.nextInt(senzaEsercito.size()));
         }
-        else{ribellione.annullaPacificazione();}
-
-        ribellione.nextTurn();
-
-        if(ribellione.getTurniAttiva()>7){
-            territory.getOwner().setSconfitto();
-            territory.rimuoviRibellione();
-        }
+        return piuDebole;
     }
 
-    public boolean territorioProduceOro(Territory territory){
-        if(territory == null){throw new IllegalArgumentException("territory null");}
-        return !territory.hasRibellione();
-    }
-    public boolean applicaMalusOro(Territory territory){
-        if(territory == null){throw new IllegalArgumentException("territory null");}
-        if(!territory.hasRibellione()){return false;}
-        return territory.getRibellione().applicaMalusOro();
+    private Army esercitoInCitta(City city, Player player){
+        Location l = city.getLocation();
+        if(l == null){return null;}
+        for(Army a : l.getArmies()){
+            if(a != null && a.getOwner() == player){return a;}
+        }
+        return null;
     }
 
+    private boolean puoEssereRiappacificata(City city, Player player){
+        Army presidio = esercitoInCitta(city, player);
+        return presidio != null && presidio.getNumeroUnita() >= Ribellione.UNITA_PER_PACIFICARE;
+    }
 
-    private int calcolaProbabilitaRibellione(Territory territory, boolean effettoLeaderNemico){
+    //PROBABILITA' (mostrata anche nell'interfaccia)
+    public int calcolaProbabilita(Player player, Game game){
         int probabilita = 0;
+        Territory territory = player.getTerritorio();
+        if(territory.getCities().isEmpty()){return 0;}
         if(tutteCittaSenzaGuarnigione(territory)){probabilita += 20;}
         if(tutteCittaNonSviluppate(territory)){probabilita += 10;}
-        if(!haCittaMilitare(territory)){probabilita +=15;}
-        if(effettoLeaderNemico){probabilita += 20;}
+        if(!haCittaMilitare(territory)){probabilita += 15;}
+        if(subisceEffettoLeaderNemico(player, game)){probabilita += 20;}
         return probabilita;
     }
 
-    //CONDIZIONI PER RIBELLIONE
-    //1
-    private boolean tutteCittaNonSviluppate(Territory territory){
-        if(territory == null){throw new IllegalArgumentException("territory null");}
-        for(City city : territory.getCities()){
-            if(city.getLevel() != CityLevel.ACCAMPAMENTO){
-                return false;
-            }
-        }
-        return true;
+    public List<String> causeAttive(Player player, Game game){
+        List<String> cause = new ArrayList<>();
+        Territory territory = player.getTerritorio();
+        if(territory.getCities().isEmpty()){return cause;}
+        if(tutteCittaSenzaGuarnigione(territory)){cause.add("+20%  nessuna città con un tuo esercito");}
+        if(tutteCittaNonSviluppate(territory)){cause.add("+10%  tutte le città sono accampamenti");}
+        if(!haCittaMilitare(territory)){cause.add("+15%  nessuna città militare");}
+        if(subisceEffettoLeaderNemico(player, game)){cause.add("+20%  leader nemico vicino");}
+        return cause;
     }
-    //2
-    private boolean tutteCittaSenzaGuarnigione(Territory territory){
-        if(territory == null){throw new IllegalArgumentException("territory null");}
-        for(City city : territory.getCities()){
-            Location l = city.getLocation();
-            for(Army a: l.getArmies()){
-                if(a != null && a.getOwner() == territory.getOwner()){return false;}
-            }
-        }
-        return true;
-    }
-    //3
-    private boolean haCittaMilitare(Territory territory){
-        if(territory == null){throw new IllegalArgumentException("territory null");}
 
+    //Giovanna d'Arco: un suo esercito vicino a una città nemica ne aumenta il rischio
+    public boolean subisceEffettoLeaderNemico(Player player, Game game){
+        for(Player altro : game.getPlayers()){
+            if(altro == player || altro.isSconfitto() || !altro.getLeader().aumentaProbabilitaInsurrezioniNemiche()){continue;}
+            for(Army army : altro.getEserciti()){
+                for(City city : player.getTerritorio().getCities()){
+                    Location l = city.getLocation();
+                    if(l != null && army.getPosizione() != null && l.isAdiacente(army.getPosizione())){return true;}
+                }
+            }
+        }
+        return false;
+    }
+
+    //CONDIZIONI
+    private boolean tutteCittaNonSviluppate(Territory territory){
+        for(City city : territory.getCities()){
+            if(city.getLevel() != CityLevel.ACCAMPAMENTO){return false;}
+        }
+        return true;
+    }
+    private boolean tutteCittaSenzaGuarnigione(Territory territory){
+        for(City city : territory.getCities()){
+            if(esercitoInCitta(city, territory.getOwner()) != null){return false;}
+        }
+        return true;
+    }
+    private boolean haCittaMilitare(Territory territory){
         for(City city : territory.getCities()){
             if(city.getSpecialization() == CitySpecialization.MILITARE){return true;}
         }
         return false;
     }
-
-    private boolean puoEsserePacificato(Territory territory){
-        if(territory == null){throw new IllegalArgumentException("territory null");}
-        for(City city : territory.getCities()){
-            Location l = city.getLocation();
-            for(Army a: l.getArmies()){
-                if(a != null && a.getOwner() == territory.getOwner() && a.getNumeroUnita()>=4){return true;}
-            }
-        }
-        return false;
-    }
-
-
 }
