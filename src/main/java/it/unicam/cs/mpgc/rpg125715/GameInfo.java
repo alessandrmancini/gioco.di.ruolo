@@ -105,7 +105,7 @@ public class GameInfo {
         t += "  Giulio Cesare paga +1 su tutte le unità tranne le speciali.\n\n";
 
         t += "QUANDO SI RECLUTA\n";
-        t += "  Solo in una tua città dove c'è un tuo esercito, con il territorio senza ribellione.\n";
+        t += "  Solo in una tua città dove c'è un tuo esercito e che nonn è in ribellione.\n";
         t += "  Fanteria, Cavalleria, Assedio: da Avamposto in su.\n";
         t += "  Unità speciali: solo da Città o Metropoli.\n";
         t += "  Elefanti: solo Annibale, in una città militare.\n\n";
