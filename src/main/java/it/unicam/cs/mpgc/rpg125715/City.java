@@ -7,6 +7,8 @@ public class City {
     private CitySpecialization specialization;
     private Player owner;
     private Location location;
+    private Ribellione ribellione;
+    private Player exProprietario;
 
     public City(String name) {
         if(name == null || name.isBlank()) {throw new IllegalArgumentException("il nome non può essere vuoto");}
@@ -15,6 +17,8 @@ public class City {
         this.specialization = CitySpecialization.NESSUNA;
         this.owner = null;
         this.location = null;
+        this.ribellione = null;
+        this.exProprietario = null;
     }
 
     public String getName(){return name;}
@@ -54,4 +58,16 @@ public class City {
         if(l == null){throw new IllegalArgumentException("location null");}
         this.location = l;
     }
+
+    //RIBELLIONE
+    public Ribellione getRibellione(){return ribellione;}
+    public boolean hasRibellione(){return ribellione != null;}
+    public void arrivaRibellione(){
+        if(ribellione == null){ribellione = new Ribellione();}
+    }
+    public void rimuoviRibellione(){ribellione = null;}
+
+    //EX PROPRIETARIO
+    public Player getExProprietario(){return exProprietario;}
+    public void setExProprietario(Player p){this.exProprietario = p;}
 }

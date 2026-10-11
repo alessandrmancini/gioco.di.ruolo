@@ -8,10 +8,22 @@ public class ConquestService {
         if(city.getOwner() == conquistatore){throw new IllegalArgumentException("conquistatore già in possesso della città");}
 
         togliCittaAlProprietario(city);
+        city.rimuoviRibellione();
+        city.setExProprietario(null);
 
         Territory nuovoTerritory = conquistatore.getTerritorio();
         nuovoTerritory.addCity(city);
         if(nuovoTerritory.getCapitale() == null){nuovoTerritory.nominaCapitale();}
+    }
+
+    public void abbandona(City city){
+        if(city == null){throw new IllegalArgumentException("city null");}
+        Player vecchioOwner = city.getOwner();
+        if(vecchioOwner == null){return;}
+
+        togliCittaAlProprietario(city);
+        city.rimuoviRibellione();
+        city.setExProprietario(vecchioOwner);
     }
 
     private void togliCittaAlProprietario(City city){

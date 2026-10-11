@@ -50,10 +50,10 @@ public class BotDecisionService {
         }
 
         //DECISIONE RECLUTAMENTO
-        if(bot.getOro() >= ORO_MINIMO_RECLUTAMENTO && !territory.hasRibellione()){
+        if(bot.getOro() >= ORO_MINIMO_RECLUTAMENTO){
             for(City c : territory.getCities()){
                 Location locationCity = c.getLocation();
-                if(locationCity != null && c.getLevel() != CityLevel.ACCAMPAMENTO && locationCity.hasArmyPlayer(bot)){
+                if(locationCity != null && !c.hasRibellione() && c.getLevel() != CityLevel.ACCAMPAMENTO && locationCity.hasArmyPlayer(bot)){
                     return new BotDecision(BotActionType.RECRUIT, null, null, c);
                 }
             }
@@ -138,7 +138,7 @@ public class BotDecisionService {
         if(!capitaleMinacciata(bot,locCapitale)){return null;}
 
         if(locCapitale.hasArmyPlayer(bot)){
-            if(bot.getOro()>= ORO_MINIMO_RECLUTAMENTO && capitale.getLevel() != CityLevel.ACCAMPAMENTO && !bot.getTerritorio().hasRibellione()){
+            if(bot.getOro()>= ORO_MINIMO_RECLUTAMENTO && capitale.getLevel() != CityLevel.ACCAMPAMENTO && !capitale.hasRibellione()){
                 return new BotDecision(BotActionType.RECRUIT, null, null, capitale);
             }
             return null;
