@@ -4,6 +4,7 @@ public enum BotActionType {
     RECRUIT,
     BUILD,
     SPECIALIZE,
+    NEW_ARMY,
     ATTACK,
     MOVE,
     PASS
