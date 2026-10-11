@@ -62,7 +62,7 @@ public class City {
     //RIBELLIONE
     public Ribellione getRibellione(){return ribellione;}
     public boolean hasRibellione(){return ribellione != null;}
-    public void arrivaRibellione(){
+    public void attivaRibellione(){
         if(ribellione == null){ribellione = new Ribellione();}
     }
     public void rimuoviRibellione(){ribellione = null;}

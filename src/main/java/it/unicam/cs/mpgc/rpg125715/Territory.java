@@ -9,7 +9,6 @@ public class Territory {
     private final List<City> cities;
     private Player owner;
     private City capitale;
-    private Ribellione ribellione;
 
     public Territory(int id, String name){
         if(id < 0){throw new IllegalArgumentException("l'id non può essere negativo");}
@@ -19,7 +18,6 @@ public class Territory {
         this.cities = new ArrayList<>();
         this.owner = null;
         this.capitale = null;
-        this.ribellione = null;
     }
 
     public int getId() {return id;}
@@ -108,16 +106,5 @@ public class Territory {
     public List<City> getCities() {return new ArrayList<>(cities);}
     public boolean cercaCity(City c){return c!=null && cities.contains(c);}
 
-    //RIBELLIONE
-    public Ribellione getRibellione() {return ribellione;}
-    public void setRibellione(Ribellione ribellione) {this.ribellione = ribellione;}
-    public boolean hasRibellione(){return ribellione != null && ribellione.isAttiva();}
-    public void attivaRibellione(){
-        if(ribellione == null){
-            ribellione = new Ribellione();
-        }
-        else {ribellione.setAttiva();}
-    }
-    public void rimuoviRibellione(){ribellione = null;}
 
 }
