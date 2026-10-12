@@ -104,7 +104,7 @@ public class GameController {
         this.movementService = new MovementService(battleService, armyService, conquestService);
         this.recruitmentService = new RecruitmentService();
         this.constructionService = new ConstructionService();
-        this.ribellioneService = new RibellioneService();
+        this.ribellioneService = new RibellioneService(conquestService);
         this.turnService = new TurnService(ribellioneService);
         BotDecisionService botDecisionService = new BotDecisionService(constructionService);
         this.botTurnService = new BotTurnService(botDecisionService, turnService, recruitmentService, movementService, constructionService, armyService, conquestService);
@@ -545,13 +545,6 @@ public class GameController {
         }
     }
 
-    private int numeroCittaRibellione(Player p){
-        int n= 0;
-        for (City c : p.getTerritorio().getCities()){
-            if(c.hasRibellione()){n++;}
-        }
-        return n;
-    }
     private void logEventi(){
         for(String evento : game.prelevaEventi()){
             log("! "+ evento);
@@ -694,7 +687,7 @@ public class GameController {
 
             Label statistiche = new Label("Oro " + p.getOro() + "  |  Città " + p.numeroCitta() +
                     "  |  Eserciti " + p.numeroEserciti() + "/"+ ArmyService.MAX_ESERCITI +
-                    (numeroCittaRibellione(p)>0 ? " | Ribellione" + numeroCittaRibellione(p) : ""));
+                    (numeroCittaInRibellione(p)>0 ? " | Ribellione " + numeroCittaInRibellione(p) : ""));
 
             statistiche.getStyleClass().add("player-stats");
 

@@ -84,14 +84,6 @@ public class TurnService {
         player.spendiOro(Math.min(cittaConMalus, player.getOro()));
     }
 
-    private int bonusOroCities(Player player){
-        int bonus = 0;
-        for(City city : player.getTerritorio().getCities()){
-            bonus += bonusOroCittaConLeader(city, player.getLeader());
-        }
-        return bonus;
-    }
-
     public static int bonusOroCitta(City city){
         return switch (city.getSpecialization()){
             case COMMERCIALE -> switch (city.getLevel()){
