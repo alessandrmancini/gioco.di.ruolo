@@ -58,6 +58,7 @@ public class GameController {
     @FXML private Button undoButton;
     @FXML private Button newArmyButton;
     @FXML private Button foundCityButton;
+    @FXML private Button skipBotButton;
     @FXML private Label rebellionLabel;
 
     private MapView mapView;
@@ -74,6 +75,11 @@ public class GameController {
     private Location ultimaPartenza;
     private ArmyService armyService;
     private int roundMostrato;
+
+    // bot visibili passo per passo
+    private static final int PAUSA_BOT_MS = 900;
+    private boolean saltaBot;
+    private Player botCorrente;
 
     // ---- servizi del modello (ricreati a ogni nuova partita) ----
     private MovementService movementService;
@@ -101,7 +107,7 @@ public class GameController {
         this.ribellioneService = new RibellioneService();
         this.turnService = new TurnService(ribellioneService);
         BotDecisionService botDecisionService = new BotDecisionService(constructionService);
-        this.botTurnService = new BotTurnService(botDecisionService, turnService, recruitmentService, movementService, constructionService);
+        this.botTurnService = new BotTurnService(botDecisionService, turnService, recruitmentService, movementService, constructionService, armyService, conquestService);
         GameSetUpService gameSetUpService = new GameSetUpService(idGenerator);
         MapSetupService mapSetupService = new MapSetupService(gameSetUpService);
         this.gameInitializationService = new GameInitializationService(gameSetUpService, mapSetupService, armyService);
@@ -260,6 +266,7 @@ public class GameController {
             creaServizi();   // servizi nuovi: i contatori degli id ripartono da zero
             game = gameInitializationService.creaPartitaBase(configurazione(umani));
             fineMostrata = false;
+            botCorrente = null;
             azzeraUndo();
             resetSelezione();
             logArea.clear();
@@ -285,29 +292,70 @@ public class GameController {
             logNuovoRound();
             logEventi();
 
-            // i bot giocano finché non tocca di nuovo a un umano
-            int guardia = 0;
-            int limite = game.getPlayers().size() * 2;
-            while (!game.isGameOver()
-                    && game.getCurrentPlayer().getKind() == PlayerKind.BOT
-                    && guardia++ < limite) {
-                log(botTurnService.eseguiTurnoBot(game));
-                logNuovoRound();
-                logEventi();
-            }
-            if (!game.isGameOver()) {
-                Player prossimo = game.getCurrentPlayer();
-                log("Tocca a " + prossimo.getName() + " (" + leaderName(prossimo.getLeader()) + ").");
-                if(prossimo.numeroCitta() == 0 && conquestService.trovaLocationPerFondazione(prossimo) != null){
-                    log("Non hai più insediamenti: usa 'Fonda città' per trasformare in nodo dove si trova il tuo esercito in una nuova città");
-                }
-                if(numeroCittaRibellione(prossimo)>0){
-                    log("Attenzione: il territorio di "+ prossimo.getName()+ " è in ribellione!");
-                }
-            }
             azzeraUndo();
             resetSelezione();
         });
+        avviaTurniBot();
+    }
+    private void avviaTurniBot() {
+        saltaBot = false;
+        passoBot();
+    }
+
+    @FXML
+    private void onSaltaBotClick() {
+        saltaBot = true;
+    }
+
+    private void passoBot() {
+        if (game == null || game.isGameOver() || game.getCurrentPlayer().getKind() != PlayerKind.BOT) {
+            botCorrente = null;
+            if (game != null && !game.isGameOver()) {annunciaTurnoUmano();}
+            refresh();
+            return;
+        }
+        Player bot = game.getCurrentPlayer();
+        if (botCorrente != bot) {
+            botCorrente = bot;
+            botTurnService.iniziaTurnoBot();
+            log("Gioca " + bot.getName() + " (" + leaderName(bot.getLeader()) + ")");
+        }
+        refresh();
+
+        PauseTransition pausa = new PauseTransition(Duration.millis(saltaBot ? 0 : PAUSA_BOT_MS));
+        pausa.setOnFinished(e -> {
+            String esito;
+            try {
+                esito = botTurnService.eseguiProssimaAzione(game);
+            } catch (RuntimeException ex) {
+                log("Errore del bot: " + ex.getMessage());
+                esito = null;
+            }
+            if (esito != null) {
+                log(esito);
+                logEventi();
+                passoBot();
+            } else {
+                botTurnService.terminaTurno(game);
+                logNuovoRound();
+                logEventi();
+                verificaFinePartita();
+                botCorrente = null;
+                passoBot();
+            }
+        });
+        pausa.play();
+    }
+
+    private void annunciaTurnoUmano() {
+        Player prossimo = game.getCurrentPlayer();
+        log("Tocca a " + prossimo.getName() + " (" + leaderName(prossimo.getLeader()) + ").");
+        if (numeroCittaInRibellione(prossimo) > 0) {
+            log("Attenzione: " + numeroCittaInRibellione(prossimo) + " città di " + prossimo.getName() + " sono in ribellione!");
+        }
+        if (prossimo.numeroCitta() == 0 && conquestService.trovaLocationPerFondazione(prossimo) != null) {
+            log("Non hai più città: usa 'Fonda città' per trasformare il nodo dove si trova il tuo esercito.");
+        }
     }
 
     @FXML
@@ -510,6 +558,14 @@ public class GameController {
         }
     }
 
+    private int numeroCittaInRibellione(Player p) {
+        int n = 0;
+        for (City c : p.getTerritorio().getCities()) {
+            if (c.hasRibellione()) {n++;}
+        }
+        return n;
+    }
+
     private boolean esisteUmanoAttivo() {
         for (Player p : game.getPlayers()) {
             if (p.getKind() == PlayerKind.HUMAN && !p.isSconfitto()) {return true;}
@@ -610,6 +666,8 @@ public class GameController {
             newArmyButton.setDisable(true);
             foundCityButton.setVisible(false);
             foundCityButton.setManaged(false);
+            skipBotButton.setVisible(false);
+            skipBotButton.setManaged(false);
             rebellionLabel.setText("");
             return;
         }
@@ -670,6 +728,11 @@ public class GameController {
         boolean puoFondare = umano && conquestService.trovaLocationPerFondazione(current) != null;
         foundCityButton.setVisible(puoFondare);
         foundCityButton.setManaged(puoFondare);
+
+        //pulsante per saltare le pause dei bot
+        boolean botInGioco = botCorrente != null && !game.isGameOver();
+        skipBotButton.setVisible(botInGioco);
+        skipBotButton.setManaged(botInGioco);
 
         if(umano){
             String testoRibellione = "Rischio a inizio prossimo turno: "+ ribellioneService.calcolaProbabilita(current, game) + "%";

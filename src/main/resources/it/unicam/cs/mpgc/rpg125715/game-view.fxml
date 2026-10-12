@@ -29,6 +29,7 @@
                 <Label fx:id="turnLabel" styleClass="turn-label"/>
                 <Button text = "Legenda" onAction="#onLegendaClick"/>
                 <Button text="Nuova partita" onAction="#onNuovaPartitaClick"/>
+                <Button fx:id="skipBotButton" text="Salta mosse dei bot" onAction="#onSaltaBotClick"/>
                 <Button fx:id="endTurnButton" text="Fine turno" onAction="#onFineTurnoClick"/>
                 <Button fx:id="undoButton" text="Annulla spostamento" onAction="#onAnnullaSpostamentoClick"/>
             </HBox>
