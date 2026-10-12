@@ -110,15 +110,18 @@ public class MapSetupService {
 
         // nodi intermedi (senza città)
         coordinates.put(27, new int[]{555, 280});
-        coordinates.put(32, new int[]{240, 338});
-        coordinates.put(33, new int[]{250, 314});
         coordinates.put(34, new int[]{490, 240});
         coordinates.put(35, new int[]{445, 378});
         coordinates.put(36, new int[]{566, 432});
         coordinates.put(37, new int[]{640, 452});
-        coordinates.put(38, new int[]{790, 408});
         coordinates.put(39, new int[]{893, 400});
         coordinates.put(40, new int[]{925, 445});
+        coordinates.put(43, new int[]{837, 255});  // tra Bratsk e Xianyang
+        coordinates.put(44, new int[]{229, 321});  // tra Roma e Marsiglia
+        coordinates.put(45, new int[]{370, 203});  // tra Mosca e Stoccolma (1)
+        coordinates.put(46, new int[]{326, 191});  // tra Mosca e Stoccolma (2)
+        coordinates.put(47, new int[]{407, 459});  // tra Il Cairo e Gedda
+        coordinates.put(48, new int[]{227, 363});  // tra Cartagine e Cagliari
     }
     private void assegnaAdiacenzaBase(List<int[]> adiacenze){
         if(adiacenze == null){throw new IllegalArgumentException("adiacenze is null");}
@@ -130,12 +133,13 @@ public class MapSetupService {
         adiacenze.add(new int[]{12, 6});
         adiacenze.add(new int[]{6, 13});
         adiacenze.add(new int[]{6, 5});
-        adiacenze.add(new int[]{5, 4});
+        adiacenze.add(new int[]{5, 44});
+        adiacenze.add(new int[]{44, 4});
         adiacenze.add(new int[]{4, 3});
         adiacenze.add(new int[]{6, 7});
-        adiacenze.add(new int[]{7, 1});
         adiacenze.add(new int[]{1, 2});
-        adiacenze.add(new int[]{2, 3});
+        adiacenze.add(new int[]{2, 48});
+        adiacenze.add(new int[]{48, 3});
 
         // Tariff vicino madrid e rabat
         adiacenze.add(new int[]{42, 7});
@@ -143,6 +147,9 @@ public class MapSetupService {
 
         //Nord europa
         adiacenze.add(new int[]{11, 41});
+        adiacenze.add(new int[]{24,45});
+        adiacenze.add(new int[]{45, 46});
+        adiacenze.add(new int[]{46, 41});
 
         // Centro Europa
         adiacenze.add(new int[]{4, 8});
@@ -157,7 +164,8 @@ public class MapSetupService {
         adiacenze.add(new int[]{20, 35});
         adiacenze.add(new int[]{35, 21});
         adiacenze.add(new int[]{21, 22});
-        adiacenze.add(new int[]{22, 23});
+        adiacenze.add(new int[]{22, 47});
+        adiacenze.add(new int[]{47, 23});
         adiacenze.add(new int[]{23, 2});
         adiacenze.add(new int[]{23, 19});
 
@@ -172,18 +180,15 @@ public class MapSetupService {
         adiacenze.add(new int[]{21, 36});
         adiacenze.add(new int[]{36, 37});
         adiacenze.add(new int[]{37, 28});
-        adiacenze.add(new int[]{28, 38});
-        adiacenze.add(new int[]{38, 29});
+        adiacenze.add(new int[]{28, 29});
+        adiacenze.add(new int[]{26, 43});
+        adiacenze.add(new int[]{43, 29});
         adiacenze.add(new int[]{29, 39});
         adiacenze.add(new int[]{39, 40});
         adiacenze.add(new int[]{40, 30});
         adiacenze.add(new int[]{30, 31});
 
         // collegamenti alternativi interni
-        adiacenze.add(new int[]{3, 32});
-        adiacenze.add(new int[]{32, 4});
-        adiacenze.add(new int[]{4, 33});
-        adiacenze.add(new int[]{33, 8});
         adiacenze.add(new int[]{20, 24});
     }
     private void assegnaCittaAiNodi(List<Player> players, Map<Integer,City> cityPerLocation){
