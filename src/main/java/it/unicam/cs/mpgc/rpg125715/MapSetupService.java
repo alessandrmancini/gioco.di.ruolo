@@ -186,7 +186,7 @@ public class MapSetupService {
         adiacenze.add(new int[]{26, 43});
         adiacenze.add(new int[]{43, 29});
         adiacenze.add(new int[]{29, 39});
-        adiacenze.add(new int[]{39, 40});
+        adiacenze.add(new int[]{39, 30});
         adiacenze.add(new int[]{30, 31});
 
         // collegamenti alternativi interni
