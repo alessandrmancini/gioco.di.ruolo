@@ -224,7 +224,7 @@ public class GameController {
                if(nuovo != null){faccia.setImage(immagineLeader(nuovo));}
             });
 
-            HBox riga = new HBox(10, campione, etichetta, combo);
+            HBox riga = new HBox(10, faccia ,campione, etichetta, combo);
             riga.setAlignment(Pos.CENTER_LEFT);
             humansBox.getChildren().add(new VBox(4, riga, info));
         }
