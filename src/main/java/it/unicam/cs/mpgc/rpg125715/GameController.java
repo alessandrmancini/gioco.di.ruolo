@@ -616,7 +616,7 @@ public class GameController {
                 nuovi += riga+ "\n";
             }
         }
-        if(nuovi.isEmpty() && !game.isGameOver()){
+        if(!nuovi.isEmpty() && !game.isGameOver()){
             Alert alert = new Alert(Alert.AlertType.WARNING, nuovi.trim());
             alert.setTitle("Giocatore eliminato");
             alert.setHeaderText("Giocatore eliminato");
