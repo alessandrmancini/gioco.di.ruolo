@@ -1,13 +1,18 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+import javafx.animation.TranslateTransition;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -16,6 +21,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,12 +34,20 @@ import java.util.function.Consumer;
  * VIEW: disegna la mappa di gioco sopra l'immagine di sfondo (mappa_colorata.jpeg).
  * Le coordinate delle Location sono in pixel dell'immagine originale: la vista le scala
  * in base allo spazio disponibile (adattamento automatico) e allo zoom scelto dall'utente.
- * Non modifica il modello: notifica i click tramite il callback.
  */
 public class MapView extends Pane {
 
     /** Immagine di sfondo, da mettere in src/main/resources/it/unicam/cs/mpgc/rpg125715/ */
-    private static final String MAP_RESOURCE = "mappa_colorata.jpeg";
+    private static final String MAP_RESOURCE = "mappa_binaco_nero.jpeg";
+    private static final String REGIONI_RESOURCE = "regioni_id.png";
+    private static final double OPACITA_REGIONI = 0.6;
+
+    private static final String[] NOMI_CITTA = {
+            "Rabat", "Cartagine", "Cagliari", "Roma", "Marsiglia", "Parigi", "Madrid", "Vienna",
+            "Berlino", "Varsavia", "Copenaghen", "Amsterdam", "Rennes", "Londra", "Dublino", "Edimburgo",
+            "Reykjavik", "Pella", "Creta", "Ankara", "Babilonia", "Gedda", "Il Cairo", "Mosca",
+            "Astana", "Bratsk", "Delhi", "Xianyang", "Hong Kong", "Tokyo", "Stoccolma", "Tariff"
+    };
     private static final double DEFAULT_WIDTH = 1170;
     private static final double DEFAULT_HEIGHT = 642;
     private static final double MIN_ZOOM = 1.0;
@@ -57,6 +71,9 @@ public class MapView extends Pane {
 
     private final Consumer<Location> onLocationClicked;
     private final Image background;
+    private int[] regioni;              //per ogni pixel: numero della città a cui appartiene (0 = mare)
+    private int regioniLarghezza;
+    private int regioniAltezza;
     private final double baseWidth;
     private final double baseHeight;
     private final DropShadow halo = new DropShadow(BlurType.GAUSSIAN, Color.BLACK, 3, 0.9, 0, 0);
@@ -78,8 +95,9 @@ public class MapView extends Pane {
             img = null;
         }
         this.background = img;
-        this.baseWidth = img != null ? img.getWidth() : DEFAULT_WIDTH;
-        this.baseHeight = img != null ? img.getHeight() : DEFAULT_HEIGHT;
+        caricaRegioni();
+        this.baseWidth = DEFAULT_WIDTH;
+        this.baseHeight = DEFAULT_HEIGHT;
         applySize();
     }
 
@@ -124,6 +142,75 @@ public class MapView extends Pane {
         setMaxSize(w, h);
     }
 
+    // ================ REGIONI COLORATE =======================
+    private void caricaRegioni() {
+        regioni = null;
+        try(InputStream in = MapView.class.getResourceAsStream(REGIONI_RESOURCE)){
+            if(in == null){return;}
+            Image img = new Image(in);
+            if(img.isError()) {return;}
+            regioniLarghezza = (int) img.getWidth();
+            regioniAltezza = (int) img.getHeight();
+            PixelReader lettore = img.getPixelReader();
+            regioni = new int[regioniLarghezza * regioniAltezza];
+            for(int y = 0; y < regioniAltezza; y++){
+                for(int x = 0; x < regioniLarghezza; x++){
+                    regioni [y * regioniLarghezza+ x] = (lettore.getArgb(x,y) >> 16) & 0xFF;
+                }
+            }
+        }catch (IOException e){
+            regioni = null;
+        }
+    }
+
+    private Image creaRegioniColorate(Game game){
+        if(regioni == null){return null;}
+
+        int[] coloreCitta = new int[NOMI_CITTA.length+1];
+        for(Location l : game.getLocations()){
+            if(!l.hasCity()){continue;}
+            for(int k = 0; k<NOMI_CITTA.length; k++){
+                if(NOMI_CITTA[k].equals(l.getCity().getName())){
+                    Player proprietario = l.getCity().getOwner();
+                    if(proprietario != null){
+                        Color c = colorOf(proprietario.getLeader());
+                        coloreCitta[k+1] = (0xFF << 24) | ((int) (c.getRed()*255) << 16)
+                            | ((int) (c.getGreen()*255) <<8) | (int) (c.getBlue()*255);
+                    }
+                }
+            }
+        }
+        int[] pixel = new int[regioni.length];
+        for(int i = 0; i< regioni.length; i++){
+            int indice = regioni[i];
+            pixel[i] = indice < coloreCitta.length ? coloreCitta[indice] : 0;
+        }
+        WritableImage immagine = new WritableImage(regioniLarghezza, regioniAltezza);
+        immagine.getPixelWriter().setPixels(0,0, regioniLarghezza, regioniAltezza, PixelFormat.getIntArgbInstance(), pixel, 0, regioniLarghezza);
+        return immagine;
+    }
+
+    public void animaSpostamento(Location da, Location a, Color colore, Runnable alTermine){
+        if(da == null || a == null){
+            alTermine.run();
+            return;
+        }
+        Circle pedina = new Circle(px(da), py(da), 9, colore);
+        pedina.setStroke(Color.WHITE);
+        pedina.setStrokeWidth(2);
+        pedina.setMouseTransparent(true);
+        getChildren().add(pedina);
+
+        TranslateTransition movimento = new TranslateTransition(Duration.millis(450), pedina);
+        movimento.setByX(px(a)- px(da));
+        movimento.setByY(py(a)- py(da));
+        movimento.setOnFinished(e -> {
+            getChildren().remove(pedina);
+            alTermine.run();
+        });
+        movimento.play();
+    }
+
     // ================= DISEGNO =================
 
     public void render(Game game, Location selected, Army selectedArmy, Set<Location> targets) {
@@ -140,6 +227,19 @@ public class MapView extends Pane {
             getChildren().add(sfondo);
         }
         if (game == null) {return;}
+
+        Image coloriRegioni = creaRegioniColorate(game);
+        if(coloriRegioni != null){
+            ImageView sopra = new ImageView(coloriRegioni);
+            sopra.setFitWidth(baseWidth * s);
+            sopra.setFitHeight(baseHeight * s);
+            sopra.setPreserveRatio(false);
+            sopra.setSmooth(true);
+            sopra.setOpacity(OPACITA_REGIONI);
+            sopra.setBlendMode(BlendMode.MULTIPLY);
+            sopra.setMouseTransparent(true);
+            getChildren().add(sopra);
+        }
 
         Player viewer = game.getCurrentPlayer();
 
@@ -279,6 +379,8 @@ public class MapView extends Pane {
                 int oro = TurnService.bonusOroCittaConLeader(c, proprietario.getLeader());
                 if(oro>0 && !c.hasRibellione()){testo += "\nProduce: +"+ oro + " oro a turno";}
             }
+            int bonusDifesa = BattleService.calcolaBonusDifesaTerritorio(c);
+            if(bonusDifesa > 0){testo += "\nBonus difesa: "+ bonusDifesa;}
             if(c.hasRibellione()){
                 testo += "\nRIBELLIONE da " + c.getRibellione().getTurniAttiva() + " turni (serve un esercito di "
                         + Ribellione.UNITA_PER_PACIFICARE + "+ unità)";
@@ -296,7 +398,8 @@ public class MapView extends Pane {
         }
         for(Army a : l.getArmies()){
             if(a == null){continue;}
-            testo += "\n\nEsercito di "+a.getOwner().getName() + " - "+ a.getNumeroUnita()+ " unità";
+            testo += "\n\nEsercito di "+a.getOwner().getName() + " - "+ a.getNumeroUnita()+ " unità"
+                    + " (attacco "+ a.getAttaccoTotale()+ " / difesa "+ a.getDifesaTotale()+ ")";
             for(UnitType tipo : UnitType.values()){
                 int quante = a.getNumeroUnitaPerTipo(tipo);
                 if(quante > 0){testo += "\n "+ bello(tipo.name())+ " x"+ quante;}

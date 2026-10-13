@@ -71,7 +71,9 @@
                         <Separator/>
                         <Label text="Ribellioni" styleClass="section-title"/>
                         <Label fx:id="rebellionLabel" wrapText="true"/>
-
+                        <Separator/>
+                        <Label text="Abilità" styleClass="section-title"/>
+                        <Label fx:id="abilityLabel" wrapText="true"/>
                     </VBox>
                 </content>
             </ScrollPane>

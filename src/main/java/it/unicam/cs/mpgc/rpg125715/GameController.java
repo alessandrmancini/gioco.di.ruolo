@@ -7,6 +7,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -14,6 +15,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -60,6 +63,7 @@ public class GameController {
     @FXML private Button foundCityButton;
     @FXML private Button skipBotButton;
     @FXML private Label rebellionLabel;
+    @FXML private Label abilityLabel;
 
     private MapView mapView;
 
@@ -80,6 +84,10 @@ public class GameController {
     private static final int PAUSA_BOT_MS = 900;
     private boolean saltaBot;
     private Player botCorrente;
+    private Location animazioneDa;
+    private Location animazioneA;
+    private Color animazioneColore;
+    private final Set<Player> sconfittiMostrati = new HashSet<>();
 
     // ---- servizi del modello (ricreati a ogni nuova partita) ----
     private MovementService movementService;
@@ -207,11 +215,31 @@ public class GameController {
                 }
             });
 
+            ImageView faccia = new ImageView();
+            faccia.setFitWidth(56);
+            faccia.setFitHeight(56);
+            faccia.setPreserveRatio(true);
+            faccia.setImage(immagineLeader(iniziale));
+            combo.valueProperty().addListener((obs, vecchio, nuovo) -> {
+               if(nuovo != null){faccia.setImage(immagineLeader(nuovo));}
+            });
+
             HBox riga = new HBox(10, campione, etichetta, combo);
             riga.setAlignment(Pos.CENTER_LEFT);
             humansBox.getChildren().add(new VBox(4, riga, info));
         }
     }
+
+    private Image immagineLeader(LeaderType leader){
+        String nomeFile = "leaders/" + leader.name().toLowerCase() + ".png";
+        try(java.io.InputStream in = GameController.class.getResourceAsStream(nomeFile)){
+            if(in == null){return null;}
+            return new Image(in);
+        }catch(java.io.IOException e){
+            return null;
+        }
+    }
+
     private void azzeraUndo(){
         ultimoEsercitoMosso = null;
         ultimaPartenza = null;
@@ -266,6 +294,7 @@ public class GameController {
             creaServizi();   // servizi nuovi: i contatori degli id ripartono da zero
             game = gameInitializationService.creaPartitaBase(configurazione(umani));
             fineMostrata = false;
+            sconfittiMostrati.clear();
             botCorrente = null;
             azzeraUndo();
             resetSelezione();
@@ -334,7 +363,14 @@ public class GameController {
             if (esito != null) {
                 log(esito);
                 logEventi();
-                passoBot();
+                Location da = botTurnService.getUltimaPartenza();
+                Location a = botTurnService.getUltimaDestinazione();
+                if(da != null && a != null && !saltaBot){
+                    mapView.animaSpostamento(da, a, MapView.colorOf(bot.getLeader()), this::passoBot);
+                }
+                else{
+                    passoBot();
+                }
             } else {
                 botTurnService.terminaTurno(game);
                 logNuovoRound();
@@ -494,6 +530,10 @@ public class GameController {
         else {azzeraUndo();}
         resetSelezione();
         selectedLocation = destinazione;
+
+        animazioneDa = partenza;
+        animazioneA = destinazione;
+        animazioneColore = MapView.colorOf(p.getLeader());
     }
 
     private void logDopoBattaglia(BattleResult r){
@@ -520,7 +560,14 @@ public class GameController {
             log("Azione non valida: " + e.getMessage());
         }
         verificaFinePartita();
-        refresh();
+        if(animazioneDa != null){
+            Location da = animazioneDa;
+            Location a = animazioneA;
+            Color colore = animazioneColore;
+            animazioneDa = null;
+            mapView.animaSpostamento(da, a, colore, this::refresh);
+        }
+        else{refresh();}
     }
 
     private void verificaFinePartita() {
@@ -557,6 +604,24 @@ public class GameController {
             if (c.hasRibellione()) {n++;}
         }
         return n;
+    }
+
+    private void verificaEliminazioni(){
+        String nuovi = "";
+        for(Player p : game.getPlayers()){
+            if(p.isSconfitto() && !sconfittiMostrati.contains(p)){
+                sconfittiMostrati.add(p);
+                String riga = p.getName() + " ("+ leaderName(p.getLeader()) + ") è stato eliminato!";
+                log(riga);
+                nuovi += riga+ "\n";
+            }
+        }
+        if(nuovi.isEmpty() && !game.isGameOver()){
+            Alert alert = new Alert(Alert.AlertType.WARNING, nuovi.trim());
+            alert.setTitle("Giocatore eliminato");
+            alert.setHeaderText("Giocatore eliminato");
+            alert.show();
+        }
     }
 
     private boolean esisteUmanoAttivo() {
@@ -662,9 +727,11 @@ public class GameController {
             skipBotButton.setVisible(false);
             skipBotButton.setManaged(false);
             rebellionLabel.setText("");
+            abilityLabel.setText("");
             return;
         }
 
+        verificaEliminazioni();
         Player current = game.getCurrentPlayer();
         turnLabel.setText(game.isGameOver()
                 ? "Partita finita"
@@ -736,10 +803,44 @@ public class GameController {
         }
         else{rebellionLabel.setText("");}
 
+        abilityLabel.setText(umano ? GameInfo.abilitaDelTurno(current.getLeader()) : "");
+        aggiornaCostiUnita(miaCitta ? city : null, current);
+
         upgradeButton.setText(miaCitta && !city.isMetropoli()
                 ? "Migliora città (" + constructionService.costoMiglioramento(city) + " oro)"
                 : "Migliora città");
     }
+
+    private void aggiornaCostiUnita(City city, Player current){
+        UnitType scelta = unitCombo.getValue();
+        unitCombo.setCellFactory(lista -> creaCellaUnita(city, current));
+        unitCombo.setButtonCell(creaCellaUnita(city, current));
+        unitCombo.setValue(scelta);
+    }
+
+    private ListCell<UnitType> creaCellaUnita(City city, Player current){
+        return new ListCell<>(){
+            @Override
+            protected void updateItem(UnitType tipo, boolean vuota){
+                super.updateItem(tipo, vuota);
+                if(vuota || tipo == null){
+                    setText(null);
+                    return;
+                }
+                String testo = MapView.bello(tipo.name());
+                if(city != null){
+                    if(recruitmentService.puoReclutareDaCitta(city, tipo, current.getLeader())){
+                        testo += " ("+ recruitmentService.costoUnita(tipo, city, current.getLeader())+ " oro)";
+                    }
+                    else{
+                        testo += " (non disponibile qui)";
+                    }
+                }
+                setText(testo);
+            }
+        };
+    }
+
     @FXML
     private void onLegendaClick() {
         TextArea testo = new TextArea(GameInfo.legenda());

@@ -20,7 +20,7 @@ public class RecruitmentService {
         return unita;
     }
 
-    private int costoUnita(UnitType type, City city, LeaderType leader) {
+    public int costoUnita(UnitType type, City city, LeaderType leader) {
         if(city == null || type == null || leader == null){throw new IllegalArgumentException("non possono esserci argomenti null");}
         int base = switch (type) {
             case FANTERIA -> 2;
@@ -38,7 +38,7 @@ public class RecruitmentService {
         return Math.max(1, base);
     }
 
-    private boolean puoReclutareDaCitta(City city, UnitType type, LeaderType leader) {
+    public boolean puoReclutareDaCitta(City city, UnitType type, LeaderType leader) {
         if (city == null || type == null || leader == null || city.getLevel() == CityLevel.ACCAMPAMENTO) {return false;}
         if (type == UnitType.ELEFANTI) {
             return (leader == LeaderType.ANNIBALE && city.getSpecialization() == CitySpecialization.MILITARE);

@@ -69,6 +69,10 @@ public class GameInfo {
                             + "- Dopo una conquista la città ci mette un turno in più a stabilizzarsi (non ancora attivo).";
         };
     }
+
+    public static String abilitaDelTurno(LeaderType leader){
+        return nomeLeader(leader)+ "\n"+ abilita(leader);
+    }
     public static String riassuntoLeader(LeaderType leader){
         return testoDifficolta(leader)+ "\n" + abilita(leader);
     }
@@ -89,9 +93,18 @@ public class GameInfo {
         t += "  Agricola: oro in più a ogni turno secondo il livello\n";
         t += "            (Accampamento +1, Avamposto +1, Città +2, Metropoli +2).\n\n";
 
+        t += "BONUS DIFESA DELLE CITTA'\n";
+        t += "  Avamposto +1, Città +2, Metropoli +4, specializzazione militare +2.\n\n";
+
+        t += "DADI (moltiplicatore di attacco e difesa)\n";
+        t += "  Normale: 1 = x0.8, 2 = x0.9, 3 = x1.0, 4 = x1.1, 5 = x1.2, 6 = x1.3\n";
+        t += "  Giulio Cesare: 1-2 = x1.0, 3 = x1.1, 4 = x1.2, 5 = x1.3, 6 = x1.5\n";
+        t += "  Qin Shi Huang: 1-2 = x0.8, 3-4 = x1.0, 5-6 = x1.1\n\n";
+
         t += "BATTAGLIE\n";
+        t += "  Totale = (punti delle unità + bonus) x dado. Vince il totale più alto (a pari vince chi difende).\n";
         t += "  Perdite: chi perde lascia il 40% delle unità (almeno 1), chi vince il 15%.\n";
-        t += "  L'esercito sconfitto si ritira in una tua città vicina o in un nodo libero;\n";
+        t += "  L'esercito sconfitto si ritira in una tua città vicina o in un nodo libero,\n";
         t += "  se non può, viene distrutto e ricompare in una tua città libera con una sola fanteria.\n\n";
 
 
@@ -130,12 +143,6 @@ public class GameInfo {
         t += "SENZA CITTA'\n";
         t += "  Se perdi l'ultima città ma hai ancora un esercito, resti in gioco e puoi fondare\n";
         t += "  una nuova città (con il nome che vuoi) nel nodo senza città dove si trova l'esercito.\n\n";
-
-
-        t += "LEADER (+ passiva, - debolezza)\n";
-        for (LeaderType l : LeaderType.values()) {
-            t += "\n" + nomeLeader(l) + " - " + testoDifficolta(l) + "\n" + abilita(l) + "\n";
-        }
         return t;
     }
 }
