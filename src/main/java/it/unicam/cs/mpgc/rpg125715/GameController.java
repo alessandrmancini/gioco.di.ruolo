@@ -240,6 +240,18 @@ public class GameController {
         }
     }
 
+    private void logNemiciBot(){
+        for(Player p : game.getPlayers()){
+            if(p.getKind() != PlayerKind.BOT){continue;}
+            String elenco = "";
+            for(Player nemico : p.getNemici()){
+                if(!elenco.isEmpty()){elenco+=" e ";}
+                elenco += nemico.getName();
+            }
+            log(p.getName() + " ha come nemici: "+ elenco);
+        }
+    }
+
     private void azzeraUndo(){
         ultimoEsercitoMosso = null;
         ultimaPartenza = null;
@@ -300,6 +312,7 @@ public class GameController {
             resetSelezione();
             logArea.clear();
             log("Nuova partita: " + game.getPlayers().size() + " leader in gioco, " + umani.size() + " controllati da umani.");
+            logNemiciBot();
             roundMostrato = 0;
             logNuovoRound();
             log("Inizia " + game.getCurrentPlayer().getName() + " (" + leaderName(game.getCurrentPlayer().getLeader()) + ").");
