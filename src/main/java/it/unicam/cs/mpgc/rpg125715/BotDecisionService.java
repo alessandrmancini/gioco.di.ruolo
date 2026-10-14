@@ -1,6 +1,7 @@
 package it.unicam.cs.mpgc.rpg125715;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -9,7 +10,9 @@ public class BotDecisionService {
     private static final int ORO_MINIMO_RECLUTAMENTO = 3;
     private static final int UNITA_PER_SVILUPPO = 4;
     private static final int PESO_PASSA = 1;
+    private static final int BONUS_CACCIA = 6;
     private final ConstructionService constructionService;
+    private final NemiciService nemiciService = new NemiciService();
     private final Random random = new Random();
 
     public BotDecisionService(ConstructionService constructionService) {
@@ -43,8 +46,15 @@ public class BotDecisionService {
         aggiungi(candidate, pesiCandidate, decidiSpecializzazione(bot), pesi[1]);
         aggiungi(candidate, pesiCandidate, decidiReclutamento(bot), pesi[2]);
         aggiungi(candidate, pesiCandidate, decidiNuovoEsercito(bot), pesi[3]);
-        aggiungi(candidate, pesiCandidate, decidiAttacco(game, bot), pesi[4]);
-        aggiungi(candidate, pesiCandidate, decidiMovimento(bot), pesi[5]);
+
+        BotDecision caccia = decidiCaccia(bot);
+        if(caccia != null){
+            aggiungi(candidate, pesiCandidate, caccia, pesi[4]+pesi[5]+BONUS_CACCIA);
+        }
+        else{
+            aggiungi(candidate, pesiCandidate, decidiAttacco(game, bot), pesi[4]);
+            aggiungi(candidate, pesiCandidate, decidiMovimento(bot), pesi[5]);
+        }
         aggiungi(candidate, pesiCandidate, new BotDecision(BotActionType.PASS, null, null, null), PESO_PASSA);
 
         return scegliPesata(candidate, pesiCandidate);
@@ -171,6 +181,48 @@ public class BotDecisionService {
             }
         }
         return migliore;
+    }
+
+    private BotDecision decidiCaccia(Player bot){
+        if(!nemiciService.haNemiciDaSconfiggere(bot)){return null;}
+        java.util.Map<Location,Integer> distanza = nemiciService.distanzaDaiNemici(bot);
+
+        List<BotDecision> migliori = new ArrayList<>();
+        int migliorDistanza = Integer.MAX_VALUE;
+
+        for(Army a : bot.getEserciti()){
+            if(!puoAgire(bot, a)){continue;}
+            Location loc = a.getPosizione();
+            Integer distanzaAttuale = distanza.get(loc);
+            if(distanzaAttuale == null){continue;}
+
+            for(Location l : loc.getAdiacenti()){
+                Integer d = distanza.get(l);
+                if(d == null || d>=distanzaAttuale){continue;}
+                if(l.hasArmyPlayer(bot)){continue;}
+
+                boolean daConquistare = l.hasCity() && l.getCity().getOwner() != null && l.getCity().getOwner() != bot;
+                Army nemico = null;
+                for(Army x : l.getArmies()){
+                    if(x!= null && x.getOwner() != bot){nemico = x;}
+                }
+                boolean eAttacco = nemico != null || daConquistare;
+
+                if(eAttacco && bot.getTurniGiocati() == 0){continue;}
+                if(nemico != null && a.getAttaccoTotale() - nemico.getDifesaTotale() < -3){continue;}
+
+                if(d<migliorDistanza){
+                    migliorDistanza = d;
+                    migliori.clear();
+                }
+                if(d == migliorDistanza){
+                    BotActionType tipo = eAttacco ? BotActionType.ATTACK : BotActionType.MOVE;
+                    migliori.add(new BotDecision(tipo, loc, l, null));
+                }
+            }
+        }
+        if(migliori.isEmpty()){return null;}
+        return migliori.get(random.nextInt(migliori.size()));
     }
 
     //MOVIMENTO (a caso tra le mosse migliori)

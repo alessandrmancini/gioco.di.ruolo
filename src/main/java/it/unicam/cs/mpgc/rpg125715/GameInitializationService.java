@@ -8,6 +8,7 @@ public class GameInitializationService {
     private final GameSetUpService gameSetUpService;
     private final MapSetupService  mapSetupService;
     private final ArmyService armyService;
+    private final NemiciService nemiciService = new NemiciService();
 
     public GameInitializationService(GameSetUpService gameSetUpService, MapSetupService mapSetupService, ArmyService armyService) {
         if(gameSetUpService == null){throw new IllegalArgumentException("gameSetUpService is null");}
@@ -24,6 +25,7 @@ public class GameInitializationService {
         List<Location> locations = mapSetupService.creaMappaGioco(players);
 
         creaEsercitiIniziali(players);
+        nemiciService.assegnaNemici(players);
         Game game = new Game(players, locations);
         game.iniziaPartita();
         return game;
