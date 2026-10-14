@@ -13,6 +13,7 @@ public class Player {
     private boolean sconfitto;
     private final PlayerKind kind;
     private int turniGiocati;
+    private final List<Player> nemici = new ArrayList<>();
 
     public Player(int id, String name, LeaderType leader, int oroIniziale, Territory territorio, PlayerKind kind) {
         if(id<0){throw new IllegalArgumentException("id negativo");}
@@ -82,5 +83,19 @@ public class Player {
     }
     public void incrementaTurniGiocati(){
         turniGiocati++;
+    }
+
+    //nemici assegnati a inizio partita
+    public List<Player> getNemici() {return new ArrayList<>(nemici);}
+    public void addNemico(Player p){
+        if(p == null || p == this || nemici.contains(p)){return;}
+        nemici.add(p);
+    }
+    public List<Player> getNemiciDaSconfiggere(){
+        List<Player> vivi = new ArrayList<>();
+        for(Player p : nemici){
+            if(!p.isSconfitto()){vivi.add(p);}
+        }
+        return vivi;
     }
 }
