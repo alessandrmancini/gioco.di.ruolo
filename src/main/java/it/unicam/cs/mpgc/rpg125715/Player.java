@@ -14,6 +14,7 @@ public class Player {
     private final PlayerKind kind;
     private int turniGiocati;
     private final List<Player> nemici = new ArrayList<>();
+    private Army attaccanteSconfitto;
 
     public Player(int id, String name, LeaderType leader, int oroIniziale, Territory territorio, PlayerKind kind) {
         if(id<0){throw new IllegalArgumentException("id negativo");}
@@ -91,6 +92,10 @@ public class Player {
         if(p == null || p == this || nemici.contains(p)){return;}
         nemici.add(p);
     }
+
+    public Army getAttaccanteSconfitto(){return attaccanteSconfitto;}
+    public void setAttaccanteSconfitto(Army a){this.attaccanteSconfitto =  a;}
+
     public List<Player> getNemiciDaSconfiggere(){
         List<Player> vivi = new ArrayList<>();
         for(Player p : nemici){

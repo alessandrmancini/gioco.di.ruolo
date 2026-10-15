@@ -9,6 +9,7 @@ public class City {
     private Location location;
     private Ribellione ribellione;
     private Player exProprietario;
+    private Player proprietarioIniziale;
 
     public City(String name) {
         if(name == null || name.isBlank()) {throw new IllegalArgumentException("il nome non può essere vuoto");}
@@ -19,6 +20,7 @@ public class City {
         this.location = null;
         this.ribellione = null;
         this.exProprietario = null;
+        this.proprietarioIniziale = null;
     }
 
     public String getName(){return name;}
@@ -51,6 +53,7 @@ public class City {
         if(owner == null){throw new IllegalArgumentException("owner null");}
         this.owner = owner;
     }
+    public Player getProprietarioIniziale(){return proprietarioIniziale;}
 
     //LOCATION
     public Location getLocation() {return location;}

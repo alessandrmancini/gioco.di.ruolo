@@ -59,6 +59,7 @@ public class MovementService {
         if(army.isVuoto()){destinazione.removeArmy(army);}
         if(nemico.isVuoto()){destinazione.removeArmy(nemico);}
         if(result.haVintoAttaccante()){conquistaSePossibile(destinazione, army);}
+        else{result.vincitore().getOwner().setAttaccanteSconfitto(result.sconfitto());}
         return result;
     }
 
