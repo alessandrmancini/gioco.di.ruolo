@@ -80,8 +80,21 @@ public class TurnService {
             }
             oro += bonusOroCittaConLeader(city, player.getLeader());
         }
-        player.aggiungiOro(oro);
-        player.spendiOro(Math.min(cittaConMalus, player.getOro()));
+        if(player.getKind() == PlayerKind.BOT){
+            oro = Math.max(0, oro + compensazioneOroBot(player.getLeader()));
+            player.aggiungiOro(oro);
+            player.spendiOro(Math.min(cittaConMalus, player.getOro()));
+        }
+    }
+
+    public static int compensazioneOroBot(LeaderType leader){
+        return switch (leader){
+            case ALESSANDRO_MAGNO, ATTILA -> 3;
+            case ANNIBALE, REGINA_ELISABETTA, GIOVANNA_D_ARCO -> 0;
+            case GIULIO_CESARE -> 5;
+            case QIN_SHI_HUANG -> -4;
+            case FEDERICO_BARBAROSSA -> 1;
+        };
     }
 
     public static int bonusOroCitta(City city){

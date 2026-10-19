@@ -186,7 +186,7 @@ public class BotDecisionService {
             for(City c : libere){
                 if(strategia.eCittaDiConfine(bot,c.getLocation())){diConfine.add(c);}
             }
-            if(diConfine.isEmpty()){return new BotDecision(BotActionType.NEW_ARMY, null, null, diConfine.get(random.nextInt(diConfine.size())));}
+            if(!diConfine.isEmpty()){return new BotDecision(BotActionType.NEW_ARMY, null, null, diConfine.get(random.nextInt(diConfine.size())));}
         }
         //preferisce la capitale, altrimenti una città a caso
         City scelta = libere.get(random.nextInt(libere.size()));
@@ -369,7 +369,7 @@ public class BotDecisionService {
     //MOVIMENTO (a caso tra le mosse migliori)
     private BotDecision decidiMovimento(Player bot){
         List<BotDecision> migliori = new ArrayList<>();
-        int bestScore = -1;
+        int bestScore = Integer.MIN_VALUE;
 
         for(Army a : bot.getEserciti()){
             if(!puoAgire(bot, a)){continue;}
@@ -426,6 +426,20 @@ public class BotDecisionService {
             if(a == null || a.getPosizione() == null || !a.isPuoMuovere() || a.isVuoto()){continue;}
             if(a.getPosizione().isAdiacente(locCapitale) && !locCapitale.hasEnemyArmiesFor(bot)){
                 return new BotDecision(BotActionType.MOVE, a.getPosizione(), locCapitale, null);
+            }
+        }
+        return null;
+    }
+
+    private BotDecision decidiDifesaCitta(Player bot){
+        for(City c : bot.getTerritorio().getCities()){
+            Location loc = c.getLocation();
+            if(loc == null || c == bot.getCapitale() || c.hasRibellione()){continue;}
+            if(loc.hasArmy() || !haNemicoVicino(bot, loc)){continue;}
+            for(Army a : bot.getEserciti()){
+                if(a.isVuoto() || !a.isPuoMuovere() || a.getPosizione() == null || a.getPosizione().isAdiacente(loc)){continue;}
+                if(eGuardiaCapitale(bot, a) || strategia.eGuardia(bot, a)){continue;}
+                return new BotDecision(BotActionType.MOVE, a.getPosizione(), loc, null);
             }
         }
         return null;
@@ -514,7 +528,7 @@ public class BotDecisionService {
             int punteggio = punteggioCitta(bot,c);
             if(frontiera){
                 Integer d = c.getLocation() == null ? null : distanzaNemici.get(c.getLocation());
-                punteggio = (bot.getCapitale() == c ? -100 : 0) - (d == null ? 500 : d);
+                punteggio = (bot.getCapitale() == c ? -1000 : 0) - (d == null ? 500 : d);
             }
             if(punteggio>migliorePunteggio){
                 migliorePunteggio = punteggio;

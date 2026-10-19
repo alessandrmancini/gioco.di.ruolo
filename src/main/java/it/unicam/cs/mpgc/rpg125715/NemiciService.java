@@ -3,6 +3,7 @@ package it.unicam.cs.mpgc.rpg125715;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ public class NemiciService {
     public static final int NUMERO_NEMICI = 2;
     //sono "vicini" i giocatori a distanza minima + questo margine
     private static final int MARGINE_VICINATO = 1;
+    public static final int MAX_INSEGUITORI = 1;
     private final Random random;
 
     public NemiciService(){
@@ -31,17 +33,30 @@ public class NemiciService {
 
 
     //ASSEGNAZIONE
+    //ASSEGNAZIONE
     public void assegnaNemici(List<Player> players){
         if(players == null){throw new IllegalArgumentException("players null");}
-        for(Player bot : players){
+        //quante volte ogni giocatore è già stato scelto come nemico: serve a non far ricadere tutti i bot sugli stessi giocatori
+        Map<Player, Integer> inseguitori = new HashMap<>();
+        //l'ordine è casuale così nessun leader sceglie sempre per primo
+        List<Player> ordine = new ArrayList<>(players);
+        Collections.shuffle(ordine, random);
+
+        for(Player bot : ordine){
             if(bot == null || bot.getKind() != PlayerKind.BOT){continue;}
 
             Map<Player, Integer> distanze = distanzeGiocatori(bot, players);
-            Player vicino = scegliVicino(distanze);
-            if(vicino != null){bot.addNemico(vicino);}
+            Player vicino = scegliVicino(distanze, inseguitori);
+            if(vicino != null){
+                bot.addNemico(vicino);
+                inseguitori.merge(vicino, 1, Integer::sum);
+            }
 
-            Player secondo = scegliPiuVicinoRimasto(distanze, vicino);
-            if(secondo != null){bot.addNemico(secondo);}
+            Player secondo = scegliPiuVicinoRimasto(distanze, vicino, inseguitori);
+            if(secondo != null){
+                bot.addNemico(secondo);
+                inseguitori.merge(secondo, 1, Integer::sum);
+            }
         }
     }
 
@@ -62,31 +77,55 @@ public class NemiciService {
     }
 
     //primo nemico: uno a caso tra i giocatori vicini (distanza minima + margine)
-    private Player scegliVicino(Map<Player, Integer> distanze){
+    private Player scegliVicino(Map<Player, Integer> distanze, Map<Player, Integer> inseguitori){
         int minima = Integer.MAX_VALUE;
         for(int d : distanze.values()){minima = Math.min(minima, d);}
 
         List<Player> vicini = new ArrayList<>();
         for(Map.Entry<Player, Integer> e : distanze.entrySet()){
-            if(e.getValue() <= minima + MARGINE_VICINATO){vicini.add(e.getKey());}
+            if(e.getValue() <= minima + MARGINE_VICINATO && inseguitori.getOrDefault(e.getKey(),0)<MAX_INSEGUITORI){
+                vicini.add(e.getKey());
+            }
         }
-        if(vicini.isEmpty()){return null;}
-        return vicini.get(random.nextInt(vicini.size()));
+        if(vicini.isEmpty()){return scegliPiuVicino(distanze, null ,inseguitori);}
+        return scegliTraMenoScelti(vicini, inseguitori);
     }
 
     //secondo nemico: il giocatore più vicino tra quelli rimasti (a pari distanza a caso)
-    private Player scegliPiuVicinoRimasto(Map<Player, Integer> distanze, Player giaScelto){
-        int minima = Integer.MAX_VALUE;
-        for(Map.Entry<Player, Integer> e : distanze.entrySet()){
-            if(e.getKey() != giaScelto){minima = Math.min(minima, e.getValue());}
-        }
-        List<Player> candidati = new ArrayList<>();
-        for(Map.Entry<Player, Integer> e : distanze.entrySet()){
-            if(e.getKey() != giaScelto && e.getValue() == minima){candidati.add(e.getKey());}
-        }
-        if(candidati.isEmpty()){return null;}
-        return candidati.get(random.nextInt(candidati.size()));
+    private Player scegliPiuVicinoRimasto(Map<Player, Integer> distanza, Player giaScelto, Map<Player, Integer> inseguitori){
+        return scegliPiuVicino(distanza, giaScelto, inseguitori);
     }
+    //se tutti sono già al massimo si ignora il limite
+    private Player scegliPiuVicino(Map<Player, Integer> distanze, Player escluso, Map<Player, Integer> inseguitori){
+        for(boolean conLimite : new boolean[]{true, false}){
+            int minima = Integer.MAX_VALUE;
+            for(Map.Entry<Player, Integer> e : distanze.entrySet()){
+                if(e.getKey() == escluso){continue;}
+                if(conLimite && inseguitori.getOrDefault(e.getKey(), 0) >= MAX_INSEGUITORI){continue;}
+                minima = Math.min(minima, e.getValue());
+            }
+            List<Player> candidati = new ArrayList<>();
+            for(Map.Entry<Player, Integer> e : distanze.entrySet()){
+                if(e.getKey() == escluso || e.getValue() != minima){continue;}
+                if(conLimite && inseguitori.getOrDefault(e.getKey(), 0) >= MAX_INSEGUITORI){continue;}
+                candidati.add(e.getKey());
+            }
+            if(!candidati.isEmpty()){return scegliTraMenoScelti(candidati, inseguitori);}
+        }
+        return null;
+    }
+
+    private Player scegliTraMenoScelti(List<Player> candidati, Map<Player, Integer> inseguitori){
+        if(candidati.isEmpty()){return null;}
+        int minimo = Integer.MAX_VALUE;
+        for(Player p : candidati){minimo = Math.min(minimo, inseguitori.getOrDefault(p, 0));}
+        List<Player> scelti = new ArrayList<>();
+        for(Player p : candidati){
+            if(inseguitori.getOrDefault(p, 0) == minimo){scelti.add(p);}
+        }
+        return scelti.get(random.nextInt(scelti.size()));
+    }
+
 
     //NEMICI ANCORA DA SCONFIGGERE
     public boolean haNemiciDaSconfiggere(Player bot){

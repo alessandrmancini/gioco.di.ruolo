@@ -131,7 +131,7 @@ public class BotTurnService {
         Army armyInCity = trovaEsercitoNellaCitta(bot, sourceCity);
         if(armyInCity == null){return bot.getName() + " non ha un esercito nella città " + sourceCity.getName();}
 
-        UnitType[] tipoDaReclutare = scegliTipoDaReclutare();
+        UnitType[] tipoDaReclutare = botDecisionService.ordineReclutamento(bot);
         for(UnitType unitType : tipoDaReclutare){
             try{
                 Unit unita = recruitmentService.reclutaUnita(bot, sourceCity, armyInCity, unitType);
@@ -151,12 +151,6 @@ public class BotTurnService {
         return null;
     }
 
-    private UnitType[] scegliTipoDaReclutare(){
-        return new UnitType[]{
-                UnitType.SPECIALI,UnitType.ELEFANTI,UnitType.ASSEDIO,
-                UnitType.CAVALLERIA, UnitType.FANTERIA
-        };
-    }
     //ATTACCO
     private String eseguiAttacco(Player bot, Location start, Location end){
         if(bot == null){throw new IllegalArgumentException("bot null");}
