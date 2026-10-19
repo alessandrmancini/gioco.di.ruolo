@@ -81,11 +81,12 @@ public class TurnService {
             }
             oro += bonusOroCittaConLeader(city, player.getLeader());
         }
-        if(player.getKind() == PlayerKind.BOT){
+        if(player.getKind() == PlayerKind.BOT) {
             oro = Math.max(0, oro + compensazioneOroBot(player.getLeader()));
-            player.aggiungiOro(oro);
-            player.spendiOro(Math.min(cittaConMalus, player.getOro()));
         }
+        player.aggiungiOro(oro);
+        player.spendiOro(Math.min(cittaConMalus, player.getOro()));
+
     }
 
     public static int compensazioneOroBot(LeaderType leader){
