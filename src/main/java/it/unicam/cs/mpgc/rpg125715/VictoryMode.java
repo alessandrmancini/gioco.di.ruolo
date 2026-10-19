@@ -9,6 +9,7 @@ public enum VictoryMode {
     CONQUISTA("Conquista totale (nessun limite di round)",
             "Non c'è limite di round: la partita finisce solo quando resta un unico giocatore, che vince.");
 
+
     private final String nome;
     private final String descrizione;
 
