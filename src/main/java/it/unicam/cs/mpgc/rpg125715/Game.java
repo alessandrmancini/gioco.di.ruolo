@@ -12,10 +12,12 @@ public class Game {
     private int numeroTurno;
     private int round;
     private final List<String> eventi;
+    private final VictoryMode modalita;
 
-    public Game(List<Player> players, List<Location> locations){
+    public Game(List<Player> players, List<Location> locations, VictoryMode modalita) {
         if(players == null ||players.isEmpty()){throw new IllegalArgumentException("players null o vuota");}
         if(locations == null || locations.isEmpty()){throw new IllegalArgumentException("locations null o vuota");}
+        if(modalita  == null){throw new IllegalArgumentException("modalità null");}
         this.players = new  ArrayList<>(players);
         this.locations = new  ArrayList<>(locations);
         this.turno = 0;
@@ -24,6 +26,7 @@ public class Game {
         this.numeroTurno = 1;
         this.round = 1;
         this.eventi = new ArrayList<>();
+        this.modalita = modalita;
     }
     //PLAYER
     public List<Player> getActivePlayers(){
@@ -71,6 +74,8 @@ public class Game {
     public int getNumeroTurno(){return numeroTurno;}
     public void incrementaNumeroTurno(){this.numeroTurno++;}
     public int getRound(){return round;}
+
+    public VictoryMode getModalita(){return modalita;}
 
     //EVENTI
     public void aggiungiEvento(String testo){eventi.add(testo);}

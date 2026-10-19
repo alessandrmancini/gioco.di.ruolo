@@ -45,6 +45,7 @@ public class MovementService {
         }
         BattleResult result = battaglia.combatti(army, nemico, destinazione.getCity());
 
+        result.vincitore().getOwner().incrementaBattaglieVinte();
         Army sconfitto = result.sconfitto();
         Location ritirata = getRitirata(destinazione, sconfitto.getOwner());
 

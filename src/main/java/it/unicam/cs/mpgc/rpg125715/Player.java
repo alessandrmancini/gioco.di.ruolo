@@ -13,6 +13,7 @@ public class Player {
     private boolean sconfitto;
     private final PlayerKind kind;
     private int turniGiocati;
+    private int battaglieVinte;
     private final List<Player> nemici = new ArrayList<>();
     private Army attaccanteSconfitto;
 
@@ -85,6 +86,10 @@ public class Player {
     public void incrementaTurniGiocati(){
         turniGiocati++;
     }
+
+    // battaglie vinte
+    public int getBattaglieVinte(){return battaglieVinte;}
+    public void incrementaBattaglieVinte(){battaglieVinte++;}
 
     //nemici assegnati a inizio partita
     public List<Player> getNemici() {return new ArrayList<>(nemici);}

@@ -20,13 +20,17 @@ public class GameInitializationService {
         this.armyService = armyService;
     }
     public Game creaPartitaBase(List<PlayerConfig> configurazioneGiocatori){
+        return creaPartitaBase(configurazioneGiocatori, VictoryMode.CONQUISTA);
+    }
+    public Game creaPartitaBase(List<PlayerConfig> configurazioneGiocatori, VictoryMode modalita){
+        if(modalita == null){throw new IllegalArgumentException("modalità is null");}
         if(configurazioneGiocatori == null || configurazioneGiocatori.isEmpty()){throw new IllegalArgumentException("configurazioneGiocatori null or vuota");}
         List<Player> players = creaPlayersIniziali(configurazioneGiocatori);
         List<Location> locations = mapSetupService.creaMappaGioco(players);
 
         creaEsercitiIniziali(players);
         nemiciService.assegnaNemici(players);
-        Game game = new Game(players, locations);
+        Game game = new Game(players, locations, modalita);
         game.iniziaPartita();
         return game;
     }

@@ -24,6 +24,7 @@ public class TurnService {
 
         prossimoPlayer(game);
         if(game.haSoloUnPlayerAttivo()){game.setFinita();return;}
+        if(game.getModalita() == VictoryMode.PUNTI && game.getRound()>MAX_ROUND){game.setFinita();return;}
 
         Player corrente = game.getCurrentPlayer();
         sbloccaEsercitiPlayer(corrente);
