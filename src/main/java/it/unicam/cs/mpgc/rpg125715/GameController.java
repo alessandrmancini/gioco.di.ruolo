@@ -3,6 +3,7 @@ package it.unicam.cs.mpgc.rpg125715;
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -14,14 +15,18 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.control.TextInputDialog;
+import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
@@ -64,6 +69,8 @@ public class GameController {
     @FXML private Button skipBotButton;
     @FXML private Label rebellionLabel;
     @FXML private Label abilityLabel;
+    @FXML private ComboBox<VictoryMode> modeCombo;
+    @FXML private Label modeInfoLabel;
 
     private MapView mapView;
 
@@ -150,6 +157,19 @@ public class GameController {
         humanSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, LeaderType.values().length, 1));
         humanSpinner.valueProperty().addListener((obs, vecchio, nuovo) -> rebuildHumanRows());
         rebuildHumanRows();
+
+        //modalità di vittoria
+        modeCombo.getItems().setAll(VictoryMode.values());
+        modeCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(VictoryMode m) {return m == null ? "" : m.getNome();}
+            @Override
+            public VictoryMode fromString(String string) {return null;}
+        });
+        modeCombo.valueProperty().addListener((obs, vecchio, nuovo) -> {
+            if(nuovo != null){modeInfoLabel.setText(nuovo.getDescrizione());}
+        });
+        modeCombo.setValue(VictoryMode.PUNTI);
         mostraSetup();
 
         log("Scegli quanti giocatori umani ci saranno e con quali leader, poi premi 'Avvia partita'.");
@@ -259,7 +279,7 @@ public class GameController {
     private void logNuovoRound(){
         if(game.getRound() != roundMostrato && !game.isGameOver()){
             roundMostrato = game.getRound();
-            log("===== ROUND "+ roundMostrato + " di "+ TurnService.MAX_ROUND+" ======");
+            log("===== ROUND "+ roundMostrato+ (game.getModalita() == VictoryMode.PUNTI ? " di "+ TurnService.MAX_ROUND : "")+ " ======");
         }
     }
 
@@ -304,7 +324,7 @@ public class GameController {
         for (ComboBox<LeaderType> c : humanLeaderCombos) {umani.add(c.getValue());}
         try {
             creaServizi();   // servizi nuovi: i contatori degli id ripartono da zero
-            game = gameInitializationService.creaPartitaBase(configurazione(umani));
+            game = gameInitializationService.creaPartitaBase(configurazione(umani), modeCombo.getValue());
             fineMostrata = false;
             sconfittiMostrati.clear();
             botCorrente = null;
@@ -312,6 +332,7 @@ public class GameController {
             resetSelezione();
             logArea.clear();
             log("Nuova partita: " + game.getPlayers().size() + " leader in gioco, " + umani.size() + " controllati da umani.");
+            log("Modalità: "+ game.getModalita().getNome() + ".");
             logNemiciBot();
             roundMostrato = 0;
             logNuovoRound();
@@ -589,18 +610,33 @@ public class GameController {
         if (game.isGameOver() && !fineMostrata) {
             fineMostrata = true;
             Player vincitore = null;
+            String esito;
+            String classifica = "";
             if (game.haSoloUnPlayerAttivo()) {
                 for (Player p : game.getPlayers()) {
                     if (!p.isSconfitto()) {vincitore = p;}
                 }
+                esito = "Vincitore per conquista: " + vincitore.getName() + " (" + leaderName(vincitore.getLeader()) + ")";
+            } else if (!esisteUmanoAttivo()) {
+                esito = "Tutti i giocatori umani sono stati sconfitti.";
+            } else {
+                // fine dei round nella modalità a punti
+                vincitore = PunteggioService.classifica(game).get(0).player();
+                esito = "Vincitore ai punti: " + vincitore.getName() + " (" + leaderName(vincitore.getLeader()) + ")";
+                classifica = PunteggioService.testoClassifica(game);
             }
-            String esito = vincitore != null
-                    ? "Vincitore: " + vincitore.getName() + " (" + leaderName(vincitore.getLeader()) + ")"
-                    : "Tutti i giocatori umani sono stati sconfitti.";
             log("PARTITA FINITA. " + esito);
+            if (!classifica.isEmpty()) {log("Classifica finale:\n" + classifica);}
             Alert alert = new Alert(Alert.AlertType.INFORMATION, esito);
             alert.setTitle("Partita finita");
             alert.setHeaderText("Partita finita");
+            if (!classifica.isEmpty()) {
+                TextArea tabella = new TextArea(classifica);
+                tabella.setEditable(false);
+                tabella.setPrefSize(640, 360);
+                alert.getDialogPane().setContent(new VBox(8, new Label(esito), tabella));
+                alert.setResizable(true);
+            }
             alert.show();
         }
     }
@@ -748,10 +784,11 @@ public class GameController {
         Player current = game.getCurrentPlayer();
         turnLabel.setText(game.isGameOver()
                 ? "Partita finita"
-                : "Round " + game.getRound() + " / " + TurnService.MAX_ROUND
+                : "Round " + game.getRound() + (game.getModalita() == VictoryMode.PUNTI ? " / " + TurnService.MAX_ROUND : "")
                 + " (turno " + (game.getTurno() + 1) + "/" + game.getPlayers().size()
                 + ") - " + current.getName());
 
+        boolean aPunti = game.getModalita() == VictoryMode.PUNTI;
         for (Player p : game.getPlayers()) {
             boolean inTurno = (p == current && !game.isGameOver());
             Rectangle campione = new Rectangle(14, 14, MapView.colorOf(p.getLeader()));
@@ -765,7 +802,8 @@ public class GameController {
             Label nome = new Label(titolo);
             nome.getStyleClass().add(inTurno ? "player-current" : "player-name");
 
-            Label statistiche = new Label("Oro " + p.getOro() + "  |  Città " + p.numeroCitta() +
+            Label statistiche = new Label((aPunti && !p.isSconfitto() ? "Punti "+ PunteggioService.punti(game, p)+ " | ": "")
+                    + "Oro " + p.getOro() + "  |  Città " + p.numeroCitta() +
                     "  |  Eserciti " + p.numeroEserciti() + "/"+ ArmyService.MAX_ESERCITI +
                     (numeroCittaInRibellione(p)>0 ? " | Ribellione " + numeroCittaInRibellione(p) : ""));
 
@@ -852,6 +890,58 @@ public class GameController {
                 setText(testo);
             }
         };
+    }
+
+
+    // TUTORIAL
+    @FXML
+    private void onTutorialClick() {
+        List<Tutorial.Pagina> pagine = Tutorial.pagine();
+        int[] indice = {0};
+
+        Label titolo = new Label();
+        titolo.getStyleClass().add("title");
+        Label contatore = new Label();
+        TextArea testo = new TextArea();
+        testo.setEditable(false);
+        testo.setWrapText(true);
+        testo.setPrefSize(600, 380);
+        VBox.setVgrow(testo, Priority.ALWAYS);
+
+        Button indietro = new Button("Indietro");
+        Button avanti = new Button("Avanti");
+        Button chiudi = new Button("Chiudi");
+
+        Runnable aggiorna = () -> {
+            Tutorial.Pagina p = pagine.get(indice[0]);
+            titolo.setText(p.titolo());
+            testo.setText(p.testo());
+            contatore.setText("Pagina " + (indice[0] + 1) + " di " + pagine.size());
+            indietro.setDisable(indice[0] == 0);
+            avanti.setDisable(indice[0] == pagine.size() - 1);
+        };
+        indietro.setOnAction(e -> {indice[0]--; aggiorna.run();});
+        avanti.setOnAction(e -> {indice[0]++; aggiorna.run();});
+
+        Region spazio = new Region();
+        HBox.setHgrow(spazio, Priority.ALWAYS);
+        HBox pulsanti = new HBox(8, contatore, spazio, indietro, avanti, chiudi);
+        pulsanti.setAlignment(Pos.CENTER_LEFT);
+
+        VBox radice = new VBox(10, titolo, testo, pulsanti);
+        radice.setPadding(new Insets(14));
+        radice.getStyleClass().add("setup-card");
+
+        Stage finestra = new Stage();
+        finestra.setTitle("Tutorial");
+        finestra.initOwner(mapScroll.getScene().getWindow());
+        finestra.initModality(Modality.NONE);   // si può tenere aperto e continuare a guardare il gioco
+        Scene scena = new Scene(radice);
+        scena.getStylesheets().add(GameController.class.getResource("game.css").toExternalForm());
+        finestra.setScene(scena);
+        chiudi.setOnAction(e -> finestra.close());
+        aggiorna.run();
+        finestra.show();
     }
 
     @FXML

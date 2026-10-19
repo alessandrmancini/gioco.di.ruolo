@@ -29,6 +29,7 @@
                 <Label fx:id="turnLabel" styleClass="turn-label"/>
                 <Button text = "Legenda" onAction="#onLegendaClick"/>
                 <Button text="Nuova partita" onAction="#onNuovaPartitaClick"/>
+                <Button text = "Tutorial" onAction="#onTutorialClick"/>
                 <Button fx:id="skipBotButton" text="Salta mosse dei bot" onAction="#onSaltaBotClick"/>
                 <Button fx:id="endTurnButton" text="Fine turno" onAction="#onFineTurnoClick"/>
                 <Button fx:id="undoButton" text="Annulla spostamento" onAction="#onAnnullaSpostamentoClick"/>
@@ -96,6 +97,12 @@
                 <Spinner fx:id="humanSpinner" prefWidth="80"/>
             </HBox>
 
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Modalità di vittoria"/>
+                <ComboBox fx:id="modeCombo" prefWidth="300"/>
+            </HBox>
+            <Label fx:id="modeInfoLabel" wrapText="true" styleClass="hint"/>
+
             <Separator/>
 
             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefViewportHeight="300" styleClass="setup-scroll">
@@ -107,6 +114,7 @@
             <Separator/>
 
             <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text = "Tutorial" onAction="#onTutorialClick"/>
                 <Button text = "Legenda" onAction = "#onLegendaClick"/>
                 <Button fx:id="cancelSetupButton" text="Annulla" onAction="#onAnnullaSetupClick"/>
                 <Button text="Avvia partita" onAction="#onAvviaPartitaClick"/>
