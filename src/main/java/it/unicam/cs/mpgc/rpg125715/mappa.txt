@@ -1,0 +1,106 @@
+# Mappa del gioco.
+#
+# NODO:        N <id> <x> <y> [nome della città]
+# COLLEGAMENTO: E <id> <id>
+#
+# Un nodo con il nome di una città è il posto dove quella città compare sulla mappa.
+#I nodi senza nome sono luoghi di passaggio.
+# Le coordinate sono in pixel sull'immagine della mappa.
+
+N 1 106 406 Rabat
+N 2 229 379 Cartagine
+N 3 226 348 Cagliari
+N 4 253 329 Roma
+N 5 205 313 Marsiglia
+N 6 192 267 Parigi
+N 7 135 341 Madrid
+N 8 261 289 Vienna
+N 9 248 245 Berlino
+N 10 301 244 Varsavia
+N 11 248 211 Copenaghen
+N 12 205 238 Amsterdam
+N 13 156 278 Rennes
+N 14 171 243 Londra
+N 15 121 231 Dublino
+N 16 161 213 Edimburgo
+N 17 68 143 Reykjavik
+N 18 333 333 Pella
+N 19 335 384 Creta
+N 20 397 350 Ankara
+N 21 494 405 Babilonia
+N 22 449 493 Gedda
+N 23 365 426 Il Cairo
+N 24 414 215 Mosca
+N 25 616 307 Astana
+N 26 813 161 Bratsk
+N 27 555 280
+N 28 714 467 Delhi
+N 29 861 348 Xianyang
+N 30 955 482 Hong Kong
+N 31 1085 384 Tokyo
+N 34 490 240
+N 35 445 378
+N 36 566 432
+N 37 640 452
+N 39 893 400
+N 41 282 179 Stoccolma
+N 42 119 373 Tariff
+N 43 837 255
+N 44 229 321
+N 45 370 203
+N 46 326 191
+N 47 407 459
+N 48 227 363
+N 49 160 305
+
+E 17 16
+E 16 14
+E 14 15
+E 14 12
+E 12 6
+E 6 13
+E 6 5
+E 5 44
+E 44 4
+E 4 3
+E 6 49
+E 49 7
+E 13 49
+E 1 2
+E 2 48
+E 48 3
+E 42 7
+E 42 1
+E 11 41
+E 24 45
+E 45 46
+E 46 41
+E 4 8
+E 8 9
+E 9 10
+E 9 11
+E 8 18
+E 18 19
+E 18 20
+E 20 35
+E 35 21
+E 21 22
+E 22 47
+E 47 23
+E 23 2
+E 23 19
+E 10 24
+E 24 34
+E 34 27
+E 27 25
+E 25 26
+E 21 36
+E 36 37
+E 37 28
+E 28 29
+E 26 43
+E 43 29
+E 29 39
+E 39 30
+E 30 31
+E 20 24
