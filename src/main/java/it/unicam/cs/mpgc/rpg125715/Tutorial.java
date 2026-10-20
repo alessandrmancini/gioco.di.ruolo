@@ -104,8 +104,9 @@ public final class Tutorial {
                                 + "A pari punti vince chi ha più città, poi più oro. In questa modalità i punti provvisori sono visibili nel pannello dei giocatori. "
                                 + "Se resta un solo giocatore la partita finisce subito anche a punti."),
 
-                new Pagina("11. Consigli",
-                        "Consigli per i primi turni:\n"
+                new Pagina("11. Salvare e consigli",
+                        "Con 'Salva partita' (durante il tuo turno) salvi la partita in un file .rpg; con 'Carica partita' la riapri quando vuoi.\n\n"
+                                +"Consigli per i primi turni:\n"
                                 + "  1. Specializza la capitale (militare o commerciale) e migliorala ad Avamposto.\n"
                                 + "  2. Recluta qualche unità prima di muoverti: gli eserciti piccoli perdono.\n"
                                 + "  3. Non lasciare le tue città senza esercito vicino ai nemici.\n"
