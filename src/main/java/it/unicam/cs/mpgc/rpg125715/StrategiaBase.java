@@ -25,7 +25,7 @@ public abstract class StrategiaBase implements LeaderStrategy {
         return attaccoTotale(bot, esercito) - difesaBersaglio(destinazione, nemico);
     }
     //eserciti che possono ancora muovere e vicini alla destinazione
-    protected int esercitiAdiacenti(Player bot, Location destinazione){
+    protected int esercitiAdiacentiA(Player bot, Location destinazione){
         int totale = 0;
         for(Army a : bot.getEserciti()){
             if(!a.isVuoto() && a.isPuoMuovere() && a.getPosizione() != null && a.getPosizione().isAdiacente(destinazione)){
