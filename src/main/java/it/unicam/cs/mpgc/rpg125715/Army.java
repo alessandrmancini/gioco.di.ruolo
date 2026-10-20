@@ -37,7 +37,7 @@
         public Player getOwner() {return owner;}
     
         public Location getPosizione() {return posizione;}
-        void aggiornaPosizione(Location l) {
+        public void aggiornaPosizione(Location l) {
             if(l == null){throw new IllegalArgumentException("posizione null");}
             this.posizione = l;
         }
