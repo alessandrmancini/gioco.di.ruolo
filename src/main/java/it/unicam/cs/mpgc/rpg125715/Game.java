@@ -2,8 +2,12 @@ package it.unicam.cs.mpgc.rpg125715;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
-public class Game {
+public class Game implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private List<Player> players;
     private List<Location> locations;
     private int turno;
