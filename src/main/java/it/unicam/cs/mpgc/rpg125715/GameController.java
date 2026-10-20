@@ -25,11 +25,16 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -71,6 +76,7 @@ public class GameController {
     @FXML private Label abilityLabel;
     @FXML private ComboBox<VictoryMode> modeCombo;
     @FXML private Label modeInfoLabel;
+    @FXML private Button saveButton;
 
     private MapView mapView;
 
@@ -86,6 +92,8 @@ public class GameController {
     private Location ultimaPartenza;
     private ArmyService armyService;
     private int roundMostrato;
+    private IdGenerator idGenerator;
+    private final PartitaRepository partitaRepository = new SerializzazionePartitaRepository();
 
     // bot visibili passo per passo
     private static final int PAUSA_BOT_MS = 900;
@@ -111,7 +119,7 @@ public class GameController {
     }
 
     private void creaServizi() {
-        IdGenerator idGenerator = new IdGenerator();
+        this.idGenerator = new IdGenerator();
         DiceService diceService = new DiceService();
         BattleService battleService = new BattleService(diceService);
         this.armyService = new ArmyService(idGenerator);
@@ -765,6 +773,7 @@ public class GameController {
         if (game == null) {
             turnLabel.setText("Nessuna partita");
             selectionLabel.setText("Nessuna selezione");
+            saveButton.setDisable(true);
             endTurnButton.setDisable(true);
             recruitButton.setDisable(true);
             upgradeButton.setDisable(true);
@@ -825,6 +834,7 @@ public class GameController {
         boolean miaCitta = umano && city != null && city.getOwner() == current;
 
         endTurnButton.setDisable(!umano);
+        saveButton.setDisable(!umano);
         recruitButton.setDisable(!miaCitta);
         upgradeButton.setDisable(!miaCitta || city.isMetropoli());
         specButton.setDisable(!miaCitta);
@@ -890,6 +900,73 @@ public class GameController {
                 setText(testo);
             }
         };
+    }
+
+    //SALVATAGGIO E CARICAMENTO
+    private FileChooser creaFileChooser(String titolo){
+        FileChooser scelta = new FileChooser();
+        scelta.setTitle(titolo);
+        scelta.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+                "Partite salvate (*"+ partitaRepository.estensione()+ ")", "*"+ partitaRepository.estensione()));
+        return scelta;
+    }
+    @FXML
+    private void onSalvaClick(){
+        if(!isTurnoUmano()){
+            log("Puoi salvare solo durante il turno di un giocatore umano");
+            return;
+        }
+        FileChooser scelta = creaFileChooser("Salva partita");
+        scelta.setInitialFileName("partita"+ partitaRepository.estensione());
+        File file = scelta.showSaveDialog(mapScroll.getScene().getWindow());
+        if(file == null) {return;}
+        Path percorso = file.toPath();
+        if(!percorso.getFileName().toString().endsWith(partitaRepository.estensione())){
+            percorso = percorso.resolveSibling(percorso.getFileName() + partitaRepository.estensione());
+        }
+        try{
+            partitaRepository.salva(game, percorso);
+            log("Partita salvata in "+ percorso +".");
+        }catch (IOException | RuntimeException e){
+            log("Salvataggio non riuscito: "+ e.getMessage());
+        }
+    }
+    @FXML
+    private void onCaricaClick(){
+        if(botCorrente != null){
+            log("Aspetta la gine dei turni dei bot prima di caricare una partita");
+            return;
+        }
+        File file = creaFileChooser("Carica partita").showOpenDialog(mapScroll.getScene().getWindow());
+        if(file == null) {return;}
+        try{
+            Game caricata = partitaRepository.carica(file.toPath());
+            creaServizi();
+            idGenerator.allineaA(caricata);
+
+            game = caricata;
+            fineMostrata = game.isGameOver();
+            sconfittiMostrati.clear();
+            for(Player p : game.getPlayers()){
+                if(p.isSconfitto()){sconfittiMostrati.add(p);}
+            }
+            botCorrente = null;
+            azzeraUndo();
+            resetSelezione();
+            logArea.clear();
+
+            log("Partita caricata da "+ file.getName()+ " ("+ game.getModalita().getNome()+ ").");
+            roundMostrato = 0;
+            logNuovoRound();
+            setupOverlay.setVisible(false);
+            refresh();
+
+            if(game.isGameOver()){return;}
+            if(game.getCurrentPlayer().getKind() == PlayerKind.BOT){avviaTurniBot();}
+            else{annunciaTurnoUmano();}
+        } catch (IOException | RuntimeException e) {
+            log("Caricamento non riuscito: "+ e.getMessage());
+        }
     }
 
 

@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.chart.BubbleChart?>
 <StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="it.unicam.cs.mpgc.rpg125715.GameController">
 
@@ -29,6 +30,8 @@
                 <Label fx:id="turnLabel" styleClass="turn-label"/>
                 <Button text = "Legenda" onAction="#onLegendaClick"/>
                 <Button text="Nuova partita" onAction="#onNuovaPartitaClick"/>
+                <Button fx:id="saveButton" text = "Salva partita" onAction="#onSalvaClick"/>
+                <Button text="Carica partita" onAction="#onCaricaClick" />
                 <Button text = "Tutorial" onAction="#onTutorialClick"/>
                 <Button fx:id="skipBotButton" text="Salta mosse dei bot" onAction="#onSaltaBotClick"/>
                 <Button fx:id="endTurnButton" text="Fine turno" onAction="#onFineTurnoClick"/>
@@ -115,6 +118,7 @@
 
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button text = "Tutorial" onAction="#onTutorialClick"/>
+                <Button text = "Carica partita" onAction="#onCaricaClick"/>
                 <Button text = "Legenda" onAction = "#onLegendaClick"/>
                 <Button fx:id="cancelSetupButton" text="Annulla" onAction="#onAnnullaSetupClick"/>
                 <Button text="Avvia partita" onAction="#onAvviaPartitaClick"/>
