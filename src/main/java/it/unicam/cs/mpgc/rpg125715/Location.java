@@ -3,8 +3,11 @@ package it.unicam.cs.mpgc.rpg125715;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.io.Serializable;
 
-public class Location {
+public class Location implements Serializable{
+    private static final long serialVersionUID = 1L;
+
     private int id;
     private int x;
     private int y;

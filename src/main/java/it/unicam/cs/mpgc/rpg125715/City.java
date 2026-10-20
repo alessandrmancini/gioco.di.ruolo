@@ -1,6 +1,9 @@
 package it.unicam.cs.mpgc.rpg125715;
 
-public class City {
+import java.io.Serializable;
+
+public class City implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String name;
     private CityLevel level;

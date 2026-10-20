@@ -2,8 +2,11 @@
     
     import java.util.ArrayList;
     import java.util.List;
+    import java.io.Serializable;
     
-    public class Army {
+    public class Army implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         private final int id;
         private final Player owner;
         private Location posizione;

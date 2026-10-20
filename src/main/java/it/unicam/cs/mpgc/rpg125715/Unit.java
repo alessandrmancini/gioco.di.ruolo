@@ -1,6 +1,8 @@
 package it.unicam.cs.mpgc.rpg125715;
 
-public record Unit(UnitType type, int attacco, int difesa, int costo) {
+import java.io.Serializable;
+
+public record Unit(UnitType type, int attacco, int difesa, int costo) implements Serializable {
     public Unit {
         if (type == null) {
             throw new IllegalArgumentException("il tipo di unità non può essere null");
