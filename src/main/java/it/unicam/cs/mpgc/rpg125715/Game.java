@@ -53,6 +53,12 @@ public class Game implements Serializable {
     }
     public List<Player> getPlayers(){return new ArrayList<>(players);}
     public int numeroPlayerAttivi(){return getActivePlayers().size();}
+    public boolean haUmaniAttivi(){
+        for(Player p: players){
+            if(p.getKind() == PlayerKind.HUMAN && !p.isSconfitto()){return true;}
+        }
+        return false;
+    }
     public boolean haSoloUnPlayerAttivo(){
         int count =  0;
         for(Player p : players){
