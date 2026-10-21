@@ -2,9 +2,9 @@ package it.unicam.cs.mpgc.rpg125715;
 
 public class BattleService {
 
-    private final DiceService dadi;
+    private final DiceRoller dadi;
 
-    public BattleService(DiceService dadi) {
+    public BattleService(DiceRoller dadi) {
         if(dadi == null) {throw new IllegalArgumentException("il tiro non può essere null");}
         this.dadi = dadi;
     }

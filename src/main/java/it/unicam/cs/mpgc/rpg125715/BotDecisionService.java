@@ -1,7 +1,6 @@
 package it.unicam.cs.mpgc.rpg125715;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -11,13 +10,20 @@ public class BotDecisionService {
     private static final int UNITA_PER_SVILUPPO = 4;
     private static final int PESO_PASSA = 1;
     private final ConstructionService constructionService;
-    private final NemiciService nemiciService = new NemiciService();
-    private final StrategiaLeader strategia = new StrategiaLeader(nemiciService);
-    private final Random random = new Random();
+    private final NemiciService nemiciService;
+    private final StrategiaLeader strategia;
+    private final Random random;
 
     public BotDecisionService(ConstructionService constructionService) {
-        if(constructionService == null){throw new IllegalArgumentException("constructionService null");}
+        this(constructionService, new Random());
+    }
+    public  BotDecisionService(ConstructionService constructionService, Random random) {
+        if(constructionService == null){throw new IllegalArgumentException("constructionService is null");}
+        if(random == null){throw new IllegalArgumentException("random is null");}
         this.constructionService = constructionService;
+        this.random = random;
+        this.nemiciService = new NemiciService(random);
+        this.strategia = new StrategiaLeader(nemiciService);
     }
 
     public BotDecision decide(Game game, Player bot){
@@ -46,13 +52,13 @@ public class BotDecisionService {
         if(strategico != null){return strategico;}
 
         //SCELTA PESATA TRA LE AZIONI POSSIBILI
-        int[] pesi = pesiLeader(bot.getLeader());
+        int[] pesi = strategia.per(bot).pesiAzioni();
         List<BotDecision> candidate = new ArrayList<>();
         List<Integer> pesiCandidate = new ArrayList<>();
 
         //Giulio Cesare alterna turni di sviluppo e turni di guerra (gli altri leader fanno entrambi)
-        boolean sviluppo = strategia.ammetteSviluppo(bot);
-        boolean guerra = strategia.ammetteGuerra(bot);
+        boolean sviluppo = strategia.per(bot).ammetteSviluppo(bot);
+        boolean guerra = strategia.per(bot).ammetteGuerra(bot);
 
         if(sviluppo){
             BotDecision build = decidiCostruzione(bot);
@@ -71,7 +77,7 @@ public class BotDecisionService {
         if(guerra){
             BotDecision caccia = decidiCaccia(bot);
             if(caccia != null){
-                aggiungi(candidate, pesiCandidate, caccia, pesi[4]+pesi[5]+bonusCaccia(bot.getLeader()));
+                aggiungi(candidate, pesiCandidate, caccia, pesi[4]+pesi[5]+strategia.per(bot).bonusCaccia());
             }
             else{
                 aggiungi(candidate, pesiCandidate, decidiAttacco(game, bot), pesi[4]);
@@ -81,36 +87,6 @@ public class BotDecisionService {
         aggiungi(candidate, pesiCandidate, new BotDecision(BotActionType.PASS, null, null, null), PESO_PASSA);
 
         return scegliPesata(candidate, pesiCandidate);
-    }
-
-    //peso in più dell'azione "caccia ai nemici" rispetto a un normale attacco/movimento
-    private int bonusCaccia(LeaderType leader){
-        return switch (leader){
-            case ALESSANDRO_MAGNO, ANNIBALE, GIULIO_CESARE, REGINA_ELISABETTA, GIOVANNA_D_ARCO, FEDERICO_BARBAROSSA,
-                 QIN_SHI_HUANG, ATTILA -> 6;
-        };
-    }
-
-    //quanto rischia il leader: attacca un esercito solo se (attacco - difesa) non è più basso di questo valore
-    private int margineMinimo(LeaderType leader){
-        return switch (leader){
-            case ALESSANDRO_MAGNO, GIOVANNA_D_ARCO, REGINA_ELISABETTA, FEDERICO_BARBAROSSA, QIN_SHI_HUANG,
-                 GIULIO_CESARE, ANNIBALE, ATTILA -> -3;
-        };
-    }
-
-    //PESI: {costruzione, specializzazione, reclutamento, nuovo esercito, attacco, movimento}
-    private int[] pesiLeader(LeaderType leader){
-        return switch (leader){
-            case ALESSANDRO_MAGNO -> new int[]{2, 2, 3, 4, 6, 4};
-            case ANNIBALE -> new int[]{2, 3, 4, 3, 5, 3};
-            case ATTILA -> new int[]{1, 1, 3, 3, 7, 4};
-            case GIULIO_CESARE -> new int[]{4, 3, 3, 3, 4, 3};
-            case REGINA_ELISABETTA -> new int[]{4, 4, 3, 2, 2, 2};
-            case GIOVANNA_D_ARCO -> new int[]{3, 3, 3, 3, 4, 5};
-            case FEDERICO_BARBAROSSA -> new int[]{4, 3, 5, 3, 2, 2};
-            case QIN_SHI_HUANG -> new int[]{5, 3, 4, 3, 3, 3};
-        };
     }
 
     private void aggiungi(List<BotDecision> candidate, List<Integer> pesi, BotDecision d, int peso){
@@ -181,7 +157,7 @@ public class BotDecisionService {
             if(loc != null && !loc.hasArmy()){libere.add(c);}
         }
         if(libere.isEmpty()){return null;}
-        if(bot.getLeader() == LeaderType.FEDERICO_BARBAROSSA){
+        if(strategia.per(bot).preferisceCittaDiConfine()){
             List<City> diConfine = new ArrayList<>();
             for(City c : libere){
                 if(strategia.eCittaDiConfine(bot,c.getLocation())){diConfine.add(c);}
@@ -219,10 +195,10 @@ public class BotDecisionService {
                 if(cittaNemica){difesa += 2;}
                 int score = a.getAttaccoTotale() - difesa;
                 //non attacca se è chiaramente più debole
-                if(nemico != null && score < margineMinimo(bot.getLeader())){continue;}
-
+                if(nemico != null && score < strategia.per(bot).margineMinimo()){continue;}
+                //regole attacco leader
                 if(!strategia.attaccoConsentito(bot, a , l, nemico)){continue;}
-                score = strategia.punteggioAttacco(bot,a,l,nemico,score);
+                score = strategia.per(bot).punteggioAttacco(bot,a,l,nemico,score);
                 if(score > miglioreScore){
                     miglioreScore = score;
                     migliore = new BotDecision(BotActionType.ATTACK, a.getPosizione(), l, null);
@@ -250,7 +226,7 @@ public class BotDecisionService {
                 Integer d = distanza.get(l);
                 if(d == null || d>=distanzaAttuale){continue;}
                 if(l.hasArmyPlayer(bot)){continue;}
-                if(!strategia.mossaConsentita(bot,a,l,distanza)){continue;}
+                if(!strategia.per(bot).mossaConsentita(bot,a,l,distanza)){continue;}
 
                 boolean daConquistare = l.hasCity() && l.getCity().getOwner() != null && l.getCity().getOwner() != bot;
                 Army nemico = null;
@@ -260,13 +236,13 @@ public class BotDecisionService {
                 boolean eAttacco = nemico != null || daConquistare;
 
                 if(eAttacco && bot.getTurniGiocati() == 0){continue;}
-                if(nemico != null && a.getAttaccoTotale() - nemico.getDifesaTotale() < margineMinimo(bot.getLeader())){continue;}
+                if(nemico != null && a.getAttaccoTotale() - nemico.getDifesaTotale() < strategia.per(bot).margineMinimo()){continue;}
                 if(eAttacco && !strategia.attaccoConsentito(bot, a, l, nemico)){continue;}
 
                 //a pari distanza si preferisce l'attacco; poi decide la strategia del leader
                 int score = eAttacco
-                        ? 1000 + strategia.punteggioAttacco(bot, a, l, nemico, strategia.margineAttacco(bot, a, l, nemico))
-                        : strategia.preferenzaMovimento(bot, a, l);
+                        ? 1000 + strategia.per(bot).punteggioAttacco(bot, a, l, nemico, strategia.margineAttacco(bot, a, l, nemico))
+                        : strategia.per(bot).preferenzaMovimento(bot, a, l);
                 if(d<migliorDistanza || (d == migliorDistanza && score > miglioreScore)){
                     migliorDistanza = d;
                     miglioreScore = score;
@@ -284,7 +260,7 @@ public class BotDecisionService {
 
     //FEDERICO (contrattacco): subito dopo aver respinto un attacco, attacca l'esercito che l'ha attaccato
     private BotDecision decidiContrattacco(Player bot){
-        if(bot.getLeader() != LeaderType.FEDERICO_BARBAROSSA){return null;}
+        if(!strategia.per(bot).contrattacca()){return null;}
         Army bersaglio = bot.getAttaccanteSconfitto();
         if(bersaglio == null){return null;}
         bot.setAttaccanteSconfitto(null);      //si prova una sola volta
@@ -296,7 +272,7 @@ public class BotDecisionService {
         for(Army a : bot.getEserciti()){
             if(a.isVuoto() || !a.isPuoMuovere() || a.getPosizione() == null){continue;}
             if(!a.getPosizione().isAdiacente(destinazione)){continue;}
-            if(a.getAttaccoTotale() - bersaglio.getDifesaTotale() < margineMinimo(bot.getLeader())){continue;}
+            if(a.getAttaccoTotale() - bersaglio.getDifesaTotale() < strategia.per(bot).margineMinimo()){continue;}
             return new BotDecision(BotActionType.ATTACK, a.getPosizione(), destinazione, null);
         }
         return null;
@@ -304,11 +280,11 @@ public class BotDecisionService {
 
     //GIULIO CESARE (capitale coperta): se l'esercito di guardia è lontano dalla capitale lo riporta indietro
     private BotDecision decidiRitornoGuardia(Player bot){
-        if(bot.getLeader() != LeaderType.GIULIO_CESARE || bot.numeroEserciti() < 2){return null;}
+        if(bot.numeroEserciti()<2){return null;}
         City capitale = bot.getCapitale();
         if(capitale == null || capitale.getLocation() == null){return null;}
 
-        Army guardia = strategia.guardiaCapitale(bot);
+        Army guardia = strategia.per(bot).guardiaCapitale(bot);
         if(guardia == null || !guardia.isPuoMuovere() || guardia.isVuoto()){return null;}
         java.util.Map<Location,Integer> distanza = nemiciService.distanzeDa(List.of(capitale.getLocation()));
         Integer attuale = distanza.get(guardia.getPosizione());
@@ -326,7 +302,7 @@ public class BotDecisionService {
     //SVILUPPO PRIORITARIO: le specializzazioni che il leader vuole fare appena può
     private BotDecision decidiSviluppoPrioritario(Player bot){
         CitySpecialization voluta = null;
-        for(CitySpecialization s : strategia.specializzazioniPrioritarie(bot.getLeader())){
+        for(CitySpecialization s : strategia.per(bot).specializzazioniPrioritarie()){
             if(!haSpecializzazione(bot, s)){
                 voluta = s;
                 break;
@@ -345,7 +321,7 @@ public class BotDecisionService {
         if(bot.getOro() < ConstructionService.COSTO_SPECIALIZZAZIONE){return null;}
 
         City scelta = null;
-        if(strategia.specializzaInCapitale(bot.getLeader()) && capitale != null
+        if(strategia.per(bot).specializzaInCapitale() && capitale != null
                 && !capitale.isAccampamento() && capitale.getSpecialization() == CitySpecialization.NESSUNA){
             scelta = capitale;
         }
@@ -359,7 +335,7 @@ public class BotDecisionService {
     //RECLUTAMENTO: ordine con cui provare i tipi di unità (il primo che si può pagare)
     public UnitType[] ordineReclutamento(Player bot){
         UnitType[] standard = {UnitType.SPECIALI, UnitType.ELEFANTI, UnitType.ASSEDIO, UnitType.CAVALLERIA, UnitType.FANTERIA};
-        if(strategia.preferisceAssedio(bot)){
+        if(strategia.per(bot).preferisceAssedio(bot)){
             //Attila: contro città di livello alto prima l'assedio
             return new UnitType[]{UnitType.ASSEDIO, UnitType.SPECIALI, UnitType.CAVALLERIA, UnitType.FANTERIA};
         }
@@ -379,7 +355,7 @@ public class BotDecisionService {
                 if(l.hasArmy()){continue;}
                 //nel primo turno non si può entrare in una città nemica (sarebbe un attacco)
                 if(bot.getTurniGiocati() == 0 && l.hasCity() && l.getCity().getOwner() != null && l.getCity().getOwner() != bot){continue;}
-                int score = punteggioNodo(bot, l)*100+strategia.preferenzaMovimento(bot,a,l);
+                int score = punteggioNodo(bot, l)*100+strategia.per(bot).preferenzaMovimento(bot,a,l);
                 if(score > bestScore){
                     bestScore = score;
                     migliori.clear();
@@ -406,7 +382,7 @@ public class BotDecisionService {
 
     private boolean puoAgire(Player bot, Army a){
         return a != null && a.getPosizione() != null && !a.isVuoto() && a.isPuoMuovere()
-                && !eGuardiaCapitale(bot, a) && !strategia.eGuardia(bot, a);
+                && !eGuardiaCapitale(bot, a) && !strategia.per(bot).eGuardia(bot, a);
     }
 
     //PRIORITA': difesa capitale
@@ -437,8 +413,10 @@ public class BotDecisionService {
             if(loc == null || c == bot.getCapitale() || c.hasRibellione()){continue;}
             if(loc.hasArmy() || !haNemicoVicino(bot, loc)){continue;}
             for(Army a : bot.getEserciti()){
-                if(a.isVuoto() || !a.isPuoMuovere() || a.getPosizione() == null || a.getPosizione().isAdiacente(loc)){continue;}
-                if(eGuardiaCapitale(bot, a) || strategia.eGuardia(bot, a)){continue;}
+                if(a.isVuoto() || !a.isPuoMuovere() || a.getPosizione() == null || !a.getPosizione().isAdiacente(loc)){continue;}
+                //non lascia scoperta una città a sua volta minacciata
+                if(a.getPosizione().hasCity() && a.getPosizione().getCity().getOwner() == bot && haNemicoVicino(bot, a.getPosizione())){continue;}
+                if(eGuardiaCapitale(bot, a) || strategia.per(bot).eGuardia(bot,a)){continue;}
                 return new BotDecision(BotActionType.MOVE, a.getPosizione(), loc, null);
             }
         }
@@ -519,7 +497,7 @@ public class BotDecisionService {
         City migliore = null;
         int migliorePunteggio = Integer.MIN_VALUE;
 
-        boolean frontiera = bot.getLeader() == LeaderType.ALESSANDRO_MAGNO && nemiciService.haNemiciDaSconfiggere(bot);
+        boolean frontiera = strategia.per(bot).sviluppoDiFrontiera() && nemiciService.haNemiciDaSconfiggere(bot);
         java.util.Map<Location, Integer> distanzaNemici = frontiera ? nemiciService.distanzaDaiNemici(bot) : null;
         for(City c : bot.getTerritorio().getCities()){
             if(c.isMetropoli()){continue;}
