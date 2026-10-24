@@ -15,10 +15,10 @@ public enum LeaderType {
             case ALESSANDRO_MAGNO -> "Alessandro Magno";
             case ANNIBALE -> "Annibale";
             case ATTILA -> "Attila";
-            case GIULIO_CESARE -> "Giulio cesare";
+            case GIULIO_CESARE -> "Giulio Cesare";
             case QIN_SHI_HUANG -> "Qin Shi Huang";
             case FEDERICO_BARBAROSSA ->  "Federico Barbarossa";
-            case GIOVANNA_D_ARCO ->   "Giovanna D' Arco";
+            case GIOVANNA_D_ARCO ->   "Giovanna D'Arco";
             case REGINA_ELISABETTA -> "Regina Elisabetta";
         };
     }

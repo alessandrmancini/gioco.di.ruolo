@@ -18,6 +18,10 @@ public class Game implements Serializable {
     private final List<String> eventi;
     private final VictoryMode modalita;
 
+    public Game(List<Player> players, List<Location> locations) {
+        this(players, locations, VictoryMode.CONQUISTA);
+    }
+
     public Game(List<Player> players, List<Location> locations, VictoryMode modalita) {
         if(players == null ||players.isEmpty()){throw new IllegalArgumentException("players null o vuota");}
         if(locations == null || locations.isEmpty()){throw new IllegalArgumentException("locations null o vuota");}

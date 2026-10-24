@@ -54,6 +54,7 @@ public class City implements Serializable {
     public void resetOwner(){owner = null;}
     public void setOwner(Player owner){
         if(owner == null){throw new IllegalArgumentException("owner null");}
+        if(proprietarioIniziale == null){proprietarioIniziale = owner;}
         this.owner = owner;
     }
     public Player getProprietarioIniziale(){return proprietarioIniziale;}

@@ -15,7 +15,8 @@ public class RibellioneService {
 
     public RibellioneService(ConquestService conquestService, Random random) {
         if(conquestService == null){throw new IllegalArgumentException("conquestService null");}
-        this.random = new Random();
+        if(random == null){throw new IllegalArgumentException("random cannot be null.");}
+        this.random = random;
         this.conquestService = conquestService;
     }
 

@@ -12,7 +12,7 @@ public class DiceService implements DiceRoller{
 
     public DiceService(Random random) {
         if(random == null){throw new IllegalArgumentException("Random cannot be null.");}
-        this.random = new Random();
+        this.random = random;
     }
 
     @Override

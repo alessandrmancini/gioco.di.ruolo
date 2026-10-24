@@ -19,7 +19,7 @@ public class NemiciService {
     public static final int NUMERO_NEMICI = 2;
     //sono "vicini" i giocatori a distanza minima + questo margine
     private static final int MARGINE_VICINATO = 1;
-    private static final int MAX_INSEGUITORI = 1;
+    private static final int MAX_INSEGUITORI = 2;
     private final Random random;
 
     public NemiciService(){

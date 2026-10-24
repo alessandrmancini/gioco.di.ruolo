@@ -60,7 +60,7 @@ public abstract class StrategiaBase implements LeaderStrategy {
         }
         int c = Integer.compare(a.getNumeroUnita(), b.getNumeroUnita());
         if(c != 0){return c;}
-        return Integer.compare(a.getNumeroUnita(), b.getNumeroUnita());
+        return Integer.compare(a.getAttaccoTotale(), b.getAttaccoTotale());
     }
 
     protected Army esercitoPiuForte(Player bot, boolean contaElefanti){
