@@ -25,6 +25,7 @@
     -fx-text-fill: white;
     -fx-background-radius: 6;
     -fx-cursor: hand;
+    -fx-padding: 7 14 7 14;
 }
 .button:hover { -fx-background-color: #2563eb; }
 .button:disabled { -fx-background-color: #4b5563; -fx-text-fill: #9ca3af; }

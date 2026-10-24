@@ -22,21 +22,31 @@
     <BorderPane styleClass="root-pane">
 
         <top>
-            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+            <VBox spacing="8" styleClass="toolbar">
                 <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
-                <Label text="Conquest Game" styleClass="title"/>
-                <Label text="Ctrl + rotella: zoom  |  trascina: sposta la mappa" styleClass="hint"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="turnLabel" styleClass="turn-label"/>
-                <Button text = "Legenda" onAction="#onLegendaClick"/>
-                <Button text="Nuova partita" onAction="#onNuovaPartitaClick"/>
-                <Button fx:id="saveButton" text = "Salva partita" onAction="#onSalvaClick"/>
-                <Button text="Carica partita" onAction="#onCaricaClick" />
-                <Button text = "Tutorial" onAction="#onTutorialClick"/>
-                <Button fx:id="skipBotButton" text="Salta mosse dei bot" onAction="#onSaltaBotClick"/>
-                <Button fx:id="endTurnButton" text="Fine turno" onAction="#onFineTurnoClick"/>
-                <Button fx:id="undoButton" text="Annulla spostamento" onAction="#onAnnullaSpostamentoClick"/>
-            </HBox>
+
+                <!-- riga 1: titolo, aiuto e turno -->
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <Label text="Conquest Game" styleClass="title"/>
+                    <Label text="Ctrl + rotella: zoom  |  trascina: sposta la mappa" styleClass="hint"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="turnLabel" styleClass="turn-label"/>
+                </HBox>
+
+                <!-- riga 2: pulsanti a gruppi -->
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Button text="Legenda" onAction="#onLegendaClick"/>
+                    <Button text="Tutorial" onAction="#onTutorialClick"/>
+                    <Separator orientation="VERTICAL"/>
+                    <Button text="Nuova partita" onAction="#onNuovaPartitaClick"/>
+                    <Button fx:id="saveButton" text="Salva partita" onAction="#onSalvaClick"/>
+                    <Button text="Carica partita" onAction="#onCaricaClick"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="undoButton" text="Annulla spostamento" onAction="#onAnnullaSpostamentoClick"/>
+                    <Button fx:id="skipBotButton" text="Salta mosse dei bot" onAction="#onSaltaBotClick"/>
+                    <Button fx:id="endTurnButton" text="Fine turno" onAction="#onFineTurnoClick"/>
+                </HBox>
+            </VBox>
         </top>
 
         <center>
