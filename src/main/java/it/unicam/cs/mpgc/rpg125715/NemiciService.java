@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -19,7 +19,7 @@ public class NemiciService {
     public static final int NUMERO_NEMICI = 2;
     //sono "vicini" i giocatori a distanza minima + questo margine
     private static final int MARGINE_VICINATO = 1;
-    public static final int MAX_INSEGUITORI = 1;
+    private static final int MAX_INSEGUITORI = 1;
     private final Random random;
 
     public NemiciService(){
@@ -37,7 +37,7 @@ public class NemiciService {
     public void assegnaNemici(List<Player> players){
         if(players == null){throw new IllegalArgumentException("players null");}
         //quante volte ogni giocatore è già stato scelto come nemico: serve a non far ricadere tutti i bot sugli stessi giocatori
-        Map<Player, Integer> inseguitori = new HashMap<>();
+        Map<Player, Integer> inseguitori = new LinkedHashMap<>();
         //l'ordine è casuale così nessun leader sceglie sempre per primo
         List<Player> ordine = new ArrayList<>(players);
         Collections.shuffle(ordine, random);
@@ -63,7 +63,7 @@ public class NemiciService {
     //distanza tra il bot e ogni altro giocatore (minimo tra due città dei due giocatori)
     private Map<Player, Integer> distanzeGiocatori(Player bot, List<Player> players){
         Map<Location, Integer> distanza = distanzeDa(posizioniCitta(bot));
-        Map<Player, Integer> distanzaGiocatori = new HashMap<>();
+        Map<Player, Integer> distanzaGiocatori = new LinkedHashMap<>();
         for(Player p : players){
             if(p == bot){continue;}
             int d = Integer.MAX_VALUE;
@@ -155,7 +155,7 @@ public class NemiciService {
 
     //ricerca in ampiezza: numero minimo di collegamenti da uno qualsiasi dei nodi di partenza
     public Map<Location, Integer> distanzeDa(Collection<Location> partenze){
-        Map<Location, Integer> distanza = new HashMap<>();
+        Map<Location, Integer> distanza = new LinkedHashMap<>();
         Deque<Location> coda = new ArrayDeque<>();
         for(Location l : partenze){
             if(l != null && !distanza.containsKey(l)){

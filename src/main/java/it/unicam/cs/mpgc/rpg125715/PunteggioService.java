@@ -90,7 +90,7 @@ public class PunteggioService {
         int posto = 1;
         for (Punteggio s : classifica(game)) {
             sb.append(posto++).append(". ").append(s.player().getName())
-                    .append(" (").append(GameInfo.nomeLeader(s.player().getLeader())).append(")");
+                    .append(" (").append(s.player().getLeader().getDisplayName()).append(")");
             if (s.player().isSconfitto()) {
                 sb.append(" - sconfitto\n");
                 continue;

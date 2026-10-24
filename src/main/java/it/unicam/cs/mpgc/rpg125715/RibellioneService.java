@@ -9,11 +9,11 @@ public class RibellioneService {
     private final Random random;
     private final ConquestService conquestService;
 
-    public RibellioneService() {
-        this(new ConquestService());
+    public RibellioneService(ConquestService conquestService) {
+        this(conquestService, new Random());
     }
 
-    public RibellioneService(ConquestService conquestService) {
+    public RibellioneService(ConquestService conquestService, Random random) {
         if(conquestService == null){throw new IllegalArgumentException("conquestService null");}
         this.random = new Random();
         this.conquestService = conquestService;

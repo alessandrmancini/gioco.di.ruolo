@@ -7,61 +7,10 @@ import java.util.Map;
 
 public class MapSetupService {
 
+    private static final String MAPPA_PREEDEFINITA = "mappa.txt";
+
     private final GameSetUpService gameSetUpService;
-
-    public MapSetupService(GameSetUpService gameSetUpService) {
-        if(gameSetUpService == null){throw new IllegalArgumentException("GameSetUpService is null");}
-        this.gameSetUpService = gameSetUpService;
-    }
-
-    public List<Location> creaMappaBase(Map<Integer,int[]> coordinates,List<int[]> adiacenze, Map<Integer, City> cityPerLocation){
-        if(coordinates == null || coordinates.isEmpty()){throw new IllegalArgumentException("coordinates is null");}
-        if(adiacenze == null){throw new IllegalArgumentException("adiacenze is null");}
-        if(cityPerLocation == null){throw new IllegalArgumentException("cityPerLocation is null");}
-
-        Map<Integer, Location> locationById = new HashMap<>();
-        for(Map.Entry<Integer,int[]> entry: coordinates.entrySet()){
-            int idLogico = entry.getKey();
-            int[] xy = entry.getValue();
-
-            if(locationById.containsKey(idLogico)){throw new IllegalArgumentException("id duplicato");}
-            if(xy == null || xy.length != 2){throw new IllegalArgumentException("coordinate non valide");}
-            Location loc = gameSetUpService.creaLocation(xy[0], xy[1]);
-            locationById.put(idLogico, loc);
-        }
-        for(int[] edge: adiacenze){
-            if(edge == null || edge.length != 2){throw new IllegalArgumentException("adiacenza non valida");}
-
-            Location a = locationById.get(edge[0]);
-            Location b = locationById.get(edge[1]);
-
-            if(a == null || b == null){throw new IllegalArgumentException("adiacenza con id inesistente");}
-            a.addAdiacente(b);
-        }
-
-        for(Map.Entry<Integer,City> entry: cityPerLocation.entrySet()){
-            Location loc = locationById.get(entry.getKey());
-            City city = entry.getValue();
-
-            if(loc == null){throw new IllegalArgumentException("city non valide");}
-            if(city == null){throw new IllegalArgumentException("city is null");}
-            loc.addCity(city);
-        }
-        return new ArrayList<>(locationById.values());
-    }
-
-    public List<Location> creaMappaGioco(List<Player> players){
-        if(players == null){throw new IllegalArgumentException("players is null");}
-
-        Map<Integer, int[]> coordinates = new HashMap<>();
-        List<int[]> adiacenze = new ArrayList<>();
-        Map<Integer,City> cityPerLocation = new HashMap<>();
-
-        assegnaCoordinateBase(coordinates);
-        assegnaAdiacenzaBase(adiacenze);
-        assegnaCittaAiNodi(players, cityPerLocation);
-        return creaMappaBase(coordinates, adiacenze, cityPerLocation);
-    }
+    private final MapDefinition mappa;
 
     private void assegnaCoordinateBase(Map<Integer, int[]> coordinates){
         if(coordinates == null){throw new IllegalArgumentException("coordinates is null");}
@@ -123,74 +72,60 @@ public class MapSetupService {
         coordinates.put(48, new int[]{227, 363});  // tra Cartagine e Cagliari
         coordinates.put(49, new int[]{160, 305});  // tra Parigi e Madrid (collegato a Rennes)
     }
-    private void assegnaAdiacenzaBase(List<int[]> adiacenze){
+
+    public MapSetupService(GameSetUpService gameSetUpService) {
+        this(gameSetUpService, MapDefinition.daRisorsa(MAPPA_PREEDEFINITA));
+    }
+
+    public MapSetupService(GameSetUpService gameSetUpService, MapDefinition mappa) {
+        if(gameSetUpService == null){throw new IllegalArgumentException("GameSetUpService is null");}
+        if(mappa == null){throw new IllegalArgumentException("mappa is null");}
+        this.gameSetUpService = gameSetUpService;
+        this.mappa = mappa;
+    }
+
+    public List<Location> creaMappaBase(Map<Integer,int[]> coordinates,List<int[]> adiacenze, Map<Integer, City> cityPerLocation){
+        if(coordinates == null || coordinates.isEmpty()){throw new IllegalArgumentException("coordinates is null");}
         if(adiacenze == null){throw new IllegalArgumentException("adiacenze is null");}
-        // Ovest
-        adiacenze.add(new int[]{17, 16});
-        adiacenze.add(new int[]{16, 14});
-        adiacenze.add(new int[]{14, 15});
-        adiacenze.add(new int[]{14, 12});
-        adiacenze.add(new int[]{12, 6});
-        adiacenze.add(new int[]{6, 13});
-        adiacenze.add(new int[]{6, 5});
-        adiacenze.add(new int[]{5, 44});
-        adiacenze.add(new int[]{44, 4});
-        adiacenze.add(new int[]{4, 3});
-        adiacenze.add(new int[]{6, 49});
-        adiacenze.add(new int[]{49, 7});
-        adiacenze.add(new int[]{13, 49});
-        adiacenze.add(new int[]{1, 2});
-        adiacenze.add(new int[]{2, 48});
-        adiacenze.add(new int[]{48, 3});
+        if(cityPerLocation == null){throw new IllegalArgumentException("cityPerLocation is null");}
 
-        // Tariff vicino madrid e rabat
-        adiacenze.add(new int[]{42, 7});
-        adiacenze.add(new int[]{42, 1});
+        Map<Integer, Location> locationById = new HashMap<>();
+        for(Map.Entry<Integer,int[]> entry: coordinates.entrySet()){
+            int idLogico = entry.getKey();
+            int[] xy = entry.getValue();
 
-        //Nord europa
-        adiacenze.add(new int[]{11, 41});
-        adiacenze.add(new int[]{24,45});
-        adiacenze.add(new int[]{45, 46});
-        adiacenze.add(new int[]{46, 41});
+            if(locationById.containsKey(idLogico)){throw new IllegalArgumentException("id duplicato");}
+            if(xy == null || xy.length != 2){throw new IllegalArgumentException("coordinate non valide");}
+            Location loc = gameSetUpService.creaLocation(xy[0], xy[1]);
+            locationById.put(idLogico, loc);
+        }
+        for(int[] edge: adiacenze){
+            if(edge == null || edge.length != 2){throw new IllegalArgumentException("adiacenza non valida");}
 
-        // Centro Europa
-        adiacenze.add(new int[]{4, 8});
-        adiacenze.add(new int[]{8, 9});
-        adiacenze.add(new int[]{9, 10});
-        adiacenze.add(new int[]{9, 11});
-        adiacenze.add(new int[]{8, 18});
-        adiacenze.add(new int[]{18, 19});
-        adiacenze.add(new int[]{18, 20});
+            Location a = locationById.get(edge[0]);
+            Location b = locationById.get(edge[1]);
 
-        // Sud-est / Medio Oriente
-        adiacenze.add(new int[]{20, 35});
-        adiacenze.add(new int[]{35, 21});
-        adiacenze.add(new int[]{21, 22});
-        adiacenze.add(new int[]{22, 47});
-        adiacenze.add(new int[]{47, 23});
-        adiacenze.add(new int[]{23, 2});
-        adiacenze.add(new int[]{23, 19});
+            if(a == null || b == null){throw new IllegalArgumentException("adiacenza con id inesistente");}
+            a.addAdiacente(b);
+        }
 
-        // Urali
-        adiacenze.add(new int[]{10, 24});
-        adiacenze.add(new int[]{24, 34});
-        adiacenze.add(new int[]{34, 27});
-        adiacenze.add(new int[]{27, 25});
-        adiacenze.add(new int[]{25, 26});
+        for(Map.Entry<Integer,City> entry: cityPerLocation.entrySet()){
+            Location loc = locationById.get(entry.getKey());
+            City city = entry.getValue();
 
-        // Cina / India
-        adiacenze.add(new int[]{21, 36});
-        adiacenze.add(new int[]{36, 37});
-        adiacenze.add(new int[]{37, 28});
-        adiacenze.add(new int[]{28, 29});
-        adiacenze.add(new int[]{26, 43});
-        adiacenze.add(new int[]{43, 29});
-        adiacenze.add(new int[]{29, 39});
-        adiacenze.add(new int[]{39, 30});
-        adiacenze.add(new int[]{30, 31});
+            if(loc == null){throw new IllegalArgumentException("city non valide");}
+            if(city == null){throw new IllegalArgumentException("city is null");}
+            loc.addCity(city);
+        }
+        return new ArrayList<>(locationById.values());
+    }
 
-        // collegamenti alternativi interni
-        adiacenze.add(new int[]{20, 24});
+    public List<Location> creaMappaGioco(List<Player> players) {
+        if(players == null){throw new IllegalArgumentException("players is null");}
+
+        Map<Integer, City> cityPerLocation = new HashMap<>();
+        assegnaCittaAiNodi(players, cityPerLocation);
+        return creaMappaBase(mappa.getCoordinate(), mappa.getAdiacenze(), cityPerLocation);
     }
     private void assegnaCittaAiNodi(List<Player> players, Map<Integer,City> cityPerLocation){
         if(players == null){throw new IllegalArgumentException("players is null");}
@@ -199,48 +134,8 @@ public class MapSetupService {
         for(Player player: players){
             if(player == null){throw new IllegalArgumentException("player is null");}
             for(City city: player.getTerritorio().getCities()){
-                int locationId = trovaLocationPerNomeCitta(city.getName());
-                cityPerLocation.put(locationId,city);
+                cityPerLocation.put(mappa.getNodoDellaCitta(city.getName()), city);
             }
         }
-    }
-
-    private int trovaLocationPerNomeCitta(String nome){
-        if(nome == null){throw new IllegalArgumentException("nome is null");}
-        return switch (nome){
-          case "Rabat" -> 1;
-          case "Cartagine" -> 2;
-          case "Cagliari" -> 3;
-          case "Roma" -> 4;
-          case "Marsiglia" -> 5;
-          case "Parigi" -> 6;
-          case "Madrid" -> 7;
-          case "Vienna" -> 8;
-          case "Berlino" -> 9;
-          case "Varsavia" -> 10;
-          case "Copenaghen" -> 11;
-          case "Amsterdam" -> 12;
-          case "Rennes" -> 13;
-          case "Londra" -> 14;
-          case "Dublino" -> 15;
-          case "Edimburgo" -> 16;
-          case "Reykjavik" -> 17;
-          case "Pella" -> 18;
-          case "Creta" -> 19;
-          case "Ankara" -> 20;
-          case "Babilonia" -> 21;
-          case "Gedda" -> 22;
-          case "Il Cairo" -> 23;
-          case "Mosca" -> 24;
-          case "Astana" -> 25;
-          case "Bratsk" -> 26;
-          case "Delhi" -> 28;
-          case "Xianyang" -> 29;
-          case "Hong Kong" -> 30;
-          case "Tokyo" -> 31;
-          case "Stoccolma" -> 41;
-          case "Tariff" -> 42;
-          default -> throw new IllegalArgumentException("nome non riconosciuto: "+ nome);
-        };
     }
 }

@@ -8,9 +8,14 @@ public class GameInitializationService {
     private final GameSetUpService gameSetUpService;
     private final MapSetupService  mapSetupService;
     private final ArmyService armyService;
-    private final NemiciService nemiciService = new NemiciService();
+    private final NemiciService nemiciService;
 
-    public GameInitializationService(GameSetUpService gameSetUpService, MapSetupService mapSetupService, ArmyService armyService) {
+    public GameInitializationService(GameSetUpService gameSetUpService,MapSetupService mapSetupService, ArmyService armyService) {
+        this(gameSetUpService, mapSetupService, armyService, new NemiciService());
+    }
+
+    public GameInitializationService(GameSetUpService gameSetUpService, MapSetupService mapSetupService, ArmyService armyService, NemiciService nemiciService) {
+        if(nemiciService == null){throw new IllegalArgumentException("nemiciService is null");}
         if(gameSetUpService == null){throw new IllegalArgumentException("gameSetUpService is null");}
         if(mapSetupService == null){throw new IllegalArgumentException("mapSetupService is null");}
         if(armyService == null){throw new IllegalArgumentException("armyService is null");}
@@ -18,6 +23,7 @@ public class GameInitializationService {
         this.gameSetUpService = gameSetUpService;
         this.mapSetupService = mapSetupService;
         this.armyService = armyService;
+        this.nemiciService = nemiciService;
     }
     public Game creaPartitaBase(List<PlayerConfig> configurazioneGiocatori){
         return creaPartitaBase(configurazioneGiocatori, VictoryMode.CONQUISTA);
@@ -76,6 +82,22 @@ public class GameInitializationService {
         if(player.getLeader() != LeaderType.ANNIBALE){
             army.addUnit(UnitFactory.creaUnita(UnitType.SPECIALI, player.getLeader()));
         }
+    }
+
+    public static List<PlayerConfig> configurazioneStandard(List<LeaderType> umani, int oroIniziale){
+        if(umani == null){throw new IllegalArgumentException("umani is null");}
+        List<PlayerConfig> config = new ArrayList<>();
+        int numero = 1;
+        for(LeaderType l : umani){
+            config.add(new PlayerConfig("Giocatore "+ numero, l, oroIniziale, PlayerKind.HUMAN));
+            numero++;
+        }
+        for(LeaderType l : LeaderType.values()){
+            if(!umani.contains(l)){
+                config.add(new PlayerConfig("Bot "+ l.getDisplayName(), l , oroIniziale, PlayerKind.BOT));
+            }
+        }
+        return config;
     }
 
     public record PlayerConfig(String nome, LeaderType leader, int oroIniziale, PlayerKind playerKind) {

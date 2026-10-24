@@ -5,16 +5,7 @@ public class GameInfo {
     private GameInfo(){} //
 
     public static String nomeLeader(LeaderType leader){
-        return switch(leader){
-            case ALESSANDRO_MAGNO -> "Alessandro Magno";
-            case ANNIBALE -> "Annibale";
-            case ATTILA -> "Attila";
-            case GIULIO_CESARE -> "Giulio Cesare";
-            case REGINA_ELISABETTA -> "Regina Elisabetta";
-            case GIOVANNA_D_ARCO ->  "Giovanna d'Arco";
-            case FEDERICO_BARBAROSSA -> "Federico Barbarossa";
-            case QIN_SHI_HUANG ->  "Qin Shi Huang";
-        };
+        return leader.getDisplayName();
     }
     public static int difficolta(LeaderType leader){
         return switch (leader){

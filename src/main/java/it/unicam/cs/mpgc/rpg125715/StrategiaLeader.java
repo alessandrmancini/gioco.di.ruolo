@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Punto di accesso alle strategie dei leader: sceglie la {@link LeaderStrategy} giusta per ogni bot.
- * Per aggiungere un leader: nuova classe che estende {@link StrategiaBase} e una riga in {@link #registra(LeaderType, LeaderStrategy)}.
+ * Punto di accesso alle strategie dei leader: sceglie la LeaderStrategy giusta per ogni bot.
+ * Per aggiungere un leader: nuova classe che estende StrategiaBase e una riga in registra(LeaderType, LeaderStrategy).
  */
 public class StrategiaLeader {
 

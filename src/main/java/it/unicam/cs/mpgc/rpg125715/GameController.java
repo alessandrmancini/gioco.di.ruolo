@@ -298,22 +298,6 @@ public class GameController {
         throw new IllegalStateException("nessun leader libero");
     }
 
-    /** Tutti i leader partecipano: prima gli umani (nell'ordine scelto), poi i bot. */
-    private List<GameInitializationService.PlayerConfig> configurazione(List<LeaderType> umani) {
-        List<GameInitializationService.PlayerConfig> config = new ArrayList<>();
-        int numero = 1;
-        for (LeaderType l : umani) {
-            config.add(new GameInitializationService.PlayerConfig("Giocatore " + numero, l, ORO_INIZIALE, PlayerKind.HUMAN));
-            numero++;
-        }
-        for (LeaderType l : LeaderType.values()) {
-            if (!umani.contains(l)) {
-                config.add(new GameInitializationService.PlayerConfig("Bot " + leaderName(l), l, ORO_INIZIALE, PlayerKind.BOT));
-            }
-        }
-        return config;
-    }
-
     // ================= EVENTI =================
 
     @FXML
@@ -332,7 +316,7 @@ public class GameController {
         for (ComboBox<LeaderType> c : humanLeaderCombos) {umani.add(c.getValue());}
         try {
             creaServizi();   // servizi nuovi: i contatori degli id ripartono da zero
-            game = gameInitializationService.creaPartitaBase(configurazione(umani), modeCombo.getValue());
+            game = gameInitializationService.creaPartitaBase(GameInitializationService.configurazioneStandard(umani,ORO_INIZIALE), modeCombo.getValue());
             fineMostrata = false;
             sconfittiMostrati.clear();
             botCorrente = null;
@@ -348,7 +332,6 @@ public class GameController {
             setupOverlay.setVisible(false);
         } catch (RuntimeException e) {
             log("Errore creazione partita: " + e.getMessage());
-            e.printStackTrace();
         }
         refresh();
     }
@@ -614,39 +597,36 @@ public class GameController {
 
     private void verificaFinePartita() {
         if (game == null) {return;}
-        if (!game.isGameOver() && (game.haSoloUnPlayerAttivo() || !esisteUmanoAttivo())) {game.setFinita();}
+        EsitoPartitaService.aggiornaFine(game);
         if (game.isGameOver() && !fineMostrata) {
             fineMostrata = true;
-            Player vincitore = null;
-            String esito;
-            String classifica = "";
-            if (game.haSoloUnPlayerAttivo()) {
-                for (Player p : game.getPlayers()) {
-                    if (!p.isSconfitto()) {vincitore = p;}
-                }
-                esito = "Vincitore per conquista: " + vincitore.getName() + " (" + leaderName(vincitore.getLeader()) + ")";
-            } else if (!esisteUmanoAttivo()) {
-                esito = "Tutti i giocatori umani sono stati sconfitti.";
-            } else {
-                // fine dei round nella modalità a punti
-                vincitore = PunteggioService.classifica(game).get(0).player();
-                esito = "Vincitore ai punti: " + vincitore.getName() + " (" + leaderName(vincitore.getLeader()) + ")";
-                classifica = PunteggioService.testoClassifica(game);
-            }
-            log("PARTITA FINITA. " + esito);
-            if (!classifica.isEmpty()) {log("Classifica finale:\n" + classifica);}
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, esito);
-            alert.setTitle("Partita finita");
-            alert.setHeaderText("Partita finita");
-            if (!classifica.isEmpty()) {
-                TextArea tabella = new TextArea(classifica);
-                tabella.setEditable(false);
-                tabella.setPrefSize(640, 360);
-                alert.getDialogPane().setContent(new VBox(8, new Label(esito), tabella));
-                alert.setResizable(true);
-            }
-            alert.show();
+            mostraEsito(EsitoPartitaService.esito(game));
         }
+    }
+
+    private void mostraEsito(EsitoPartitaService.Esito esito) {
+        String testo = switch (esito.tipo()){
+            case CONQUISTA -> "Vincitore per conquista: " + nomeVincitore(esito.vincitore());
+            case PUNTI -> "Vincitore ai punti: " + nomeVincitore(esito.vincitore());
+            case UMANI_SCONFITTI -> "Tutti i giocatori umani sono stati sconfitti.";
+        };
+        log("PARTITA FINITA. " + testo);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, testo);
+        alert.setTitle("Partita finita");
+        alert.setHeaderText("Partita finita");
+        if (!esito.classifica().isEmpty()) {
+            log("Classifica finale:\n" + esito.classifica());
+            TextArea tabella = new TextArea(esito.classifica());
+            tabella.setEditable(false);
+            tabella.setPrefSize(640, 360);
+            alert.getDialogPane().setContent(new VBox(8, new Label(testo), tabella));
+            alert.setResizable(true);
+        }
+        alert.show();
+    }
+
+    private String nomeVincitore(Player p) {
+        return p.getName()+" ("+leaderName(p.getLeader())+")";
     }
 
     private void logEventi(){
@@ -679,13 +659,6 @@ public class GameController {
             alert.setHeaderText("Giocatore eliminato");
             alert.show();
         }
-    }
-
-    private boolean esisteUmanoAttivo() {
-        for (Player p : game.getPlayers()) {
-            if (p.getKind() == PlayerKind.HUMAN && !p.isSconfitto()) {return true;}
-        }
-        return false;
     }
 
     private boolean isTurnoUmano() {
@@ -724,16 +697,7 @@ public class GameController {
     // ================= NOMI DA MOSTRARE =================
 
     private static String leaderName(LeaderType leader) {
-        return switch (leader) {
-            case ALESSANDRO_MAGNO -> "Alessandro Magno";
-            case ANNIBALE -> "Annibale";
-            case ATTILA -> "Attila";
-            case GIULIO_CESARE -> "Giulio Cesare";
-            case REGINA_ELISABETTA -> "Regina Elisabetta";
-            case GIOVANNA_D_ARCO -> "Giovanna d'Arco";
-            case FEDERICO_BARBAROSSA -> "Federico Barbarossa";
-            case QIN_SHI_HUANG -> "Qin Shi Huang";
-        };
+        return GameInfo.nomeLeader(leader);
     }
 
     private static StringConverter<LeaderType> convertitoreLeader() {
