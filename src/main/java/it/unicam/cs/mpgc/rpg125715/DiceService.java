@@ -3,13 +3,19 @@ package it.unicam.cs.mpgc.rpg125715;
 
 import java.util.Random;
 
-public class DiceService {
+public class DiceService implements DiceRoller{
     private final Random random;
 
-    public DiceService(){
+    public DiceService() {
+        this(new Random());
+    }
+
+    public DiceService(Random random) {
+        if(random == null){throw new IllegalArgumentException("Random cannot be null.");}
         this.random = new Random();
     }
 
+    @Override
     public double lanciaDado(Player p){
         if(p == null){throw new IllegalArgumentException("il player non può essere null");}
 

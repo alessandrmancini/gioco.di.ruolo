@@ -10,6 +10,19 @@ public enum LeaderType {
     FEDERICO_BARBAROSSA,
     QIN_SHI_HUANG;
 
+    public String getDisplayName(){
+        return switch (this){
+            case ALESSANDRO_MAGNO -> "Alessandro Magno";
+            case ANNIBALE -> "Annibale";
+            case ATTILA -> "Attila";
+            case GIULIO_CESARE -> "Giulio cesare";
+            case QIN_SHI_HUANG -> "Qin Shi Huang";
+            case FEDERICO_BARBAROSSA ->  "Federico Barbarossa";
+            case GIOVANNA_D_ARCO ->   "Giovanna D' Arco";
+            case REGINA_ELISABETTA -> "Regina Elisabetta";
+        };
+    }
+
     //ALESSANDRO MAGNO
     public boolean haMobilitaMaggiore(){return this == ALESSANDRO_MAGNO;}
     public boolean rischioRibellioneLontananza(){return this == ALESSANDRO_MAGNO;}
