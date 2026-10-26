@@ -22,20 +22,21 @@ public class RecruitmentService {
 
     public int costoUnita(UnitType type, City city, LeaderType leader) {
         if(city == null || type == null || leader == null){throw new IllegalArgumentException("non possono esserci argomenti null");}
-        int base = switch (type) {
+        int costoBase = switch (type) {
             case FANTERIA -> 2;
             case CAVALLERIA -> 3;
             case ASSEDIO -> 4;
             case SPECIALI -> 6;
             case ELEFANTI -> 5;
         };
+        int minimo = (costoBase +1)/2;
+        int base = costoBase;
         if(leader.haCostoReclutamentoMaggiore(type)){base+=1;}
         if (city.isCitta()) {base -= 1;}
         else if (city.isMetropoli()) {base -= 2;}
 
         if (city.getSpecialization() == CitySpecialization.MILITARE) {base -= 1;}
-        //fa in modo che se un'unità arrivi a costare 0, ci sia sempre un minimo di costo 1
-        return Math.max(1, base);
+        return Math.max(minimo, base);
     }
 
     public boolean puoReclutareDaCitta(City city, UnitType type, LeaderType leader) {
