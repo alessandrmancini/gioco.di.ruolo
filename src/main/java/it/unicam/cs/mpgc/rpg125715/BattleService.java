@@ -35,8 +35,8 @@ public class BattleService {
             sconfitto = attaccante;
         }
 
-        int perditeAttaccante = calcolaPerdite(attaccante, sconfitto == attaccante);
-        int perditeDifensore = calcolaPerdite(difensore, sconfitto == difensore);
+        int perditeAttaccante = calcolaPerdite(attaccante, sconfitto == attaccante, totaleAttaccante, totaleDifensore);
+        int perditeDifensore = calcolaPerdite(difensore, sconfitto == difensore, totaleDifensore, totaleAttaccante);
 
         attaccante.rimuoviUnitaPerPriorita(perditeAttaccante);
         difensore.rimuoviUnitaPerPriorita(perditeDifensore);
@@ -79,19 +79,22 @@ public class BattleService {
         return bonus;
     }
 
-    private int calcolaPerdite(Army esercito,boolean haPerso) {
+    private int calcolaPerdite(Army esercito,boolean haPerso, int totaleProprio, int totaleNemico) {
         if (esercito.isVuoto()) {
             return 0;
         }
         int unita = esercito.getNumeroUnita();
+        if(!haPerso) {
+            return Math.min(unita, (int) Math.round(unita*0.15));
+        }
+
+        double rapporto = (double) totaleNemico / Math.max(1, totaleProprio);
         int perdite;
 
-        if(haPerso) {
-            perdite = Math.max(1,(int)Math.round(unita*0.40));
-        }
-        else {
-            perdite = (int) Math.round(unita*0.15);
-        }
+        if(rapporto >= 2){perdite = unita;}
+        else if(rapporto >= 1.3){perdite = (int) Math.round(unita * 0.5);}
+        else{perdite = Math.max(1, (int) Math.round(unita*0.25));}
+
         return Math.min(perdite, unita);
     }
 
