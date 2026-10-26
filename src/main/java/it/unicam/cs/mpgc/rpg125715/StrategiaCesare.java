@@ -47,11 +47,4 @@ public class StrategiaCesare extends StrategiaBase {
 
     @Override
     public List<CitySpecialization> specializzazioniPrioritarie() {return List.of(CitySpecialization.COMMERCIALE);}
-
-    //turni alternati, sviluppo (pari) e guerra (dispari)
-    @Override
-    public boolean ammetteSviluppo(Player bot) {return bot.getTurniGiocati() % 2 == 0;}
-
-    @Override
-    public boolean ammetteGuerra(Player bot) {return bot.getTurniGiocati() % 2 == 1;}
 }

@@ -56,7 +56,7 @@ public class BotDecisionService {
         List<BotDecision> candidate = new ArrayList<>();
         List<Integer> pesiCandidate = new ArrayList<>();
 
-        //Giulio Cesare alterna turni di sviluppo e turni di guerra (gli altri leader fanno entrambi)
+
         boolean sviluppo = strategia.per(bot).ammetteSviluppo(bot);
         boolean guerra = strategia.per(bot).ammetteGuerra(bot);
 

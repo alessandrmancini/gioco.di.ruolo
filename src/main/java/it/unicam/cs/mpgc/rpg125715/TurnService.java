@@ -93,7 +93,7 @@ public class TurnService {
         return switch (leader){
             case ALESSANDRO_MAGNO, ATTILA -> 3;
             case ANNIBALE, REGINA_ELISABETTA, GIOVANNA_D_ARCO -> 0;
-            case GIULIO_CESARE -> 5;
+            case GIULIO_CESARE -> 2;
             case QIN_SHI_HUANG -> -4;
             case FEDERICO_BARBAROSSA -> 1;
         };
