@@ -77,14 +77,6 @@
             return totale;
         }
     
-        public int getCostoTotale() {
-            int totale = 0;
-            for (Unit unit : units) {
-                totale += unit.costo();
-            }
-            return totale;
-        }
-    
         public int getNumeroUnita() {return units.size();}
     
         public int getNumeroUnitaPerTipo(UnitType type) {

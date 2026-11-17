@@ -14,23 +14,23 @@ public class UnitFactory {
         }
 
         return switch (type) {
-            case FANTERIA -> new Unit(UnitType.FANTERIA, 2, 2, 2);
-            case CAVALLERIA -> new Unit(UnitType.CAVALLERIA, 3, 1, 3);
-            case ASSEDIO -> new Unit(UnitType.ASSEDIO, 2, 1, 4);
-            case ELEFANTI -> new Unit(UnitType.ELEFANTI, 4, 3, 5);
+            case FANTERIA -> new Unit(UnitType.FANTERIA, 2, 2);
+            case CAVALLERIA -> new Unit(UnitType.CAVALLERIA, 3, 1);
+            case ASSEDIO -> new Unit(UnitType.ASSEDIO, 2, 1);
+            case ELEFANTI -> new Unit(UnitType.ELEFANTI, 4, 3);
             case SPECIALI -> creaUnitaSpeciale(leader);
         };
     }
 
     private static Unit creaUnitaSpeciale(LeaderType leader) {
         return switch (leader) {
-            case ALESSANDRO_MAGNO -> new Unit(UnitType.SPECIALI, 5, 3, 6);
-            case ANNIBALE -> new Unit(UnitType.SPECIALI, 4, 4, 6);
-            case ATTILA -> new Unit(UnitType.SPECIALI, 6, 2, 6);
-            case GIULIO_CESARE, QIN_SHI_HUANG -> new Unit(UnitType.SPECIALI, 4, 5, 6);
-            case REGINA_ELISABETTA -> new Unit(UnitType.SPECIALI, 3, 4, 5);
-            case GIOVANNA_D_ARCO -> new Unit(UnitType.SPECIALI, 5, 2, 5);
-            case FEDERICO_BARBAROSSA -> new Unit(UnitType.SPECIALI, 3, 6, 6);
+            case ALESSANDRO_MAGNO -> new Unit(UnitType.SPECIALI, 5, 3);
+            case ANNIBALE -> new Unit(UnitType.SPECIALI, 4, 4);
+            case ATTILA -> new Unit(UnitType.SPECIALI, 6, 2);
+            case GIULIO_CESARE, QIN_SHI_HUANG -> new Unit(UnitType.SPECIALI, 4, 5);
+            case REGINA_ELISABETTA -> new Unit(UnitType.SPECIALI, 3, 4);
+            case GIOVANNA_D_ARCO -> new Unit(UnitType.SPECIALI, 5, 2);
+            case FEDERICO_BARBAROSSA -> new Unit(UnitType.SPECIALI, 3, 6);
         };
     }
 }

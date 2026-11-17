@@ -59,7 +59,7 @@ public class Player implements Serializable {
     }
     public void spendiOro(int q){
         if(q<0){throw new IllegalArgumentException("la quantità da spendere non può essere negativa");}
-        if(q>oro){return;}
+        if(q>oro){throw new IllegalArgumentException("la quantità di oro necessaria è maggiore di quella posseduta");}
         this.oro -= q;
     }
 
