@@ -51,6 +51,7 @@ public class ArmyService {
         Army nuovo = creaEsercito(owner, destinazione);
         nuovo.addUnit(UnitFactory.creaUnita(UnitType.FANTERIA, owner.getLeader()));
         nuovo.addUnit(UnitFactory.creaUnita(UnitType.SPECIALI, owner.getLeader()));
+        nuovo.bloccaMovimento();
         return nuovo;
     }
 

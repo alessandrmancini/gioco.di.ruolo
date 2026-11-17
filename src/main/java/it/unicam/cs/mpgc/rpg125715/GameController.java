@@ -544,7 +544,7 @@ public class GameController {
                     r.perditeAttaccante(), r.perditeDifensore()));
         }
         if(r != null){logDopoBattaglia(r);}
-        boolean conquista = destinazione.hasCity() && vecchioOwner != null && vecchioOwner != p && destinazione.getCity().getOwner() == p;
+        boolean conquista = destinazione.hasCity() && vecchioOwner != p && destinazione.getCity().getOwner() == p;
         if(conquista){
             log(p.getName() + " conquista " + destinazione.getCity().getName()+ "!");
         }
