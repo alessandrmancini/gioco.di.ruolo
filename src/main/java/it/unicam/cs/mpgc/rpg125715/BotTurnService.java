@@ -55,7 +55,7 @@ public class BotTurnService {
             Location l = conquestService.trovaLocationPerFondazione(bot);
             if(l != null){
                 City c = conquestService.fondaCitta(bot, l , "Nuova città di: "+bot.getName());
-                return bot.getLeader()+ " fonda "+ c.getName();
+                return bot.getName()+ " fonda "+ c.getName();
             }
         }
         if(azioniEseguite >= MAX_AZIONI){return null;}

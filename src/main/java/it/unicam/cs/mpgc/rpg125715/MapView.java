@@ -25,20 +25,20 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * VIEW: disegna la mappa di gioco sopra l'immagine di sfondo (mappa_colorata.jpeg).
+ * VIEW: disegna la mappa di gioco sopra l'immagine di sfondo (mappa_bianco_nero.png).
  * Le coordinate delle Location sono in pixel dell'immagine originale: la vista le scala
  * in base allo spazio disponibile (adattamento automatico) e allo zoom scelto dall'utente.
  */
 public class MapView extends Pane {
 
-    /** Immagine di sfondo, da mettere in src/main/resources/it/unicam/cs/mpgc/rpg125715/ */
-    private static final String MAP_RESOURCE = "mappa_binaco_nero.jpeg";
+    private static final String MAP_RESOURCE = "mappa_bianco_nero.png";
     private static final String REGIONI_RESOURCE = "regioni_id.png";
     private static final double OPACITA_REGIONI = 0.6;
 
@@ -74,6 +74,8 @@ public class MapView extends Pane {
     private int[] regioni;              //per ogni pixel: numero della città a cui appartiene (0 = mare)
     private int regioniLarghezza;
     private int regioniAltezza;
+    private Image regioniInCache;       //ultima immagine delle regioni colorate
+    private int[] proprietariInCache;   //proprietari delle città con cui è stata calcolata
     private final double baseWidth;
     private final double baseHeight;
     private final DropShadow halo = new DropShadow(BlurType.GAUSSIAN, Color.BLACK, 3, 0.9, 0, 0);
@@ -163,22 +165,38 @@ public class MapView extends Pane {
         }
     }
 
-    private Image creaRegioniColorate(Game game){
+    /** Immagine delle regioni colorate: si ricalcola solo se qualche città ha cambiato proprietario. */
+    private Image regioniColorate(Game game){
         if(regioni == null){return null;}
+        int[] proprietari = proprietariCitta(game);
+        if(regioniInCache == null || !Arrays.equals(proprietari, proprietariInCache)){
+            regioniInCache = creaRegioniColorate(proprietari);
+            proprietariInCache = proprietari;
+        }
+        return regioniInCache;
+    }
 
-        int[] coloreCitta = new int[NOMI_CITTA.length+1];
+    /** Per ogni città (indice in NOMI_CITTA + 1): ordinale del leader proprietario + 1, oppure 0 se non ha proprietario. */
+    private int[] proprietariCitta(Game game){
+        int[] proprietari = new int[NOMI_CITTA.length + 1];
         for(Location l : game.getLocations()){
-            if(!l.hasCity()){continue;}
-            for(int k = 0; k<NOMI_CITTA.length; k++){
+            if(!l.hasCity() || l.getCity().getOwner() == null){continue;}
+            for(int k = 0; k < NOMI_CITTA.length; k++){
                 if(NOMI_CITTA[k].equals(l.getCity().getName())){
-                    Player proprietario = l.getCity().getOwner();
-                    if(proprietario != null){
-                        Color c = colorOf(proprietario.getLeader());
-                        coloreCitta[k+1] = (0xFF << 24) | ((int) (c.getRed()*255) << 16)
-                            | ((int) (c.getGreen()*255) <<8) | (int) (c.getBlue()*255);
-                    }
+                    proprietari[k + 1] = l.getCity().getOwner().getLeader().ordinal() + 1;
                 }
             }
+        }
+        return proprietari;
+    }
+
+    private Image creaRegioniColorate(int[] proprietari){
+        int[] coloreCitta = new int[proprietari.length];
+        for(int k = 1; k < proprietari.length; k++){
+            if(proprietari[k] == 0){continue;}
+            Color c = colorOf(LeaderType.values()[proprietari[k] - 1]);
+            coloreCitta[k] = (0xFF << 24) | ((int) (c.getRed()*255) << 16)
+                    | ((int) (c.getGreen()*255) <<8) | (int) (c.getBlue()*255);
         }
         int[] pixel = new int[regioni.length];
         for(int i = 0; i< regioni.length; i++){
@@ -228,7 +246,7 @@ public class MapView extends Pane {
         }
         if (game == null) {return;}
 
-        Image coloriRegioni = creaRegioniColorate(game);
+        Image coloriRegioni = regioniColorate(game);
         if(coloriRegioni != null){
             ImageView sopra = new ImageView(coloriRegioni);
             sopra.setFitWidth(baseWidth * s);

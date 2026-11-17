@@ -1,52 +1,34 @@
 package it.unicam.cs.mpgc.rpg125715;
 
-import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.control.TextInputDialog;
-import javafx.geometry.Insets;
-import javafx.scene.layout.HBox;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.util.Duration;
-import javafx.util.StringConverter;
+import javafx.stage.Window;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 /**
- * CONTROLLER: collega gli eventi della vista (click) ai servizi del modello.
- * Partecipano sempre tutti i leader: prima di iniziare si sceglie quanti sono controllati da
- * giocatori umani (a turno, sullo stesso computer) e quali leader usano; gli altri sono bot.
+ * CONTROLLER della schermata di gioco: riceve i click dell'utente, chiama i servizi del modello
+ * e aggiorna la vista. Le parti specifiche sono delegate a:
+ * ServiziPartita (creazione dei servizi), ImpostazionePartitaView (schermata nuova partita),
+ * EsecutoreTurniBot (turni dei bot), GestoreSalvataggi (salva/carica), PannelloGiocatori,
+ * RegistroPartita (log) e Dialoghi (finestre secondarie).
  */
-public class GameController {
+public class GameController implements EsecutoreTurniBot.Ascoltatore {
 
     private static final int ORO_INIZIALE = 10;
 
@@ -62,84 +44,55 @@ public class GameController {
     @FXML private Button specButton;
     @FXML private Button endTurnButton;
     @FXML private TextArea logArea;
-
-    // schermata di impostazione partita
-    @FXML private Pane setupOverlay;
-    @FXML private Spinner<Integer> humanSpinner;
-    @FXML private VBox humansBox;
-    @FXML private Button cancelSetupButton;
     @FXML private Button undoButton;
     @FXML private Button newArmyButton;
     @FXML private Button foundCityButton;
     @FXML private Button skipBotButton;
     @FXML private Label rebellionLabel;
     @FXML private Label abilityLabel;
-    @FXML private ComboBox<VictoryMode> modeCombo;
-    @FXML private Label modeInfoLabel;
     @FXML private Button saveButton;
 
-    private MapView mapView;
+    // schermata di impostazione partita
+    @FXML private Pane setupOverlay;
+    @FXML private Spinner<Integer> humanSpinner;
+    @FXML private VBox humansBox;
+    @FXML private Button cancelSetupButton;
+    @FXML private ComboBox<VictoryMode> modeCombo;
+    @FXML private Label modeInfoLabel;
 
-    // ---- stato di interazione ----
+    // ---- parti della vista a cui il controller delega ----
+    private MapView mapView;
+    private RegistroPartita registro;
+    private PannelloGiocatori pannelloGiocatori;
+    private ImpostazionePartitaView impostazione;
+    private EsecutoreTurniBot esecutoreBot;
+    private final GestoreSalvataggi salvataggi = new GestoreSalvataggi(new SerializzazionePartitaRepository());
+
+    // ---- partita e servizi (ricreati a ogni nuova partita) ----
     private Game game;
+    private ServiziPartita servizi = new ServiziPartita();
+
+    // ---- stato dell'interazione ----
     private Location selectedLocation;
     private Army selectedArmy;
     private final Set<Location> targets = new HashSet<>();
     private boolean fineMostrata;
-    private final List<ComboBox<LeaderType>> humanLeaderCombos = new ArrayList<>();
-    private boolean aggiornandoCombo;
+    private final Set<Player> sconfittiMostrati = new HashSet<>();
     private Army ultimoEsercitoMosso;
     private Location ultimaPartenza;
-    private ArmyService armyService;
-    private int roundMostrato;
-    private IdGenerator idGenerator;
-    private final PartitaRepository partitaRepository = new SerializzazionePartitaRepository();
-
-    // bot visibili passo per passo
-    private static final int PAUSA_BOT_MS = 900;
-    private boolean saltaBot;
-    private Player botCorrente;
     private Location animazioneDa;
     private Location animazioneA;
     private Color animazioneColore;
-    private final Set<Player> sconfittiMostrati = new HashSet<>();
-
-    // ---- servizi del modello (ricreati a ogni nuova partita) ----
-    private MovementService movementService;
-    private RecruitmentService recruitmentService;
-    private ConstructionService constructionService;
-    private TurnService turnService;
-    private BotTurnService botTurnService;
-    private ConquestService conquestService;
-    private RibellioneService ribellioneService;
-    private GameInitializationService gameInitializationService;
-
-    public GameController() {
-        creaServizi();
-    }
-
-    private void creaServizi() {
-        this.idGenerator = new IdGenerator();
-        DiceService diceService = new DiceService();
-        BattleService battleService = new BattleService(diceService);
-        this.armyService = new ArmyService(idGenerator);
-        this.conquestService = new ConquestService();
-        this.movementService = new MovementService(battleService, armyService, conquestService);
-        this.recruitmentService = new RecruitmentService();
-        this.constructionService = new ConstructionService();
-        this.ribellioneService = new RibellioneService(conquestService);
-        this.turnService = new TurnService(ribellioneService);
-        BotDecisionService botDecisionService = new BotDecisionService(constructionService);
-        this.botTurnService = new BotTurnService(botDecisionService, turnService, recruitmentService, movementService, constructionService, armyService, conquestService);
-        GameSetUpService gameSetUpService = new GameSetUpService(idGenerator);
-        MapSetupService mapSetupService = new MapSetupService(gameSetUpService);
-        this.gameInitializationService = new GameInitializationService(gameSetUpService, mapSetupService, armyService);
-    }
 
     @FXML
     private void initialize() {
+        registro = new RegistroPartita(logArea);
+        pannelloGiocatori = new PannelloGiocatori(playersBox);
+        impostazione = new ImpostazionePartitaView(setupOverlay, humanSpinner, humansBox, modeCombo, modeInfoLabel, cancelSetupButton);
+
         // mappa: si adatta alla finestra; Ctrl + rotella per ingrandire, trascinando ci si sposta
         mapView = new MapView(this::onLocationClicked);
+        esecutoreBot = new EsecutoreTurniBot(mapView, registro, this);
         mapScroll.setContent(mapView);
         mapScroll.setPannable(true);
         mapScroll.viewportBoundsProperty().addListener((obs, vecchio, nuovo) -> {
@@ -155,287 +108,164 @@ public class GameController {
         });
 
         unitCombo.getItems().setAll(UnitType.values());
-        unitCombo.setConverter(convertitoreEnum());
+        unitCombo.setConverter(ConvertitoriTesto.enumerato());
         unitCombo.getSelectionModel().selectFirst();
         specCombo.getItems().setAll(CitySpecialization.MILITARE, CitySpecialization.COMMERCIALE, CitySpecialization.AGRICOLA);
-        specCombo.setConverter(convertitoreEnum());
+        specCombo.setConverter(ConvertitoriTesto.enumerato());
         specCombo.getSelectionModel().selectFirst();
 
-        // impostazione partita: da 1 a tutti i leader controllati da umani
-        humanSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, LeaderType.values().length, 1));
-        humanSpinner.valueProperty().addListener((obs, vecchio, nuovo) -> rebuildHumanRows());
-        rebuildHumanRows();
-
-        //modalità di vittoria
-        modeCombo.getItems().setAll(VictoryMode.values());
-        modeCombo.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(VictoryMode m) {return m == null ? "" : m.getNome();}
-            @Override
-            public VictoryMode fromString(String string) {return null;}
-        });
-        modeCombo.valueProperty().addListener((obs, vecchio, nuovo) -> {
-            if(nuovo != null){modeInfoLabel.setText(nuovo.getDescrizione());}
-        });
-        modeCombo.setValue(VictoryMode.PUNTI);
-        mostraSetup();
-
-        log("Scegli quanti giocatori umani ci saranno e con quali leader, poi premi 'Avvia partita'.");
+        impostazione.mostra(false);
+        registro.scrivi("Scegli quanti giocatori umani ci saranno e con quali leader, poi premi 'Avvia partita'.");
         refresh();
     }
 
-    // ================= IMPOSTAZIONE PARTITA =================
-
-    private void mostraSetup() {
-        cancelSetupButton.setVisible(game != null);
-        cancelSetupButton.setManaged(game != null);
-        setupOverlay.setVisible(true);
-    }
-
-    /** Ricostruisce le righe "Giocatore N - leader" in base al numero di umani scelto. */
-    private void rebuildHumanRows() {
-        int n = humanSpinner.getValue();
-        List<LeaderType> scelte = new ArrayList<>();
-        for (ComboBox<LeaderType> c : humanLeaderCombos) {scelte.add(c.getValue());}
-        humanLeaderCombos.clear();
-        humansBox.getChildren().clear();
-
-        for (int i = 0; i < n; i++) {
-            LeaderType iniziale;
-            if (i < scelte.size()) {
-                iniziale = scelte.get(i);
-            } else {
-                iniziale = primoLeaderLibero(scelte);
-                scelte.add(iniziale);
-            }
-
-            ComboBox<LeaderType> combo = new ComboBox<>();
-            combo.getItems().setAll(LeaderType.values());
-            combo.setConverter(convertitoreLeader());
-            combo.setValue(iniziale);
-            combo.setMaxWidth(Double.MAX_VALUE);
-            HBox.setHgrow(combo, Priority.ALWAYS);
-
-            Rectangle campione = new Rectangle(16, 16, MapView.colorOf(iniziale));
-            campione.setArcWidth(4);
-            campione.setArcHeight(4);
-            Label etichetta = new Label("Giocatore " + (i + 1));
-            etichetta.setMinWidth(90);
-
-            Label info = new Label(GameInfo.riassuntoLeader(iniziale));
-            info.setWrapText(true);
-            info.getStyleClass().add("leader-info");
-
-            humanLeaderCombos.add(combo);
-            combo.valueProperty().addListener((obs, vecchio, nuovo) -> {
-                if (nuovo == null) {return;}
-                campione.setFill(MapView.colorOf(nuovo));
-                info.setText(GameInfo.riassuntoLeader(nuovo));
-                if (aggiornandoCombo) {return;}
-                // se il leader era già di un altro umano, i due si scambiano
-                for (ComboBox<LeaderType> altro : humanLeaderCombos) {
-                    if (altro != combo && altro.getValue() == nuovo) {
-                        aggiornandoCombo = true;
-                        altro.setValue(vecchio);
-                        aggiornandoCombo = false;
-                        break;
-                    }
-                }
-            });
-
-            ImageView faccia = new ImageView();
-            faccia.setFitWidth(56);
-            faccia.setFitHeight(56);
-            faccia.setPreserveRatio(true);
-            faccia.setImage(immagineLeader(iniziale));
-            combo.valueProperty().addListener((obs, vecchio, nuovo) -> {
-               if(nuovo != null){faccia.setImage(immagineLeader(nuovo));}
-            });
-
-            HBox riga = new HBox(10, faccia ,campione, etichetta, combo);
-            riga.setAlignment(Pos.CENTER_LEFT);
-            humansBox.getChildren().add(new VBox(4, riga, info));
-        }
-    }
-
-    private Image immagineLeader(LeaderType leader){
-        String nomeFile = "leaders/" + leader.name().toLowerCase() + ".png";
-        try(java.io.InputStream in = GameController.class.getResourceAsStream(nomeFile)){
-            if(in == null){return null;}
-            return new Image(in);
-        }catch(java.io.IOException e){
-            return null;
-        }
-    }
-
-    private void logNemiciBot(){
-        for(Player p : game.getPlayers()){
-            if(p.getKind() != PlayerKind.BOT){continue;}
-            String elenco = "";
-            for(Player nemico : p.getNemici()){
-                if(!elenco.isEmpty()){elenco+=" e ";}
-                elenco += nemico.getName();
-            }
-            log(p.getName() + " ha come nemici: "+ elenco);
-        }
-    }
-
-    private void azzeraUndo(){
-        ultimoEsercitoMosso = null;
-        ultimaPartenza = null;
-    }
-    private void logNuovoRound(){
-        if(game.getRound() != roundMostrato && !game.isGameOver()){
-            roundMostrato = game.getRound();
-            log("===== ROUND "+ roundMostrato+ (game.getModalita() == VictoryMode.PUNTI ? " di "+ TurnService.MAX_ROUND : "")+ " ======");
-        }
-    }
-
-    private LeaderType primoLeaderLibero(List<LeaderType> usati) {
-        for (LeaderType l : LeaderType.values()) {
-            if (!usati.contains(l)) {return l;}
-        }
-        throw new IllegalStateException("nessun leader libero");
-    }
-
-    // ================= EVENTI =================
+    // ================= NUOVA PARTITA, SALVA, CARICA =================
 
     @FXML
     private void onNuovaPartitaClick() {
-        mostraSetup();
+        impostazione.mostra(game != null);
     }
 
     @FXML
     private void onAnnullaSetupClick() {
-        setupOverlay.setVisible(false);
+        impostazione.nascondi();
     }
 
     @FXML
     private void onAvviaPartitaClick() {
-        List<LeaderType> umani = new ArrayList<>();
-        for (ComboBox<LeaderType> c : humanLeaderCombos) {umani.add(c.getValue());}
         try {
-            creaServizi();   // servizi nuovi: i contatori degli id ripartono da zero
-            game = gameInitializationService.creaPartitaBase(GameInitializationService.configurazioneStandard(umani,ORO_INIZIALE), modeCombo.getValue());
-            fineMostrata = false;
-            sconfittiMostrati.clear();
-            botCorrente = null;
-            azzeraUndo();
-            resetSelezione();
-            logArea.clear();
-            log("Nuova partita: " + game.getPlayers().size() + " leader in gioco, " + umani.size() + " controllati da umani.");
-            log("Modalità: "+ game.getModalita().getNome() + ".");
-            logNemiciBot();
-            roundMostrato = 0;
-            logNuovoRound();
-            log("Inizia " + game.getCurrentPlayer().getName() + " (" + leaderName(game.getCurrentPlayer().getLeader()) + ").");
-            setupOverlay.setVisible(false);
+            ServiziPartita nuoviServizi = new ServiziPartita();   // servizi nuovi: i contatori degli id ripartono da zero
+            Game nuova = nuoviServizi.gameInitializationService().creaPartitaBase(
+                    GameInitializationService.configurazioneStandard(impostazione.leaderUmani(), ORO_INIZIALE), impostazione.modalita());
+            servizi = nuoviServizi;
+            iniziaConPartita(nuova);
+            registro.scrivi("Nuova partita: " + game.getPlayers().size() + " leader in gioco, " + impostazione.leaderUmani().size() + " controllati da umani.");
+            registro.scrivi("Modalità: " + game.getModalita().getNome() + ".");
+            registro.scriviNemiciBot(game);
+            registro.scriviNuovoRound(game);
+            registro.scrivi("Inizia " + game.getCurrentPlayer().getName() + " (" + GameInfo.nomeLeader(game.getCurrentPlayer().getLeader()) + ").");
+            impostazione.nascondi();
         } catch (RuntimeException e) {
-            log("Errore creazione partita: " + e.getMessage());
+            registro.scrivi("Errore creazione partita: " + e.getMessage());
         }
         refresh();
     }
+
+    @FXML
+    private void onSalvaClick() {
+        if (!isTurnoUmano()) {
+            registro.scrivi("Puoi salvare solo durante il turno di un giocatore umano");
+            return;
+        }
+        try {
+            Path percorso = salvataggi.salva(game, finestra());
+            if (percorso != null) {registro.scrivi("Partita salvata in " + percorso + ".");}
+        } catch (IOException | RuntimeException e) {
+            registro.scrivi("Salvataggio non riuscito: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onCaricaClick() {
+        if (esecutoreBot.isInCorso()) {
+            registro.scrivi("Aspetta la fine dei turni dei bot prima di caricare una partita");
+            return;
+        }
+        try {
+            GestoreSalvataggi.PartitaCaricata caricata = salvataggi.carica(finestra());
+            if (caricata == null) {return;}
+
+            servizi = ServiziPartita.perPartitaCaricata(caricata.game());
+            iniziaConPartita(caricata.game());
+            for (Player p : game.getPlayers()) {
+                if (p.isSconfitto()) {sconfittiMostrati.add(p);}
+            }
+            fineMostrata = game.isGameOver();
+            registro.scrivi("Partita caricata da " + caricata.nomeFile() + " (" + game.getModalita().getNome() + ").");
+            registro.scriviNuovoRound(game);
+            impostazione.nascondi();
+            refresh();
+
+            if (game.isGameOver()) {return;}
+            if (game.getCurrentPlayer().getKind() == PlayerKind.BOT) {esecutoreBot.avvia(game, servizi.botTurnService());}
+            else {turnoUmano();}
+        } catch (IOException | RuntimeException e) {
+            registro.scrivi("Caricamento non riuscito: " + e.getMessage());
+        }
+    }
+
+    /** Azzera lo stato dell'interfaccia per giocare la partita indicata. */
+    private void iniziaConPartita(Game nuova) {
+        esecutoreBot.ferma();
+        game = nuova;
+        fineMostrata = false;
+        sconfittiMostrati.clear();
+        azzeraUndo();
+        resetSelezione();
+        registro.pulisci();
+    }
+
+    // ================= TURNI =================
 
     @FXML
     private void onFineTurnoClick() {
         if (!isTurnoUmano()) {return;}
         eseguiAzione(() -> {
             Player finito = game.getCurrentPlayer();
-            turnService.fineTurno(game);
-            log("--- " + finito.getName() + " finisce il turno ---");
-            logNuovoRound();
-            logEventi();
-
+            servizi.turnService().fineTurno(game);
+            registro.scrivi("--- " + finito.getName() + " finisce il turno ---");
+            registro.scriviNuovoRound(game);
+            registro.scriviEventi(game);
             azzeraUndo();
             resetSelezione();
         });
-        avviaTurniBot();
-    }
-    private void avviaTurniBot() {
-        saltaBot = false;
-        passoBot();
+        esecutoreBot.avvia(game, servizi.botTurnService());
     }
 
     @FXML
     private void onSaltaBotClick() {
-        saltaBot = true;
+        esecutoreBot.saltaPause();
     }
 
-    private void passoBot() {
-        if (game == null || game.isGameOver() || game.getCurrentPlayer().getKind() != PlayerKind.BOT) {
-            botCorrente = null;
-            if (game != null && !game.isGameOver()) {annunciaTurnoUmano();}
-            refresh();
-            return;
-        }
-        Player bot = game.getCurrentPlayer();
-        if (botCorrente != bot) {
-            botCorrente = bot;
-            botTurnService.iniziaTurnoBot();
-            log("Gioca " + bot.getName() + " (" + leaderName(bot.getLeader()) + ")");
-        }
-        refresh();
+    // ---- EsecutoreTurniBot.Ascoltatore ----
 
-        PauseTransition pausa = new PauseTransition(Duration.millis(saltaBot ? 0 : PAUSA_BOT_MS));
-        pausa.setOnFinished(e -> {
-            String esito;
-            try {
-                esito = botTurnService.eseguiProssimaAzione(game);
-            } catch (RuntimeException ex) {
-                log("Errore del bot: " + ex.getMessage());
-                esito = null;
-            }
-            if (esito != null) {
-                log(esito);
-                logEventi();
-                Location da = botTurnService.getUltimaPartenza();
-                Location a = botTurnService.getUltimaDestinazione();
-                if(da != null && a != null && !saltaBot){
-                    mapView.animaSpostamento(da, a, MapView.colorOf(bot.getLeader()), this::passoBot);
-                }
-                else{
-                    passoBot();
-                }
-            } else {
-                botTurnService.terminaTurno(game);
-                logNuovoRound();
-                logEventi();
-                verificaFinePartita();
-                botCorrente = null;
-                passoBot();
-            }
-        });
-        pausa.play();
-    }
+    @Override
+    public void aggiornaVista() {refresh();}
 
-    private void annunciaTurnoUmano() {
+    @Override
+    public void fineTurnoBot() {verificaFinePartita();}
+
+    @Override
+    public void turnoUmano() {
         Player prossimo = game.getCurrentPlayer();
-        log("Tocca a " + prossimo.getName() + " (" + leaderName(prossimo.getLeader()) + ").");
-        if (numeroCittaInRibellione(prossimo) > 0) {
-            log("Attenzione: " + numeroCittaInRibellione(prossimo) + " città di " + prossimo.getName() + " sono in ribellione!");
+        registro.scrivi("Tocca a " + prossimo.getName() + " (" + GameInfo.nomeLeader(prossimo.getLeader()) + ").");
+        if (prossimo.numeroCittaInRibellione() > 0) {
+            registro.scrivi("Attenzione: " + prossimo.numeroCittaInRibellione() + " città di " + prossimo.getName() + " sono in ribellione!");
         }
-        if (prossimo.numeroCitta() == 0 && conquestService.trovaLocationPerFondazione(prossimo) != null) {
-            log("Non hai più città: usa 'Fonda città' per trasformare il nodo dove si trova il tuo esercito.");
+        if (prossimo.numeroCitta() == 0 && servizi.conquestService().trovaLocationPerFondazione(prossimo) != null) {
+            registro.scrivi("Non hai più città: usa 'Fonda città' per trasformare il nodo dove si trova il tuo esercito.");
         }
     }
+
+    // ================= AZIONI DEL GIOCATORE =================
 
     @FXML
-    private void onFondaCittaClick(){
-        if(!isTurnoUmano()){return;}
+    private void onFondaCittaClick() {
+        if (!isTurnoUmano()) {return;}
         eseguiAzione(() -> {
             Player p = game.getCurrentPlayer();
-            Location posto = conquestService.trovaLocationPerFondazione(p);
-            if(posto == null){throw new IllegalArgumentException("serve un tuo esercito in un nodo libero per fondare la città");}
+            Location posto = servizi.conquestService().trovaLocationPerFondazione(p);
+            if (posto == null) {throw new IllegalArgumentException("serve un tuo esercito in un nodo libero per fondare la città");}
 
             TextInputDialog dialogo = new TextInputDialog("Nuova città");
             dialogo.setTitle("Fonda una città");
             dialogo.setHeaderText("Hai perso tutte le città: il nodo dove si trova il tuo esercito diventa una città");
             dialogo.setContentText("Nome della nuova città:");
             String nome = dialogo.showAndWait().orElse(null);
-            if(nome == null){return;}
+            if (nome == null) {return;}
 
-            City nuova = conquestService.fondaCitta(p, posto, nome);
-            log(p.getName()+ " fonda la città "+ nuova.getName()+ "!");
+            City nuova = servizi.conquestService().fondaCitta(p, posto, nome);
+            registro.scrivi(p.getName() + " fonda la città " + nuova.getName() + "!");
         });
     }
 
@@ -446,8 +276,8 @@ public class GameController {
             City city = cittaSelezionata();
             Army army = trovaEsercito(p, selectedLocation);
             if (army == null) {throw new IllegalArgumentException("serve un tuo esercito nella città per reclutare");}
-            Unit u = recruitmentService.reclutaUnita(p, city, army, unitCombo.getValue());
-            log(p.getName() + " recluta " + MapView.bello(u.type().name()) + " a " + city.getName());
+            Unit u = servizi.recruitmentService().reclutaUnita(p, city, army, unitCombo.getValue());
+            registro.scrivi(p.getName() + " recluta " + MapView.bello(u.type().name()) + " a " + city.getName());
         });
     }
 
@@ -456,9 +286,9 @@ public class GameController {
         eseguiAzione(() -> {
             Player p = game.getCurrentPlayer();
             City city = cittaSelezionata();
-            int costo = constructionService.costoMiglioramento(city);
-            constructionService.miglioraCitta(p, city);
-            log(p.getName() + " migliora " + city.getName() + " a " + MapView.bello(city.getLevel().name()) + " (-" + costo + " oro)");
+            int costo = servizi.constructionService().costoMiglioramento(city);
+            servizi.constructionService().miglioraCitta(p, city);
+            registro.scrivi(p.getName() + " migliora " + city.getName() + " a " + MapView.bello(city.getLevel().name()) + " (-" + costo + " oro)");
         });
     }
 
@@ -467,33 +297,34 @@ public class GameController {
         eseguiAzione(() -> {
             Player p = game.getCurrentPlayer();
             City city = cittaSelezionata();
-            constructionService.impostaSpecializzazione(p, city, specCombo.getValue());
-            log(city.getName() + " ora è " + MapView.bello(city.getSpecialization().name())
+            servizi.constructionService().impostaSpecializzazione(p, city, specCombo.getValue());
+            registro.scrivi(city.getName() + " ora è " + MapView.bello(city.getSpecialization().name())
                     + " (-" + ConstructionService.COSTO_SPECIALIZZAZIONE + " oro)");
         });
     }
+
     @FXML
-    private void onAnnullaSpostamentoClick(){
-        if(!isTurnoUmano()){return;}
+    private void onAnnullaSpostamentoClick() {
+        if (!isTurnoUmano()) {return;}
         eseguiAzione(() -> {
-            if(ultimoEsercitoMosso == null){throw new IllegalArgumentException("non c'è stato nessuno spostamento da annullare");}
+            if (ultimoEsercitoMosso == null) {throw new IllegalArgumentException("non c'è stato nessuno spostamento da annullare");}
             Location da = ultimoEsercitoMosso.getPosizione();
-            movementService.annullaMovimento(ultimoEsercitoMosso, ultimaPartenza);
-            log(game.getCurrentPlayer().getName()+ " annulla lo spostamento: l'esercito torna da "+ nomeLuogo(da)+ " a "+ nomeLuogo(ultimaPartenza));
+            servizi.movementService().annullaMovimento(ultimoEsercitoMosso, ultimaPartenza);
+            registro.scrivi(game.getCurrentPlayer().getName() + " annulla lo spostamento: l'esercito torna da " + nomeLuogo(da) + " a " + nomeLuogo(ultimaPartenza));
             azzeraUndo();
             resetSelezione();
         });
     }
+
     @FXML
-    private void onNuovoEsercitoClick(){
-        if(!isTurnoUmano()){return;}
+    private void onNuovoEsercitoClick() {
+        if (!isTurnoUmano()) {return;}
         eseguiAzione(() -> {
             Player p = game.getCurrentPlayer();
             City city = cittaSelezionata();
-            int costo = armyService.costoNuovoEsercito(p);
-            armyService.creaNuovoEsercito(p,city);
-            log(p.getName()+ " crea nuovo esercito a "+ city.getName()+ " per "+ costo +" oro");
-
+            int costo = ArmyService.costoNuovoEsercito(p);
+            servizi.armyService().creaNuovoEsercito(p, city);
+            registro.scrivi(p.getName() + " crea nuovo esercito a " + city.getName() + " per " + costo + " oro");
         });
     }
 
@@ -515,14 +346,12 @@ public class GameController {
             boolean primoTurno = current.getTurniGiocati() == 0;
             for (Location n : l.getAdiacenti()) {
                 if (n.hasArmyPlayer(current)) {continue;}
-                if(primoTurno && movementService.isAttacco(n, current)){continue;}
+                if (primoTurno && servizi.movementService().isAttacco(n, current)) {continue;}
                 targets.add(n);
             }
         }
         refresh();
     }
-
-    // ================= LOGICA DI SUPPORTO =================
 
     private void muoviEsercito(Army army, Location destinazione) {
         Player p = army.getOwner();
@@ -530,29 +359,30 @@ public class GameController {
         Player vecchioOwner = destinazione.hasCity() ? destinazione.getCity().getOwner() : null;
         boolean eraNemico = destinazione.hasEnemyArmiesFor(p);
 
-        BattleResult r = movementService.muovi(army, destinazione);
+        BattleResult r = servizi.movementService().muovi(army, destinazione);
 
         if (r == null) {
-            log(p.getName() + " muove verso " + nomeLuogo(destinazione));
+            registro.scrivi(p.getName() + " muove verso " + nomeLuogo(destinazione));
         } else {
-            log(String.format(Locale.ITALY,
+            registro.scrivi(String.format(Locale.ITALY,
                     "Battaglia a %s: attacco %d (x%.1f) contro difesa %d (x%.1f) - vince %s. Perdite: attaccante %d, difensore %d.",
                     nomeLuogo(destinazione),
                     r.totaleAttaccante(), r.tiroAttaccante(),
                     r.totaleDifensore(), r.tiroDifensore(),
                     r.haVintoAttaccante() ? "l'attaccante" : "il difensore",
                     r.perditeAttaccante(), r.perditeDifensore()));
+            scriviDopoBattaglia(r);
         }
-        if(r != null){logDopoBattaglia(r);}
         boolean conquista = destinazione.hasCity() && vecchioOwner != p && destinazione.getCity().getOwner() == p;
-        if(conquista){
-            log(p.getName() + " conquista " + destinazione.getCity().getName()+ "!");
+        if (conquista) {
+            registro.scrivi(p.getName() + " conquista " + destinazione.getCity().getName() + "!");
         }
-        if(r == null && !eraNemico && !conquista){
+        if (r == null && !eraNemico && !conquista) {
             ultimoEsercitoMosso = army;
             ultimaPartenza = partenza;
+        } else {
+            azzeraUndo();
         }
-        else {azzeraUndo();}
         resetSelezione();
         selectedLocation = destinazione;
 
@@ -561,105 +391,78 @@ public class GameController {
         animazioneColore = MapView.colorOf(p.getLeader());
     }
 
-    private void logDopoBattaglia(BattleResult r){
+    private void scriviDopoBattaglia(BattleResult r) {
         Army sconfitto = r.sconfitto();
         Player proprietario = sconfitto.getOwner();
-        if(proprietario.getEserciti().contains(sconfitto)){
-            log("L'esercito di "+ proprietario.getName()+ " si ritira a "+ nomeLuogo(sconfitto.getPosizione())+ ".");
-        }
-        else{
-            log("L'esercito di " + proprietario.getName() + " è distrutto"
-                    + (proprietario.isSconfitto() ? "." : " e ricompare in una sua città con una sola fanteria."));
+        if (proprietario.getEserciti().contains(sconfitto)) {
+            registro.scrivi("L'esercito di " + proprietario.getName() + " si ritira a " + nomeLuogo(sconfitto.getPosizione()) + ".");
+        } else {
+            registro.scrivi("L'esercito di " + proprietario.getName() + " è distrutto"
+                    + (proprietario.isSconfitto() ? "." : " e ricompare in una sua città con una fanteria e un'unità speciale."));
         }
     }
 
     /** Esegue un'azione dell'utente gestendo errori di regole, fine partita e aggiornamento vista. */
     private void eseguiAzione(Runnable azione) {
         if (game == null) {
-            log("Devi prima creare una partita.");
+            registro.scrivi("Devi prima creare una partita.");
             return;
         }
         try {
             azione.run();
         } catch (RuntimeException e) {
-            log("Azione non valida: " + e.getMessage());
+            registro.scrivi("Azione non valida: " + e.getMessage());
         }
         verificaFinePartita();
-        if(animazioneDa != null){
+        if (animazioneDa != null) {
             Location da = animazioneDa;
             Location a = animazioneA;
             Color colore = animazioneColore;
             animazioneDa = null;
             mapView.animaSpostamento(da, a, colore, this::refresh);
+        } else {
+            refresh();
         }
-        else{refresh();}
     }
+
+    // ================= FINE PARTITA ED ELIMINAZIONI =================
 
     private void verificaFinePartita() {
         if (game == null) {return;}
         EsitoPartitaService.aggiornaFine(game);
         if (game.isGameOver() && !fineMostrata) {
             fineMostrata = true;
-            mostraEsito(EsitoPartitaService.esito(game));
+            EsitoPartitaService.Esito esito = EsitoPartitaService.esito(game);
+            registro.scrivi("PARTITA FINITA. " + Dialoghi.testoEsito(esito));
+            if (!esito.classifica().isEmpty()) {registro.scrivi("Classifica finale:\n" + esito.classifica());}
+            Dialoghi.mostraEsito(esito);
         }
     }
 
-    private void mostraEsito(EsitoPartitaService.Esito esito) {
-        String testo = switch (esito.tipo()){
-            case CONQUISTA -> "Vincitore per conquista: " + nomeVincitore(esito.vincitore());
-            case PUNTI -> "Vincitore ai punti: " + nomeVincitore(esito.vincitore());
-            case UMANI_SCONFITTI -> "Tutti i giocatori umani sono stati sconfitti.";
-        };
-        log("PARTITA FINITA. " + testo);
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, testo);
-        alert.setTitle("Partita finita");
-        alert.setHeaderText("Partita finita");
-        if (!esito.classifica().isEmpty()) {
-            log("Classifica finale:\n" + esito.classifica());
-            TextArea tabella = new TextArea(esito.classifica());
-            tabella.setEditable(false);
-            tabella.setPrefSize(640, 360);
-            alert.getDialogPane().setContent(new VBox(8, new Label(testo), tabella));
-            alert.setResizable(true);
-        }
-        alert.show();
-    }
-
-    private String nomeVincitore(Player p) {
-        return p.getName()+" ("+leaderName(p.getLeader())+")";
-    }
-
-    private void logEventi(){
-        for(String evento : game.prelevaEventi()){
-            log("! "+ evento);
-        }
-    }
-
-    private int numeroCittaInRibellione(Player p) {
-        int n = 0;
-        for (City c : p.getTerritorio().getCities()) {
-            if (c.hasRibellione()) {n++;}
-        }
-        return n;
-    }
-
-    private void verificaEliminazioni(){
+    private void verificaEliminazioni() {
         String nuovi = "";
-        for(Player p : game.getPlayers()){
-            if(p.isSconfitto() && !sconfittiMostrati.contains(p)){
+        for (Player p : game.getPlayers()) {
+            if (p.isSconfitto() && !sconfittiMostrati.contains(p)) {
                 sconfittiMostrati.add(p);
-                String riga = p.getName() + " ("+ leaderName(p.getLeader()) + ") è stato eliminato!";
-                log(riga);
-                nuovi += riga+ "\n";
+                String riga = p.getName() + " (" + GameInfo.nomeLeader(p.getLeader()) + ") è stato eliminato!";
+                registro.scrivi(riga);
+                nuovi += riga + "\n";
             }
         }
-        if(!nuovi.isEmpty() && !game.isGameOver()){
-            Alert alert = new Alert(Alert.AlertType.WARNING, nuovi.trim());
-            alert.setTitle("Giocatore eliminato");
-            alert.setHeaderText("Giocatore eliminato");
-            alert.show();
-        }
+        if (!nuovi.isEmpty() && !game.isGameOver()) {Dialoghi.mostraEliminati(nuovi.trim());}
     }
+
+    // ================= FINESTRE =================
+
+    @FXML
+    private void onTutorialClick() {Dialoghi.mostraTutorial(finestra());}
+
+    @FXML
+    private void onLegendaClick() {Dialoghi.mostraLegenda();}
+
+    // ================= SUPPORTO =================
+
+    private Window finestra() {return mapScroll.getScene().getWindow();}
 
     private boolean isTurnoUmano() {
         return game != null && !game.isGameOver() && game.getCurrentPlayer().getKind() == PlayerKind.HUMAN;
@@ -684,72 +487,25 @@ public class GameController {
         return l.hasCity() ? l.getCity().getName() : "posizione " + l.getId();
     }
 
+    private void azzeraUndo() {
+        ultimoEsercitoMosso = null;
+        ultimaPartenza = null;
+    }
+
     private void resetSelezione() {
         selectedLocation = null;
         selectedArmy = null;
         targets.clear();
     }
 
-    private void log(String msg) {
-        logArea.appendText(msg + "\n");
-    }
-
-    // ================= NOMI DA MOSTRARE =================
-
-    private static String leaderName(LeaderType leader) {
-        return GameInfo.nomeLeader(leader);
-    }
-
-    private static StringConverter<LeaderType> convertitoreLeader() {
-        return new StringConverter<>() {
-            @Override
-            public String toString(LeaderType leader) {
-                return leader == null ? "" : leaderName(leader);
-            }
-
-            @Override
-            public LeaderType fromString(String testo) {
-                return null;
-            }
-        };
-    }
-
-    private static <T extends Enum<T>> StringConverter<T> convertitoreEnum() {
-        return new StringConverter<>() {
-            @Override
-            public String toString(T valore) {
-                return valore == null ? "" : MapView.bello(valore.name());
-            }
-
-            @Override
-            public T fromString(String testo) {
-                return null;
-            }
-        };
-    }
-
     // ================= AGGIORNAMENTO VISTA =================
 
     private void refresh() {
         mapView.render(game, selectedLocation, selectedArmy, targets);
-        playersBox.getChildren().clear();
+        pannelloGiocatori.aggiorna(game);
 
         if (game == null) {
-            turnLabel.setText("Nessuna partita");
-            selectionLabel.setText("Nessuna selezione");
-            saveButton.setDisable(true);
-            endTurnButton.setDisable(true);
-            recruitButton.setDisable(true);
-            upgradeButton.setDisable(true);
-            specButton.setDisable(true);
-            undoButton.setDisable(true);
-            newArmyButton.setDisable(true);
-            foundCityButton.setVisible(false);
-            foundCityButton.setManaged(false);
-            skipBotButton.setVisible(false);
-            skipBotButton.setManaged(false);
-            rebellionLabel.setText("");
-            abilityLabel.setText("");
+            mostraNessunaPartita();
             return;
         }
 
@@ -761,38 +517,33 @@ public class GameController {
                 + " (turno " + (game.getTurno() + 1) + "/" + game.getPlayers().size()
                 + ") - " + current.getName());
 
-        boolean aPunti = game.getModalita() == VictoryMode.PUNTI;
-        for (Player p : game.getPlayers()) {
-            boolean inTurno = (p == current && !game.isGameOver());
-            Rectangle campione = new Rectangle(14, 14, MapView.colorOf(p.getLeader()));
-            campione.setArcWidth(4);
-            campione.setArcHeight(4);
-            campione.setStroke(Color.web("#10162a"));
-
-            String titolo = (inTurno ? "> " : "") + p.getName()
-                    + (p.getKind() == PlayerKind.HUMAN ? " - " + leaderName(p.getLeader()) : "")
-                    + (p.isSconfitto() ? " (sconfitto)" : "");
-            Label nome = new Label(titolo);
-            nome.getStyleClass().add(inTurno ? "player-current" : "player-name");
-
-            Label statistiche = new Label((aPunti && !p.isSconfitto() ? "Punti "+ PunteggioService.punti(game, p)+ " | ": "")
-                    + "Oro " + p.getOro() + "  |  Città " + p.numeroCitta() +
-                    "  |  Eserciti " + p.numeroEserciti() + "/"+ ArmyService.MAX_ESERCITI +
-                    (numeroCittaInRibellione(p)>0 ? " | Ribellione " + numeroCittaInRibellione(p) : ""));
-
-            statistiche.getStyleClass().add("player-stats");
-
-            HBox riga = new HBox(8, campione, new VBox(1, nome, statistiche));
-            riga.setAlignment(Pos.CENTER_LEFT);
-            playersBox.getChildren().add(riga);
-        }
-
         String sel = MapView.descrizione(selectedLocation);
         if (selectedArmy != null && selectedArmy.isPuoMuovere() && !selectedArmy.isVuoto()) {
             sel += "\n\nClicca un nodo evidenziato per muovere (verde = libero, rosso = nemico).";
         }
         selectionLabel.setText(sel);
 
+        aggiornaPulsanti(current);
+        aggiornaInfoGiocatore(current);
+    }
+
+    private void mostraNessunaPartita() {
+        turnLabel.setText("Nessuna partita");
+        selectionLabel.setText("Nessuna selezione");
+        saveButton.setDisable(true);
+        endTurnButton.setDisable(true);
+        recruitButton.setDisable(true);
+        upgradeButton.setDisable(true);
+        specButton.setDisable(true);
+        undoButton.setDisable(true);
+        newArmyButton.setDisable(true);
+        mostra(foundCityButton, false);
+        mostra(skipBotButton, false);
+        rebellionLabel.setText("");
+        abilityLabel.setText("");
+    }
+
+    private void aggiornaPulsanti(Player current) {
         boolean umano = isTurnoUmano();
         City city = (selectedLocation != null) ? selectedLocation.getCity() : null;
         boolean miaCitta = umano && city != null && city.getOwner() == current;
@@ -802,202 +553,71 @@ public class GameController {
         recruitButton.setDisable(!miaCitta);
         upgradeButton.setDisable(!miaCitta || city.isMetropoli());
         specButton.setDisable(!miaCitta);
-
+        upgradeButton.setText(miaCitta && !city.isMetropoli()
+                ? "Migliora città (" + servizi.constructionService().costoMiglioramento(city) + " oro)"
+                : "Migliora città");
 
         boolean maxEserciti = current.numeroEserciti() >= ArmyService.MAX_ESERCITI;
         newArmyButton.setDisable(!miaCitta || maxEserciti);
-        newArmyButton.setText(maxEserciti ? "Crea esercito(massimo "+ ArmyService.MAX_ESERCITI+ ")" : "Crea esercito ("+ armyService.costoNuovoEsercito(current) + " oro)");
+        newArmyButton.setText(maxEserciti
+                ? "Crea esercito(massimo " + ArmyService.MAX_ESERCITI + ")"
+                : "Crea esercito (" + ArmyService.costoNuovoEsercito(current) + " oro)");
 
         undoButton.setDisable(!umano || ultimoEsercitoMosso == null);
+        mostra(foundCityButton, umano && servizi.conquestService().trovaLocationPerFondazione(current) != null);
+        mostra(skipBotButton, esecutoreBot.isInCorso() && !game.isGameOver());   // salta le pause dei bot
 
-        boolean puoFondare = umano && conquestService.trovaLocationPerFondazione(current) != null;
-        foundCityButton.setVisible(puoFondare);
-        foundCityButton.setManaged(puoFondare);
-
-        //pulsante per saltare le pause dei bot
-        boolean botInGioco = botCorrente != null && !game.isGameOver();
-        skipBotButton.setVisible(botInGioco);
-        skipBotButton.setManaged(botInGioco);
-
-        if(umano){
-            String testoRibellione = "Rischio a inizio prossimo turno: "+ ribellioneService.calcolaProbabilita(current, game) + "%";
-            for(String causa : ribellioneService.causeAttive(current, game)){
-                testoRibellione+= "\n " + causa;
-            }
-            rebellionLabel.setText(testoRibellione);
-        }
-        else{rebellionLabel.setText("");}
-
-        abilityLabel.setText(umano ? GameInfo.abilitaDelTurno(current.getLeader()) : "");
         aggiornaCostiUnita(miaCitta ? city : null, current);
-
-        upgradeButton.setText(miaCitta && !city.isMetropoli()
-                ? "Migliora città (" + constructionService.costoMiglioramento(city) + " oro)"
-                : "Migliora città");
     }
 
-    private void aggiornaCostiUnita(City city, Player current){
+    private void aggiornaInfoGiocatore(Player current) {
+        if (!isTurnoUmano()) {
+            rebellionLabel.setText("");
+            abilityLabel.setText("");
+            return;
+        }
+        RibellioneService ribellioni = servizi.ribellioneService();
+        String testoRibellione = "Rischio a inizio prossimo turno: " + ribellioni.calcolaProbabilita(current, game) + "%";
+        for (String causa : ribellioni.causeAttive(current, game)) {
+            testoRibellione += "\n " + causa;
+        }
+        rebellionLabel.setText(testoRibellione);
+        abilityLabel.setText(GameInfo.abilitaDelTurno(current.getLeader()));
+    }
+
+    private static void mostra(Button pulsante, boolean visibile) {
+        pulsante.setVisible(visibile);
+        pulsante.setManaged(visibile);
+    }
+
+    private void aggiornaCostiUnita(City city, Player current) {
         UnitType scelta = unitCombo.getValue();
         unitCombo.setCellFactory(lista -> creaCellaUnita(city, current));
         unitCombo.setButtonCell(creaCellaUnita(city, current));
         unitCombo.setValue(scelta);
     }
 
-    private ListCell<UnitType> creaCellaUnita(City city, Player current){
-        return new ListCell<>(){
+    private ListCell<UnitType> creaCellaUnita(City city, Player current) {
+        RecruitmentService reclutamento = servizi.recruitmentService();
+        return new ListCell<>() {
             @Override
-            protected void updateItem(UnitType tipo, boolean vuota){
+            protected void updateItem(UnitType tipo, boolean vuota) {
                 super.updateItem(tipo, vuota);
-                if(vuota || tipo == null){
+                if (vuota || tipo == null) {
                     setText(null);
                     return;
                 }
                 String testo = MapView.bello(tipo.name());
-                if(city != null){
-                    if(recruitmentService.puoReclutareDaCitta(city, tipo, current.getLeader())){
-                        testo += " ("+ recruitmentService.costoUnita(tipo, city, current.getLeader())+ " oro)";
-                    }
-                    else{
+                if (city != null) {
+                    if (reclutamento.puoReclutareDaCitta(city, tipo, current.getLeader())) {
+                        testo += " (" + reclutamento.costoUnita(tipo, city, current.getLeader()) + " oro)";
+                    } else {
                         testo += " (non disponibile qui)";
                     }
                 }
                 setText(testo);
             }
         };
-    }
-
-    //SALVATAGGIO E CARICAMENTO
-    private FileChooser creaFileChooser(String titolo){
-        FileChooser scelta = new FileChooser();
-        scelta.setTitle(titolo);
-        scelta.getExtensionFilters().add(new FileChooser.ExtensionFilter(
-                "Partite salvate (*"+ partitaRepository.estensione()+ ")", "*"+ partitaRepository.estensione()));
-        return scelta;
-    }
-    @FXML
-    private void onSalvaClick(){
-        if(!isTurnoUmano()){
-            log("Puoi salvare solo durante il turno di un giocatore umano");
-            return;
-        }
-        FileChooser scelta = creaFileChooser("Salva partita");
-        scelta.setInitialFileName("partita"+ partitaRepository.estensione());
-        File file = scelta.showSaveDialog(mapScroll.getScene().getWindow());
-        if(file == null) {return;}
-        Path percorso = file.toPath();
-        if(!percorso.getFileName().toString().endsWith(partitaRepository.estensione())){
-            percorso = percorso.resolveSibling(percorso.getFileName() + partitaRepository.estensione());
-        }
-        try{
-            partitaRepository.salva(game, percorso);
-            log("Partita salvata in "+ percorso +".");
-        }catch (IOException | RuntimeException e){
-            log("Salvataggio non riuscito: "+ e.getMessage());
-        }
-    }
-    @FXML
-    private void onCaricaClick(){
-        if(botCorrente != null){
-            log("Aspetta la gine dei turni dei bot prima di caricare una partita");
-            return;
-        }
-        File file = creaFileChooser("Carica partita").showOpenDialog(mapScroll.getScene().getWindow());
-        if(file == null) {return;}
-        try{
-            Game caricata = partitaRepository.carica(file.toPath());
-            creaServizi();
-            idGenerator.allineaA(caricata);
-
-            game = caricata;
-            fineMostrata = game.isGameOver();
-            sconfittiMostrati.clear();
-            for(Player p : game.getPlayers()){
-                if(p.isSconfitto()){sconfittiMostrati.add(p);}
-            }
-            botCorrente = null;
-            azzeraUndo();
-            resetSelezione();
-            logArea.clear();
-
-            log("Partita caricata da "+ file.getName()+ " ("+ game.getModalita().getNome()+ ").");
-            roundMostrato = 0;
-            logNuovoRound();
-            setupOverlay.setVisible(false);
-            refresh();
-
-            if(game.isGameOver()){return;}
-            if(game.getCurrentPlayer().getKind() == PlayerKind.BOT){avviaTurniBot();}
-            else{annunciaTurnoUmano();}
-        } catch (IOException | RuntimeException e) {
-            log("Caricamento non riuscito: "+ e.getMessage());
-        }
-    }
-
-
-    // TUTORIAL
-    @FXML
-    private void onTutorialClick() {
-        List<Tutorial.Pagina> pagine = Tutorial.pagine();
-        int[] indice = {0};
-
-        Label titolo = new Label();
-        titolo.getStyleClass().add("title");
-        Label contatore = new Label();
-        TextArea testo = new TextArea();
-        testo.setEditable(false);
-        testo.setWrapText(true);
-        testo.setPrefSize(600, 380);
-        VBox.setVgrow(testo, Priority.ALWAYS);
-
-        Button indietro = new Button("Indietro");
-        Button avanti = new Button("Avanti");
-        Button chiudi = new Button("Chiudi");
-
-        Runnable aggiorna = () -> {
-            Tutorial.Pagina p = pagine.get(indice[0]);
-            titolo.setText(p.titolo());
-            testo.setText(p.testo());
-            contatore.setText("Pagina " + (indice[0] + 1) + " di " + pagine.size());
-            indietro.setDisable(indice[0] == 0);
-            avanti.setDisable(indice[0] == pagine.size() - 1);
-        };
-        indietro.setOnAction(e -> {indice[0]--; aggiorna.run();});
-        avanti.setOnAction(e -> {indice[0]++; aggiorna.run();});
-
-        Region spazio = new Region();
-        HBox.setHgrow(spazio, Priority.ALWAYS);
-        HBox pulsanti = new HBox(8, contatore, spazio, indietro, avanti, chiudi);
-        pulsanti.setAlignment(Pos.CENTER_LEFT);
-
-        VBox radice = new VBox(10, titolo, testo, pulsanti);
-        radice.setPadding(new Insets(14));
-        radice.getStyleClass().add("setup-card");
-
-        Stage finestra = new Stage();
-        finestra.setTitle("Tutorial");
-        finestra.initOwner(mapScroll.getScene().getWindow());
-        finestra.initModality(Modality.NONE);   // si può tenere aperto e continuare a guardare il gioco
-        Scene scena = new Scene(radice);
-        scena.getStylesheets().add(GameController.class.getResource("game.css").toExternalForm());
-        finestra.setScene(scena);
-        chiudi.setOnAction(e -> finestra.close());
-        aggiorna.run();
-        finestra.show();
-    }
-
-    @FXML
-    private void onLegendaClick() {
-        TextArea testo = new TextArea(GameInfo.legenda());
-        testo.setEditable(false);
-        testo.setWrapText(true);
-        testo.setPrefSize(660,500);
-
-        Alert finestra = new Alert(Alert.AlertType.INFORMATION);
-        finestra.setTitle("Legenda");
-        finestra.setHeaderText("Costi, regole e leader");
-        finestra.getDialogPane().setContent(testo);
-        finestra.setResizable(true);
-        finestra.show();
     }
 
     public Game getGame() {

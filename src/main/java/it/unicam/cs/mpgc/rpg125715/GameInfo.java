@@ -94,9 +94,10 @@ public class GameInfo {
 
         t += "BATTAGLIE\n";
         t += "  Totale = (punti delle unità + bonus) x dado. Vince il totale più alto (a pari vince chi difende).\n";
-        t += "  Perdite: chi perde lascia il 40% delle unità (almeno 1), chi vince il 15%.\n";
+        t += "  Perdite di chi perde: 25% delle unità (almeno 1); 50% se il totale nemico è almeno\n";
+        t += "  1,3 volte il suo; tutte se è almeno il doppio. Chi vince perde il 15%.\n";
         t += "  L'esercito sconfitto si ritira in una tua città vicina o in un nodo libero,\n";
-        t += "  se non può, viene distrutto e ricompare in una tua città libera con una sola fanteria.\n\n";
+        t += "  se non può, viene distrutto e ricompare in una tua città libera con una fanteria e un'unità speciale.\n\n";
 
 
         t += "TRUPPE (costo base; attacco/difesa)\n";

@@ -55,8 +55,8 @@ public final class Tutorial {
                                 + "Il dado (1-6) è un moltiplicatore tra x0.8 e x1.3. Vince il totale più alto; a pari vince chi difende.\n\n"
                                 + "Bonus: le città danno bonus alla difesa (Avamposto +1, Città +2, Metropoli +4, specializzazione militare +2); "
                                 + "le macchine d'assedio attaccano meglio le città; ogni leader ha bonus e malus propri.\n\n"
-                                + "Perdite: chi perde lascia il 40% delle unità, chi vince il 15%. "
-                                + "L'esercito sconfitto si ritira; se non può, viene distrutto e ricompare in una città libera con una sola fanteria."),
+                                + "Perdite: chi perde lascia il 25% delle unità (il 50% se il nemico ha almeno 1,3 volte il suo totale, tutte se ha il doppio), chi vince il 15%. "
+                                + "L'esercito sconfitto si ritira; se non può, viene distrutto e ricompare in una città libera con una fanteria e un'unità speciale."),
 
                 new Pagina("6. Città, livelli e specializzazioni",
                         "Ogni città ha un livello: Accampamento -> Avamposto -> Città -> Metropoli.\n"

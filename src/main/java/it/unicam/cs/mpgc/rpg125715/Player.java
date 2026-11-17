@@ -78,6 +78,13 @@ public class Player implements Serializable {
     public void removeArmy(Army a){eserciti.remove(a);}
 
     public int numeroCitta(){return territorio.getCities().size();}
+    public int numeroCittaInRibellione(){
+        int n = 0;
+        for(City c : territorio.getCities()){
+            if(c.hasRibellione()){n++;}
+        }
+        return n;
+    }
     public int numeroEserciti(){return eserciti.size();}
 
     //Human o bot
