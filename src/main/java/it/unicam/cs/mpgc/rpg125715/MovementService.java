@@ -1,5 +1,9 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/**
+ * Regole del movimento degli eserciti: spostamento di un nodo, battaglia se nella destinazione
+ * c'è un nemico, ritirata dello sconfitto, conquista delle città e annullamento dell'ultimo spostamento.
+ */
 public class MovementService {
     private final BattleService battaglia;
     private final ArmyService armyService;
@@ -12,6 +16,17 @@ public class MovementService {
         this.conquestService = conquestService;
     }
 
+    /**
+     * Sposta l'esercito nel nodo adiacente indicato e ne blocca il movimento fino al prossimo turno.
+     * Se nella destinazione c'è un esercito nemico si combatte: chi perde si ritira o viene distrutto
+     * (e ricompare in una sua città). Se l'attaccante vince, o la città era indifesa, la conquista.
+     *
+     * @param army         esercito da muovere (deve poter muovere e avere almeno un'unità)
+     * @param destinazione nodo adiacente alla posizione attuale
+     * @return il risultato della battaglia, oppure null se non c'è stata battaglia
+     * @throws IllegalArgumentException se la mossa non è valida (non adiacente, esercito già mosso,
+     *         attacco nel primo turno, c'è già un proprio esercito nella destinazione...)
+     */
     public BattleResult muovi(Army army, Location destinazione) {
         if(army == null || destinazione == null){throw new IllegalArgumentException("esercito o destinazione null");}
         if(!army.isPuoMuovere()){throw new IllegalArgumentException("l'esercito non può muovere");}
@@ -63,6 +78,12 @@ public class MovementService {
         return result;
     }
 
+    /**
+     * Nodo in cui si ritira un esercito sconfitto: prima una propria città vicina senza eserciti,
+     * poi un nodo vicino libero e senza città.
+     *
+     * @return il nodo di ritirata, oppure null se non ce n'è nessuno (l'esercito verrà distrutto)
+     */
     public Location getRitirata(Location destinazione, Player proprietario){
         //una città propria vicina senza eserciti
         for (Location l : destinazione.getAdiacenti()){
@@ -78,6 +99,12 @@ public class MovementService {
         return null;
     }
 
+    /**
+     * Riporta l'esercito nel nodo di partenza e gli permette di muovere di nuovo.
+     * Si usa solo per spostamenti senza battaglia e senza conquista.
+     *
+     * @throws IllegalArgumentException se l'esercito non si è mosso o se il nodo di partenza è occupato
+     */
     public void annullaMovimento(Army army, Location partenza){
         if(army == null || partenza == null){throw new IllegalArgumentException("esercito o destinazione null");}
         Location attuale = army.getPosizione();
@@ -107,6 +134,10 @@ public class MovementService {
         }
     }
 
+    /**
+     * Vero se entrare nella destinazione è un attacco: c'è un esercito nemico
+     * oppure c'è una città che appartiene a un altro giocatore.
+     */
     public boolean isAttacco(Location destinazione, Player player){
         if(destinazione == null || player == null){throw new IllegalArgumentException("destinazione o army null");}
         if(destinazione.hasEnemyArmiesFor(player)){return true;}

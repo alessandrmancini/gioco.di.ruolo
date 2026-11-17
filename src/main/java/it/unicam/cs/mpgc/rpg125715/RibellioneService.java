@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Ribellioni delle città: probabilità che ne scoppi una, scelta della città colpita,
+ * pacificazione e perdita della città quando la ribellione dura troppo.
+ */
 public class RibellioneService {
 
     private final Random random;
@@ -109,6 +113,10 @@ public class RibellioneService {
         return probabilita;
     }
 
+    /**
+     * Cause che in questo momento aumentano il rischio di ribellione del giocatore, con la percentuale
+     * (mostrate nel pannello "Ribellioni").
+     */
     public List<String> causeAttive(Player player, Game game){
         List<String> cause = new ArrayList<>();
         Territory territory = player.getTerritorio();

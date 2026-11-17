@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/** Attila: molto aggressivo, preferisce bersagli poco difesi e usa l'assedio contro le città sviluppate. */
 public class StrategiaAttila extends StrategiaBase {
 
     public StrategiaAttila(NemiciService nemiciService) {super(nemiciService);}

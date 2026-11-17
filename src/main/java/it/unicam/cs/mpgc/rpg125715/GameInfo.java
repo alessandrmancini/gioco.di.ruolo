@@ -1,12 +1,15 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/** Testi mostrati all'utente: nome, difficoltà e abilità dei leader e la legenda delle regole. */
 public class GameInfo {
 
     private GameInfo(){} //
 
+    /** Nome del leader da mostrare. */
     public static String nomeLeader(LeaderType leader){
         return leader.getDisplayName();
     }
+    /** Difficoltà del leader per un giocatore umano, da 1 (molto facile) a 5 (molto difficile). */
     public static int difficolta(LeaderType leader){
         return switch (leader){
             case QIN_SHI_HUANG -> 1;
@@ -16,6 +19,7 @@ public class GameInfo {
             case GIOVANNA_D_ARCO, FEDERICO_BARBAROSSA, GIULIO_CESARE -> 5;
         };
     }
+    /** Difficoltà in stelle e a parole, per esempio "Difficoltà: ★★★☆☆ (media)". */
     public static String testoDifficolta(LeaderType leader){
         int d = difficolta(leader);
         String stelle = "";
@@ -32,6 +36,7 @@ public class GameInfo {
         return "Difficoltà: "+ stelle + " ("+ parola + ")";
     }
 
+    /** Abilità (+) e debolezza (-) del leader. */
     public static String abilita(LeaderType leader){
         return switch (leader){
             case QIN_SHI_HUANG ->
@@ -61,13 +66,16 @@ public class GameInfo {
         };
     }
 
+    /** Nome e abilità del leader (pannello "Abilità" durante il turno). */
     public static String abilitaDelTurno(LeaderType leader){
         return nomeLeader(leader)+ "\n"+ abilita(leader);
     }
+    /** Difficoltà e abilità del leader (schermata nuova partita). */
     public static String riassuntoLeader(LeaderType leader){
         return testoDifficolta(leader)+ "\n" + abilita(leader);
     }
 
+    /** Testo della finestra "Legenda": costi, specializzazioni, battaglie, truppe, eserciti e ribellioni. */
     public static String legenda(){
         String t = "";
         t+="Costruzione (costo in oro)\n";

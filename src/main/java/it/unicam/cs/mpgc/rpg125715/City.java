@@ -2,6 +2,7 @@ package it.unicam.cs.mpgc.rpg125715;
 
 import java.io.Serializable;
 
+/** Città: livello, specializzazione, proprietario, nodo della mappa ed eventuale ribellione. */
 public class City implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -41,6 +42,11 @@ public class City implements Serializable {
     public boolean isCitta(){return level == CityLevel.CITTA;}
     public boolean isMetropoli(){return level == CityLevel.METROPOLI;}
     public boolean isSviluppata(){return level == CityLevel.CITTA || level == CityLevel.METROPOLI;}
+    /**
+     * Porta la città al livello successivo (senza pagare: il costo lo gestisce ConstructionService).
+     *
+     * @throws IllegalStateException se è già Metropoli
+     */
     public void upgrade(){
         switch (level){
             case ACCAMPAMENTO -> level = CityLevel.AVAMPOSTO;
@@ -52,11 +58,13 @@ public class City implements Serializable {
     //OWNER
     public Player getOwner(){return owner;}
     public void resetOwner(){owner = null;}
+    /** Cambia proprietario; il primo proprietario viene ricordato come proprietario iniziale. */
     public void setOwner(Player owner){
         if(owner == null){throw new IllegalArgumentException("owner null");}
         if(proprietarioIniziale == null){proprietarioIniziale = owner;}
         this.owner = owner;
     }
+    /** Giocatore a cui apparteneva la città all'inizio della partita. */
     public Player getProprietarioIniziale(){return proprietarioIniziale;}
 
     //LOCATION
@@ -75,6 +83,10 @@ public class City implements Serializable {
     public void rimuoviRibellione(){ribellione = null;}
 
     //EX PROPRIETARIO
+    /**
+     * Giocatore che ha appena perso la città per una ribellione: non può riprenderla
+     * nello stesso turno. Viene azzerato alla fine del suo turno.
+     */
     public Player getExProprietario(){return exProprietario;}
     public void setExProprietario(Player p){this.exProprietario = p;}
 }

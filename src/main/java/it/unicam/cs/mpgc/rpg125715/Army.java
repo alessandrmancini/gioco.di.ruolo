@@ -4,6 +4,7 @@
     import java.util.List;
     import java.io.Serializable;
     
+    /** Esercito: proprietario, posizione sulla mappa, unità e se può ancora muovere in questo turno. */
     public class Army implements Serializable {
         private static final long serialVersionUID = 1L;
 
@@ -103,6 +104,7 @@
             return rimaste;
         }
     
+        /** Toglie le unità perse in battaglia, nell'ordine: fanterie, cavallerie, assedio, elefanti, speciali. */
         public void rimuoviUnitaPerPriorita(int quantita) {
             if (quantita < 0) {throw new IllegalArgumentException("La quantità da rimuovere non può essere negativa");}
     

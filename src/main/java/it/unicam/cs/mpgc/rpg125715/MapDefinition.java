@@ -40,6 +40,12 @@ public final class MapDefinition {
         }
     }
 
+    /**
+     * Legge la mappa da uno stream. Righe "N id x y [città]" per i nodi, "E id id" per i collegamenti;
+     * le righe vuote e quelle che iniziano con # sono ignorate.
+     *
+     * @throws IllegalArgumentException se una riga non è valida (con il numero della riga)
+     */
     public static MapDefinition leggi(InputStream in) throws IOException {
         Map<Integer, int[]> coordinate = new TreeMap<>();
         List<int[]> adiacenze = new ArrayList<>();
@@ -83,5 +89,6 @@ public final class MapDefinition {
         return id;
     }
 
+    /** Nome della città -> id del nodo in cui si trova (non modificabile). */
     public Map<String, Integer> getNodiDelleCitta() {return Collections.unmodifiableMap(nodoPerCitta);}
 }

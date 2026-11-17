@@ -3,6 +3,12 @@ package it.unicam.cs.mpgc.rpg125715;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Comportamento di un leader controllato dal computer. Quasi tutti i metodi hanno un'implementazione
+ * di default: ogni strategia ridefinisce solo quelli che la rendono diversa dalle altre.
+ * {@link #pesiAzioni()} restituisce i pesi di: costruzione, specializzazione, reclutamento,
+ * nuovo esercito, attacco, movimento.
+ */
 public interface LeaderStrategy {
     int[] pesiAzioni(); //pesi delle azioni: costruzione specializzazione, ...
     default int bonusCaccia(){return 6;}

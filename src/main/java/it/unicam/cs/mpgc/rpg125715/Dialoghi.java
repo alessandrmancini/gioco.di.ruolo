@@ -23,7 +23,6 @@ public final class Dialoghi {
     private Dialoghi() {}
 
     // ================= FINE PARTITA =================
-
     /** Frase che annuncia il risultato della partita. */
     public static String testoEsito(EsitoPartitaService.Esito esito) {
         return switch (esito.tipo()){
@@ -33,6 +32,7 @@ public final class Dialoghi {
         };
     }
 
+    /** Finestra di fine partita, con la classifica se si è giocato a punti. */
     public static void mostraEsito(EsitoPartitaService.Esito esito) {
         String testo = testoEsito(esito);
         Alert alert = new Alert(Alert.AlertType.INFORMATION, testo);
@@ -54,6 +54,7 @@ public final class Dialoghi {
 
     // ================= GIOCATORE ELIMINATO =================
 
+    /** Avviso che uno o più giocatori sono stati eliminati. */
     public static void mostraEliminati(String testo) {
         Alert alert = new Alert(Alert.AlertType.WARNING, testo);
         alert.setTitle("Giocatore eliminato");
@@ -63,6 +64,7 @@ public final class Dialoghi {
 
     // ================= LEGENDA =================
 
+    /** Finestra con la legenda delle regole (testo di GameInfo.legenda()). */
     public static void mostraLegenda() {
         TextArea testo = new TextArea(GameInfo.legenda());
         testo.setEditable(false);

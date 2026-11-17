@@ -1,5 +1,9 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/**
+ * Alessandro Magno: espansione rapida. Con più eserciti attacca solo se almeno due possono
+ * raggiungere il bersaglio; preferisce muovere verso città nemiche.
+ */
 public class StrategiaAlessandro extends StrategiaBase {
 
     public StrategiaAlessandro(NemiciService nemiciService) {super(nemiciService);}

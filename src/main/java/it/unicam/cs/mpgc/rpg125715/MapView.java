@@ -208,6 +208,7 @@ public class MapView extends Pane {
         return immagine;
     }
 
+    /** Anima una pedina che va da un nodo all'altro; alla fine esegue {@code alTermine}. */
     public void animaSpostamento(Location da, Location a, Color colore, Runnable alTermine){
         if(da == null || a == null){
             alTermine.run();
@@ -231,6 +232,13 @@ public class MapView extends Pane {
 
     // ================= DISEGNO =================
 
+    /**
+     * Ridisegna tutta la mappa: sfondo, regioni colorate, collegamenti, nodi, città ed eserciti.
+     *
+     * @param selected     nodo selezionato (evidenziato in oro)
+     * @param selectedArmy esercito selezionato
+     * @param targets      nodi in cui l'esercito selezionato può muovere (cerchiati)
+     */
     public void render(Game game, Location selected, Army selectedArmy, Set<Location> targets) {
         getChildren().clear();
         double s = scale();
@@ -374,10 +382,15 @@ public class MapView extends Pane {
         return g;
     }
 
+    /** Rende leggibile il nome di un enum: "METROPOLI" diventa "Metropoli", "IL_CAIRO" diventa "Il cairo". */
     public static String bello(String s){
         if(s == null || s.isBlank()){return "";}
         return s.charAt(0)+ s.substring(1).toLowerCase().replace('_',' ');
     }
+    /**
+     * Descrizione del nodo per il pannello "Selezione" e il tooltip: città, proprietario, oro prodotto,
+     * bonus difesa, ribellione ed eserciti presenti.
+     */
     public static String descrizione(Location l) {
         if(l == null){return "Nessuna selezione";}
 

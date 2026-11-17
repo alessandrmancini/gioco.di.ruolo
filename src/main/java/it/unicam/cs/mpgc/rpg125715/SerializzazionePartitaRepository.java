@@ -9,6 +9,11 @@ import java.io.StreamCorruptedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Salva le partite con la serializzazione Java in file ".rpg".
+ * Il file contiene un'intestazione, il numero di versione e l'oggetto Game (con tutti gli oggetti
+ * collegati). In lettura un filtro accetta solo le classi del gioco e quelle base di Java.
+ */
 public class SerializzazionePartitaRepository implements PartitaRepository {
 
     private static final String ESTENSIONE = ".rpg";
@@ -21,6 +26,11 @@ public class SerializzazionePartitaRepository implements PartitaRepository {
     @Override
     public String estensione() {return ESTENSIONE;}
 
+    /**
+     * Scrive intestazione, versione e partita nel file.
+     *
+     * @throws IllegalStateException se la partita è già finita
+     */
     @Override
     public void salva(Game game, Path file) throws IOException {
         if (game == null || file == null) {throw new IllegalArgumentException("game o file null");}
@@ -32,6 +42,11 @@ public class SerializzazionePartitaRepository implements PartitaRepository {
         }
     }
 
+    /**
+     * Legge una partita controllando intestazione e versione.
+     *
+     * @throws IOException se il file non è un salvataggio valido o è di una versione diversa del gioco
+     */
     @Override
     public Game carica(Path file) throws IOException {
         if (file == null) {throw new IllegalArgumentException("file null");}

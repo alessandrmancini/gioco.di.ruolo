@@ -4,6 +4,7 @@ package it.unicam.cs.mpgc.rpg125715;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Crea gli elementi iniziali della partita (giocatori, territori, città, nodi) con id univoci. */
 public class GameSetUpService {
         private final IdGenerator idGenerator;
 
@@ -12,8 +13,10 @@ public class GameSetUpService {
             this.idGenerator = idGenerator;
         }
 
+        /** Nome della zona iniziale e della capitale di un leader. */
         public record StartingProfile(String territoryName, String capitalName){}
 
+        /** Zona iniziale e capitale del leader. */
         public StartingProfile getStartingProfile(LeaderType leader){
                 if(leader == null){throw new IllegalArgumentException("leader is null");}
                 return switch (leader){
@@ -28,12 +31,14 @@ public class GameSetUpService {
                 };
         }
 
+        /** Crea il territorio (ancora senza città) con il nome della zona del leader. */
         public Territory creaTerritorioPerLeader(LeaderType leader){
             StartingProfile profile = getStartingProfile(leader);
 
             return new Territory(idGenerator.nextId(EntityType.TERRITORY), profile.territoryName());
         }
 
+        /** Crea un giocatore con il suo territorio, tutte le sue città iniziali e la capitale. */
         public Player creaPlayerIniziale(String nome, LeaderType leader, int denari, PlayerKind playerKind){
             if(nome == null || nome.isBlank()){throw new IllegalArgumentException("nome is null");}
             if(leader == null){throw new IllegalArgumentException("leader is null");}
@@ -56,10 +61,12 @@ public class GameSetUpService {
             return player;
         }
 
+        /** Crea un nodo della mappa con un id nuovo. */
         public Location creaLocation(int x, int y){
             return new Location(idGenerator.nextId(EntityType.LOCATION), x, y);
         }
 
+        /** Crea una città iniziale. La capitale di Qin parte già come Avamposto. */
         public City creaCity(CityType cityType){
             if(cityType == null){throw new IllegalArgumentException("cityType is null");}
 
@@ -70,6 +77,7 @@ public class GameSetUpService {
             return c;
         }
 
+        /** Città iniziali del leader (capitale compresa). */
         public List<CityType> getCityTypesForLeader(LeaderType leader){
             if(leader == null){throw new IllegalArgumentException("leader is null");}
             List<CityType> cityTypes = new ArrayList<>();
@@ -80,6 +88,7 @@ public class GameSetUpService {
             }
             return cityTypes;
         }
+        /** Capitale iniziale del leader. */
         public CityType getCapitaleForLeader(LeaderType leader){
             if(leader == null){throw new IllegalArgumentException("leader is null");}
             for(CityType city : CityType.values()){
@@ -88,6 +97,7 @@ public class GameSetUpService {
             throw new IllegalArgumentException("nessuna capitale trovata");
         }
 
+        /** Crea tutte le città iniziali del leader e le assegna al giocatore. */
         public List<City> creaCitiesForLeader(LeaderType leader, Player owner){
             if(leader == null){throw new IllegalArgumentException("leader is null");}
             if(owner == null){throw new IllegalArgumentException("owner is null");}
@@ -102,6 +112,7 @@ public class GameSetUpService {
             return cities;
         }
 
+        /** Tra le città indicate, restituisce quella che è la capitale iniziale del leader. */
         public City trovaCapitale(List<City> cities, LeaderType leader){
             if(cities == null || cities.isEmpty()){throw new IllegalArgumentException("cities is null or empty");}
             if(leader == null){throw new IllegalArgumentException("leader is null");}

@@ -3,6 +3,7 @@ package it.unicam.cs.mpgc.rpg125715;
 
 import java.util.Random;
 
+/** Dado a sei facce che restituisce il moltiplicatore della battaglia, con le tabelle dei leader. */
 public class DiceService implements DiceRoller{
     private final Random random;
 
@@ -15,6 +16,10 @@ public class DiceService implements DiceRoller{
         this.random = random;
     }
 
+    /**
+     * Tira il dado per il giocatore e restituisce il moltiplicatore:
+     * normale x0.8 ... x1.3, Cesare x1.0 ... x1.5, Qin x0.8 / x1.0 / x1.1.
+     */
     @Override
     public double lanciaDado(Player p){
         if(p == null){throw new IllegalArgumentException("il player non può essere null");}

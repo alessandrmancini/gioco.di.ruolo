@@ -620,6 +620,7 @@ public class GameController implements EsecutoreTurniBot.Ascoltatore {
         };
     }
 
+    /** Partita in corso (null prima di avviarne una). */
     public Game getGame() {
         return game;
     }

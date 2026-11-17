@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 
+/**
+ * Stato di una partita: giocatori, nodi della mappa, giocatore di turno, round,
+ * modalità di vittoria ed eventi da mostrare nel registro.
+ */
 public class Game implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -47,6 +51,7 @@ public class Game implements Serializable {
         return activePlayers;
     }
     public Player getCurrentPlayer(){return players.get(turno);}
+    /** Passa al prossimo giocatore non sconfitto; se si ricomincia dal primo, il round aumenta. */
     public void nextPlayer(){
         if(finita){return;}
         int start = turno;
@@ -63,6 +68,7 @@ public class Game implements Serializable {
         }
         return false;
     }
+    /** Vero se è rimasto in gioco un solo giocatore. */
     public boolean haSoloUnPlayerAttivo(){
         int count =  0;
         for(Player p : players){
@@ -93,6 +99,7 @@ public class Game implements Serializable {
 
     //EVENTI
     public void aggiungiEvento(String testo){eventi.add(testo);}
+    /** Restituisce gli eventi accumulati (ribellioni, città perse...) e svuota la lista. */
     public List<String> prelevaEventi(){
         List<String> copia = new ArrayList<>(eventi);
         eventi.clear();

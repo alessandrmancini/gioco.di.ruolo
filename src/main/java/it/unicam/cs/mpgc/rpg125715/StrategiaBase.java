@@ -3,6 +3,10 @@ package it.unicam.cs.mpgc.rpg125715;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Base comune delle strategie dei leader: contiene i calcoli che servono a più strategie
+ * (forza degli eserciti, margine di attacco, distanze, città di confine).
+ */
 public abstract class StrategiaBase implements LeaderStrategy {
     protected final NemiciService nemiciService;
 
@@ -35,6 +39,7 @@ public abstract class StrategiaBase implements LeaderStrategy {
         return totale;
     }
 
+    /** Numero di altri propri eserciti adiacenti alla destinazione. */
     protected int alleatiAccanto(Player bot, Army esercito, Location destinazione){
         int totale = 0;
         for(Army a : bot.getEserciti()){
@@ -45,6 +50,7 @@ public abstract class StrategiaBase implements LeaderStrategy {
         return totale;
     }
 
+    /** Numero di nodi adiacenti alla destinazione in cui c'è un esercito nemico. */
     protected int nemiciAccanto(Player bot, Location destinazione){
         int totale = 0;
         for(Location l : destinazione.getAdiacenti()){
@@ -53,6 +59,10 @@ public abstract class StrategiaBase implements LeaderStrategy {
         return totale;
     }
 
+    /**
+     * Confronta due eserciti: prima per numero di elefanti (se richiesto), poi per numero di unità,
+     * poi per attacco totale. Positivo se {@code a} è più forte.
+     */
     protected int confrontaForza(Army a, Army b, boolean contaElefanti){
         if(contaElefanti){
             int c = Integer.compare(a.getNumeroUnitaPerTipo(UnitType.ELEFANTI), b.getNumeroUnitaPerTipo(UnitType.ELEFANTI));
@@ -63,6 +73,7 @@ public abstract class StrategiaBase implements LeaderStrategy {
         return Integer.compare(a.getAttaccoTotale(), b.getAttaccoTotale());
     }
 
+    /** Esercito più forte del bot secondo {@link #confrontaForza}, oppure null. */
     protected Army esercitoPiuForte(Player bot, boolean contaElefanti){
         Army migliore = null;
         for(Army a : bot.getEserciti()){
@@ -72,6 +83,7 @@ public abstract class StrategiaBase implements LeaderStrategy {
         return migliore;
     }
 
+    /** Numero di passi tra l'esercito e la capitale del bot (Integer.MAX_VALUE se non raggiungibile). */
     protected int distanzaDallaCapitale(Player bot, Army esercito) {
         City capitale = bot.getCapitale();
         if(capitale == null || capitale.getLocation() == null || esercito.getPosizione() == null){return Integer.MAX_VALUE;}
@@ -87,6 +99,7 @@ public abstract class StrategiaBase implements LeaderStrategy {
         return false;
     }
 
+    /** Distanza in passi di ogni nodo dalla capitale del bot. */
     protected Map<Location, Integer> distanzeDallaCapitale(Player bot) {
         return nemiciService.distanzeDa(List.of(bot.getCapitale().getLocation()));
     }

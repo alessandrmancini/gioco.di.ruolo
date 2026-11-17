@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/** Gli 8 leader del gioco con le loro abilità e debolezze. */
 public enum LeaderType {
     ALESSANDRO_MAGNO,
     ANNIBALE,
@@ -24,7 +25,9 @@ public enum LeaderType {
     }
 
     //ALESSANDRO MAGNO
+    /** Alessandro: +1 movimento (non ancora usato nel gioco). */
     public boolean haMobilitaMaggiore(){return this == ALESSANDRO_MAGNO;}
+    /** Alessandro: le città lontane senza guarnigione possono ribellarsi (non ancora usato nel gioco). */
     public boolean rischioRibellioneLontananza(){return this == ALESSANDRO_MAGNO;}
 
     //GIULIO CESARE
@@ -45,9 +48,11 @@ public enum LeaderType {
             case ELEFANTI -> this == ANNIBALE;
         };
     }
+    /** Annibale: eserciti con elefanti più lenti (non ancora usato nel gioco). */
     public boolean mobilitaRidottaConElefanti(){return this == ANNIBALE;}
 
     //ATTILA
+    /** Bonus al totale nelle battaglie in attacco: Attila +2, Elisabetta -1. */
     public int getBonusAttacco(){
         return switch (this){
             case ATTILA -> 2;
@@ -61,6 +66,7 @@ public enum LeaderType {
 
     //GIOVANNA D'ARCO
     public boolean aumentaProbabilitaInsurrezioniNemiche(){return this == GIOVANNA_D_ARCO;}
+    /** Oro in più (o in meno) prodotto dalle città commerciali: Elisabetta +1, Giovanna -1. */
     public int getBonusCommercio(){
         return switch (this){
             case REGINA_ELISABETTA -> 1;
@@ -70,10 +76,12 @@ public enum LeaderType {
     }
 
     //FEDERICO BARBAROSSA
+    /** Bonus al totale nelle battaglie in difesa: Federico +3. */
     public int getBonusDifesa(){
         if(this == FEDERICO_BARBAROSSA){return 3;}
         return 0;
     }
+    /** Federico: le città conquistate impiegano un turno in più a stabilizzarsi (non ancora usato nel gioco). */
     public boolean haInstabilitaImperiale(){return this == FEDERICO_BARBAROSSA;}
 
 }

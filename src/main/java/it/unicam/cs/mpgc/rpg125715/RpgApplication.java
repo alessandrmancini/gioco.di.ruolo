@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/** Applicazione JavaFX: carica la schermata da game-view.fxml e lo stile da game.css. */
 public class RpgApplication extends Application {
 
     @Override

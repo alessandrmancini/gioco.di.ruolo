@@ -2,6 +2,7 @@ package it.unicam.cs.mpgc.rpg125715;
 
 import java.io.Serializable;
 
+/** Singola unità di un esercito con i suoi valori di attacco e difesa. */
 public record Unit(UnitType type, int attacco, int difesa) implements Serializable {
     public Unit {
         if (type == null) {

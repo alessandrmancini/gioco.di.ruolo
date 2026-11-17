@@ -16,6 +16,7 @@ public class RegistroPartita {
         this.area = area;
     }
 
+    /** Aggiunge una riga al registro. */
     public void scrivi(String messaggio) {
         area.appendText(messaggio + "\n");
     }

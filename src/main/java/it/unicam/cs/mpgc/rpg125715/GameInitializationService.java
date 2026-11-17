@@ -3,6 +3,10 @@ package it.unicam.cs.mpgc.rpg125715;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Crea una partita nuova e pronta da giocare: giocatori con le loro città, mappa,
+ * esercito iniziale di ogni giocatore e nemici dei bot.
+ */
 public class GameInitializationService {
 
     private final GameSetUpService gameSetUpService;
@@ -25,9 +29,15 @@ public class GameInitializationService {
         this.armyService = armyService;
         this.nemiciService = nemiciService;
     }
+    /** Crea una partita in modalità conquista totale. */
     public Game creaPartitaBase(List<PlayerConfig> configurazioneGiocatori){
         return creaPartitaBase(configurazioneGiocatori, VictoryMode.CONQUISTA);
     }
+    /**
+     * Crea una partita già iniziata con i giocatori e la modalità indicati.
+     *
+     * @param configurazioneGiocatori un elemento per ogni giocatore (nome, leader, oro iniziale, umano o bot)
+     */
     public Game creaPartitaBase(List<PlayerConfig> configurazioneGiocatori, VictoryMode modalita){
         if(modalita == null){throw new IllegalArgumentException("modalità is null");}
         if(configurazioneGiocatori == null || configurazioneGiocatori.isEmpty()){throw new IllegalArgumentException("configurazioneGiocatori null or vuota");}
@@ -84,6 +94,10 @@ public class GameInitializationService {
         }
     }
 
+    /**
+     * Configurazione con tutti gli 8 leader: prima i giocatori umani con i leader scelti,
+     * poi un bot per ogni leader rimasto.
+     */
     public static List<PlayerConfig> configurazioneStandard(List<LeaderType> umani, int oroIniziale){
         if(umani == null){throw new IllegalArgumentException("umani is null");}
         List<PlayerConfig> config = new ArrayList<>();
@@ -100,6 +114,7 @@ public class GameInitializationService {
         return config;
     }
 
+    /** Dati di un giocatore da creare. */
     public record PlayerConfig(String nome, LeaderType leader, int oroIniziale, PlayerKind playerKind) {
         public PlayerConfig{
             if(nome == null || nome.isBlank()){throw new IllegalArgumentException("nome is null");}

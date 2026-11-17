@@ -29,6 +29,7 @@ public class StrategiaLeader {
         registra(LeaderType.QIN_SHI_HUANG, new StrategiaQin(nemiciService));
     }
 
+    /** Associa (o sostituisce) la strategia di un leader. */
     public void registra(LeaderType leader, LeaderStrategy strategia) {
         if(leader == null || strategia == null){throw new IllegalArgumentException("leader o strategia null");}
         strategie.put(leader, strategia);

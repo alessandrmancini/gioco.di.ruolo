@@ -1,5 +1,9 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/**
+ * Gestisce il passaggio da un giocatore al successivo: a inizio turno sblocca gli eserciti,
+ * aggiorna le ribellioni e assegna l'oro; controlla il limite di round della modalità a punti.
+ */
 public class TurnService {
 
     public static final int MAX_ROUND = 30;
@@ -12,6 +16,13 @@ public class TurnService {
     }
 
 
+    /**
+     * Chiude il turno del giocatore corrente e prepara quello del successivo
+     * (eserciti sbloccati, ribellioni aggiornate, oro del turno). Segna la partita come finita
+     * se resta un solo giocatore o se, a punti, si supera {@link #MAX_ROUND}.
+     *
+     * @throws IllegalArgumentException se la partita è null o non è iniziata
+     */
     public  void fineTurno(Game game){
         validaGame(game);
         if(game.isGameOver()){return;}
@@ -89,6 +100,7 @@ public class TurnService {
 
     }
 
+    /** Oro in più (o in meno) che riceve un bot a ogni turno, per bilanciare la sua strategia automatica. */
     public static int compensazioneOroBot(LeaderType leader){
         return switch (leader){
             case ALESSANDRO_MAGNO, ATTILA -> 3;
@@ -99,6 +111,10 @@ public class TurnService {
         };
     }
 
+    /**
+     * Oro extra prodotto a ogni turno da una città commerciale o agricola, in base al livello
+     * (senza i bonus del leader). Le altre specializzazioni non producono oro extra.
+     */
     public static int bonusOroCitta(City city){
         return switch (city.getSpecialization()){
             case COMMERCIALE -> switch (city.getLevel()){
@@ -113,6 +129,10 @@ public class TurnService {
             default -> 0;
         };
     }
+    /**
+     * Come {@link #bonusOroCitta(City)}, ma con il bonus commerciale del leader
+     * (Elisabetta +1, Giovanna -1). Il risultato non è mai negativo.
+     */
     public static int bonusOroCittaConLeader(City city, LeaderType leader){
         int bonus = bonusOroCitta(city);
         if(city.getSpecialization() == CitySpecialization.COMMERCIALE){

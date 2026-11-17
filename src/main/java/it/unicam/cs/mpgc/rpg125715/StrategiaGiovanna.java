@@ -3,6 +3,10 @@ package it.unicam.cs.mpgc.rpg125715;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Giovanna d'Arco: preferisce liberare le città già conquistate da altri e muove gli eserciti
+ * in gruppo dietro al più forte.
+ */
 public class StrategiaGiovanna extends StrategiaBase {
 
     public StrategiaGiovanna(NemiciService nemiciService) {super(nemiciService);}
@@ -27,6 +31,7 @@ public class StrategiaGiovanna extends StrategiaBase {
         return distanzaDestinazione >= distanzaGuida;
     }
 
+    /** Prima una città agricola, perché il commercio le rende meno. */
     @Override
     public List<CitySpecialization> specializzazioniPrioritarie() {return List.of(CitySpecialization.AGRICOLA);}
 

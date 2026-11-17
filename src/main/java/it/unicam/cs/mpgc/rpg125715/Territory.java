@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 
+/** Insieme delle città di un giocatore e scelta della capitale. */
 public class Territory implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -27,6 +28,7 @@ public class Territory implements Serializable {
     public String getName() {return name;}
 
     public Player getOwner() {return owner;}
+    /** Assegna il territorio e tutte le sue città al giocatore. */
     public void setOwner(Player owner) {
         if(owner == null){throw new IllegalArgumentException("il proprietario non può essere null");}
         this.owner = owner;
@@ -73,6 +75,11 @@ public class Territory implements Serializable {
     public City getCapitale() {return capitale;}
     public boolean isCapitale(City c){return c!= null  && c == capitale;}
 
+    /**
+     * Sceglie come capitale la città di livello più alto; a parità di livello vale
+     * la specializzazione (commerciale, poi militare, poi agricola).
+     * Se non ci sono più città, il proprietario diventa sconfitto.
+     */
     public void nominaCapitale(){
         if(owner == null) {throw new IllegalStateException("owner null");}
         if(cities.isEmpty()){
@@ -98,6 +105,7 @@ public class Territory implements Serializable {
             capitale = null;
         }
     }
+    /** Aggiunge la città al territorio e la assegna al proprietario del territorio. */
     public void addCity(City c){
         if(c == null){throw new IllegalArgumentException("città null");}
         if(owner== null){throw new IllegalArgumentException("owner null");}

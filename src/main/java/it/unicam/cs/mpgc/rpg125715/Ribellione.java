@@ -19,9 +19,12 @@ public class Ribellione implements Serializable {
         this.turniAttiva = 0;
     }
 
+    /** Turni del proprietario passati senza sedare la ribellione. */
     public int getTurniAttiva() {return turniAttiva;}
     public void nextTurn() {turniAttiva++;}
 
+    /** Vero se la città costa 1 oro a turno (da {@link #TURNI_PER_MALUS} turni in poi). */
     public boolean applicaMalusOro() {return turniAttiva >= TURNI_PER_MALUS;}
+    /** Vero se la città va persa e diventa indipendente (da {@link #TURNI_PER_PERDITA} turni in poi). */
     public boolean cittaPersa() {return turniAttiva >= TURNI_PER_PERDITA;}
 }

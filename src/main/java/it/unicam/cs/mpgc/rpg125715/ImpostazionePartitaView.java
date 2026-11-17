@@ -72,6 +72,7 @@ public class ImpostazionePartitaView {
         overlay.setVisible(true);
     }
 
+    /** Nasconde la schermata e torna alla partita. */
     public void nascondi() {overlay.setVisible(false);}
 
     // ================= SCELTE DELL'UTENTE =================
@@ -83,6 +84,7 @@ public class ImpostazionePartitaView {
         return umani;
     }
 
+    /** Modalità di vittoria scelta. */
     public VictoryMode modalita() {return comboModalita.getValue();}
 
     // ================= RIGHE DEI GIOCATORI =================

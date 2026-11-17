@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * Federico Barbarossa: difensivo. Lascia un esercito sulle città di confine, crea gli eserciti
+ * lì e contrattacca subito chi lo ha attaccato.
+ */
 public class StrategiaFederico extends StrategiaBase {
 
     public StrategiaFederico(NemiciService nemiciService) {super(nemiciService);}
@@ -33,15 +37,19 @@ public class StrategiaFederico extends StrategiaBase {
         return true;
     }
 
+    /** I nuovi eserciti nascono nelle città di confine. */
     @Override
     public boolean preferisceCittaDiConfine() {return true;}
 
+    /** Dopo aver respinto un attacco, attacca l'esercito che lo ha attaccato. */
     @Override
     public boolean contrattacca() {return true;}
 
+    /** Prima una città militare (+2 difesa). */
     @Override
     public List<CitySpecialization> specializzazioniPrioritarie() {return List.of(CitySpecialization.MILITARE);}
 
+    /** La prima specializzazione va fatta nella capitale. */
     @Override
     public boolean specializzaInCapitale() {return true;}
 

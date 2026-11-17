@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Costruisce i nodi della mappa e i loro collegamenti a partire da una MapDefinition
+ * (di default il file mappa.txt) e mette ogni città nel suo nodo.
+ */
 public class MapSetupService {
 
     private static final String MAPPA_PREEDEFINITA = "mappa.txt";
@@ -23,6 +27,13 @@ public class MapSetupService {
         this.mappa = mappa;
     }
 
+    /**
+     * Crea i nodi con le coordinate, li collega e vi colloca le città.
+     *
+     * @param coordinates     id del nodo nel file -> {x, y}
+     * @param adiacenze       coppie di id dei nodi collegati
+     * @param cityPerLocation id del nodo -> città che vi si trova
+     */
     public List<Location> creaMappaBase(Map<Integer,int[]> coordinates,List<int[]> adiacenze, Map<Integer, City> cityPerLocation){
         if(coordinates == null || coordinates.isEmpty()){throw new IllegalArgumentException("coordinates is null");}
         if(adiacenze == null){throw new IllegalArgumentException("adiacenze is null");}
@@ -59,6 +70,7 @@ public class MapSetupService {
         return new ArrayList<>(locationById.values());
     }
 
+    /** Crea la mappa di gioco mettendo le città dei giocatori nei nodi indicati dal file della mappa. */
     public List<Location> creaMappaGioco(List<Player> players) {
         if(players == null){throw new IllegalArgumentException("players is null");}
 

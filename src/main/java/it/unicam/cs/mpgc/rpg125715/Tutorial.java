@@ -9,10 +9,12 @@ import java.util.List;
  */
 public final class Tutorial {
 
+    /** Una pagina del tutorial: titolo e testo. */
     public record Pagina(String titolo, String testo) {}
 
     private Tutorial() {}
 
+    /** Pagine del tutorial, nell'ordine in cui si leggono. */
     public static List<Pagina> pagine() {
         return List.of(
                 new Pagina("1. Di cosa si tratta",

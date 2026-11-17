@@ -1,5 +1,9 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/**
+ * Esegue il turno di un bot un'azione alla volta (al massimo {@code MAX_AZIONI}),
+ * così la vista può mostrare ogni azione con una pausa. Le scelte le fa BotDecisionService.
+ */
 public class BotTurnService {
 
     private final BotDecisionService botDecisionService;
@@ -34,12 +38,20 @@ public class BotTurnService {
         this.conquestService = conquestService;
     }
 
+    /** Da chiamare all'inizio del turno di ogni bot: azzera il contatore delle azioni. */
     public void iniziaTurnoBot(){
         azioniEseguite = 0;
         ultimaPartenza = null;
         ultimaDestinazione = null;
     }
 
+    /**
+     * Fa scegliere ed eseguire al bot di turno la sua prossima azione.
+     * Se il bot non ha più città ma ha un esercito, prima fonda una città.
+     *
+     * @return la descrizione dell'azione per il registro, oppure null se il bot ha finito il turno
+     * @throws IllegalArgumentException se il giocatore di turno non è un bot
+     */
     public String eseguiProssimaAzione(Game game){
         if(game == null){throw new IllegalArgumentException("game null");}
         if(game.isGameOver()){return null;}
@@ -67,13 +79,21 @@ public class BotTurnService {
         return eseguiDecisione(game, bot, decision);
     }
 
+    /** Chiude il turno del bot e passa al giocatore successivo (se la partita non è finita). */
     public void terminaTurno(Game game){
         if(game == null){throw new IllegalArgumentException("game null");}
         if(!game.isGameOver()){turnService.fineTurno(game);}
     }
+    /** Nodo di partenza dell'ultimo spostamento fatto dal bot (per l'animazione), oppure null. */
     public Location getUltimaPartenza(){return ultimaPartenza;}
+    /** Nodo di arrivo dell'ultimo spostamento fatto dal bot (per l'animazione), oppure null. */
     public Location getUltimaDestinazione(){return ultimaDestinazione;}
 
+    /**
+     * Esegue tutto il turno del bot in una volta sola e lo chiude.
+     *
+     * @return le azioni eseguite, una per riga
+     */
     public String eseguiTurnoBot(Game game){
         if(game == null){throw new IllegalArgumentException("game null");}
         if(game.isGameOver()){return "la partita è finita";}

@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/** Genera id univoci, con un contatore separato per ogni tipo di entità (giocatori, eserciti...). */
 public class IdGenerator {
     private final Map<EntityType, AtomicInteger> counters;
 
@@ -16,10 +17,15 @@ public class IdGenerator {
     }
 
 
+    /** Fa in modo che il prossimo id del tipo indicato non sia minore di {@code prossimo}. */
     public void assicuraMinimo(EntityType type, int prossimo) {
         if(type == null){throw new IllegalArgumentException("entity type null");}
         counters.get(type).accumulateAndGet(prossimo, Math::max);
     }
+    /**
+     * Porta tutti i contatori oltre gli id già usati nella partita.
+     * Va chiamato dopo aver caricato una partita, per non creare id duplicati.
+     */
     public void allineaA(Game game){
         if(game == null){throw new IllegalArgumentException("game is null");}
         for(Player p : game.getPlayers()){
@@ -34,6 +40,7 @@ public class IdGenerator {
         }
     }
 
+    /** Restituisce un nuovo id per il tipo indicato e incrementa il contatore. */
     public int nextId(EntityType type) {
         if(type == null){throw new IllegalArgumentException("entity type null");}
         return counters.get(type).getAndIncrement();

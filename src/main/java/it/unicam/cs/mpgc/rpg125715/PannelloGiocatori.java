@@ -17,6 +17,7 @@ public class PannelloGiocatori {
         this.contenitore = contenitore;
     }
 
+    /** Ricostruisce l'elenco dei giocatori (vuoto se non c'è una partita). */
     public void aggiorna(Game game) {
         contenitore.getChildren().clear();
         if(game == null){return;}

@@ -7,6 +7,7 @@ public final class ConvertitoriTesto {
 
     private ConvertitoriTesto() {}
 
+    /** Mostra il nome del leader (per esempio "Giulio Cesare"). */
     public static StringConverter<LeaderType> leader() {
         return new StringConverter<>() {
             @Override
@@ -16,6 +17,7 @@ public final class ConvertitoriTesto {
         };
     }
 
+    /** Mostra il nome della modalità di vittoria. */
     public static StringConverter<VictoryMode> modalita() {
         return new StringConverter<>() {
             @Override

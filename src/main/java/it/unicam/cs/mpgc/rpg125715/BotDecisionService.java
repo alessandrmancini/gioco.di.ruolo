@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * "Cervello" dei bot: a ogni chiamata sceglie la prossima azione del bot.
+ * Prima controlla le priorità assolute (difesa della capitale e delle città, ribellioni),
+ * poi quelle del leader, infine estrae a caso tra le azioni possibili con i pesi della
+ * strategia del leader (vedi LeaderStrategy).
+ */
 public class BotDecisionService {
 
     private static final int ORO_MINIMO_RECLUTAMENTO = 3;
@@ -26,6 +32,12 @@ public class BotDecisionService {
         this.strategia = new StrategiaLeader(nemiciService);
     }
 
+    /**
+     * Sceglie la prossima azione del bot.
+     *
+     * @return l'azione da eseguire (PASS se il bot vuole finire il turno)
+     * @throws IllegalArgumentException se il giocatore non è un bot
+     */
     public BotDecision decide(Game game, Player bot){
         if(game == null){throw new IllegalArgumentException("game null");}
         if(bot == null){throw new IllegalArgumentException("bot null");}

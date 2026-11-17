@@ -18,6 +18,8 @@ public enum VictoryMode {
         this.descrizione = descrizione;
     }
 
+    /** Nome da mostrare nella schermata di nuova partita. */
     public String getNome() {return nome;}
+    /** Spiegazione della modalità. */
     public String getDescrizione() {return descrizione;}
 }

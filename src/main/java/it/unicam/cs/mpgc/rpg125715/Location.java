@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.io.Serializable;
 
+/** Nodo della mappa: coordinate, nodi collegati, città (facoltativa) e al massimo due eserciti. */
 public class Location implements Serializable{
     private static final long serialVersionUID = 1L;
 
@@ -46,6 +47,7 @@ public class Location implements Serializable{
 
     // ADIACENTI
     public boolean isAdiacente(Location loc){return this.adiacenti.contains(loc);}
+    /** Collega i due nodi in entrambe le direzioni. */
     public void addAdiacente(Location loc){
         if(loc == null || this.adiacenti.contains(loc) || loc == this){return;}
         this.adiacenti.add(loc);
@@ -54,6 +56,12 @@ public class Location implements Serializable{
     public List<Location> getAdiacenti() {return new ArrayList<Location>(this.adiacenti);}
 
     // ESERCITI
+    /**
+     * Mette un esercito nel nodo. Nello stesso nodo ci possono essere al massimo due eserciti
+     * e mai due dello stesso giocatore.
+     *
+     * @throws IllegalArgumentException se il nodo è pieno o c'è già un esercito di quel giocatore
+     */
     public void addArmy(Army a){
         if(a == null){throw new IllegalArgumentException("l'esercito non può essere null");}
         for (Army army : armies) {
@@ -99,6 +107,7 @@ public class Location implements Serializable{
         }
         return false;
     }
+    /** Esercito di un altro giocatore presente nel nodo, oppure null. */
     public Army getEnemyArmyFor(Army army){
         if(army == null){throw new IllegalArgumentException("army null");}
         for(Army army1 : armies){

@@ -1,7 +1,13 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/** Crea le unità con i valori di attacco e difesa giusti per il leader. */
 public class UnitFactory {
 
+    /**
+     * Crea un'unità del tipo indicato; le unità speciali hanno valori diversi per ogni leader.
+     *
+     * @throws IllegalArgumentException se il leader non può reclutare quel tipo (Elefanti tranne Annibale)
+     */
     public static Unit creaUnita(UnitType type, LeaderType leader) {
         if (type == null) {
             throw new IllegalArgumentException("il tipo di unità non può essere nullo");

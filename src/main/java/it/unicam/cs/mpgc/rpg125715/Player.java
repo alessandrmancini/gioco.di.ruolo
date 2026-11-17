@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 
+/**
+ * Giocatore umano o bot: leader, oro, territorio con le città, eserciti, battaglie vinte
+ * e (solo per i bot) nemici dichiarati.
+ */
 public class Player implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -57,6 +61,11 @@ public class Player implements Serializable {
         }
         this.oro += q;
     }
+    /**
+     * Toglie oro al giocatore.
+     *
+     * @throws IllegalArgumentException se la quantità è negativa o maggiore dell'oro posseduto
+     */
     public void spendiOro(int q){
         if(q<0){throw new IllegalArgumentException("la quantità da spendere non può essere negativa");}
         if(q>oro){throw new IllegalArgumentException("la quantità di oro necessaria è maggiore di quella posseduta");}
@@ -109,9 +118,14 @@ public class Player implements Serializable {
         nemici.add(p);
     }
 
+    /**
+     * Ultimo esercito nemico che ha attaccato questo giocatore ed è stato respinto
+     * (serve al contrattacco di Federico).
+     */
     public Army getAttaccanteSconfitto(){return attaccanteSconfitto;}
     public void setAttaccanteSconfitto(Army a){this.attaccanteSconfitto =  a;}
 
+    /** Nemici dichiarati ancora in gioco. */
     public List<Player> getNemiciDaSconfiggere(){
         List<Player> vivi = new ArrayList<>();
         for(Player p : nemici){

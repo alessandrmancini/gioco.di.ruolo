@@ -3,6 +3,10 @@ package it.unicam.cs.mpgc.rpg125715;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Giulio Cesare: tiene una guardia vicino alla capitale, prende subito le città indifese
+ * e preferisce gli scontri equilibrati, dove contano i suoi dadi migliori.
+ */
 public class StrategiaCesare extends StrategiaBase {
 
     //tiene un esercito di guardia alla capitale solo se ha almeno questo numero di eserciti
@@ -45,6 +49,7 @@ public class StrategiaCesare extends StrategiaBase {
         return migliore;
     }
 
+    /** Prima una città commerciale, per pagare le unità più care. */
     @Override
     public List<CitySpecialization> specializzazioniPrioritarie() {return List.of(CitySpecialization.COMMERCIALE);}
 }

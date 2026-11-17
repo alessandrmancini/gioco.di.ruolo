@@ -1,8 +1,19 @@
 package it.unicam.cs.mpgc.rpg125715;
 
+/**
+ * Passaggio delle città da un proprietario all'altro: conquista, abbandono per ribellione
+ * e fondazione di una nuova città da parte di un giocatore rimasto senza città.
+ */
 public class ConquestService {
 
 
+    /**
+     * Assegna la città al conquistatore: la toglie al vecchio proprietario (che nomina una nuova
+     * capitale se serve) e ne cancella l'eventuale ribellione. Se il conquistatore non aveva
+     * una capitale, ne nomina una.
+     *
+     * @throws IllegalArgumentException se la città è già del conquistatore
+     */
     public void conquista(City city, Player conquistatore) {
         if(city == null || conquistatore == null){throw new IllegalArgumentException("city o conquistatore null");}
         if(city.getOwner() == conquistatore){throw new IllegalArgumentException("conquistatore già in possesso della città");}
@@ -16,6 +27,11 @@ public class ConquestService {
         if(nuovoTerritory.getCapitale() == null){nuovoTerritory.nominaCapitale();}
     }
 
+    /**
+     * La città diventa indipendente (nessun proprietario), per esempio dopo una ribellione
+     * durata troppo a lungo. Il vecchio proprietario viene salvato come ex proprietario,
+     * così non può riprenderla nello stesso turno.
+     */
     public void abbandona(City city){
         if(city == null){throw new IllegalArgumentException("city null");}
         Player vecchioOwner = city.getOwner();
@@ -54,6 +70,13 @@ public class ConquestService {
         return null;
     }
 
+    /**
+     * Crea una nuova città, con il nome scelto, nel nodo dove si trova un esercito del giocatore
+     * e la nomina capitale. È permesso solo a chi non ha più città.
+     *
+     * @throws IllegalArgumentException se il giocatore ha ancora città, se nel nodo c'è già una città
+     *         o se nel nodo non c'è un suo esercito
+     */
     public City fondaCitta(Player player, Location location, String nome){
         if(player == null || location == null){throw new IllegalArgumentException("player o location null");}
         if(nome == null || nome.isBlank()){throw new IllegalArgumentException("il nome non può essere vuoto");}
