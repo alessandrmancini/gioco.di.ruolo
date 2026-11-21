@@ -15,14 +15,14 @@ public class TurnServiceTest {
 
     @Test
     void fineTurno_gameNull_lanciaEccezione() {
-        TurnService turnService = new TurnService(new RibellioneService());
+        TurnService turnService = new TurnService(new RibellioneService(new ConquestService()));
 
         assertThrows(IllegalArgumentException.class, () -> turnService.fineTurno(null));
     }
 
     @Test
     void fineTurno_gameNonIniziato_lanciaEccezione() {
-        TurnService turnService = new TurnService(new RibellioneService());
+        TurnService turnService = new TurnService(new RibellioneService(new ConquestService()));
         Game game = creaGameBase();
 
         assertThrows(IllegalArgumentException.class, () -> turnService.fineTurno(game));
@@ -30,7 +30,7 @@ public class TurnServiceTest {
 
     @Test
     void fineTurno_gameFinito_nonCambiaTurno() {
-        TurnService turnService = new TurnService(new RibellioneService());
+        TurnService turnService = new TurnService(new RibellioneService(new ConquestService()));
         Game game = creaGameBase();
         game.iniziaPartita();
         game.setFinita();
@@ -48,7 +48,7 @@ public class TurnServiceTest {
 
     @Test
     void fineTurno_conDuePlayerAttivi_passaAlPlayerSuccessivo() {
-        TurnService turnService = new TurnService(new RibellioneService());
+        TurnService turnService = new TurnService(new RibellioneService(new ConquestService()));
         Game game = creaGameBase();
         game.iniziaPartita();
 
@@ -64,7 +64,7 @@ public class TurnServiceTest {
 
     @Test
     void fineTurno_conUnSoloPlayerAttivo_impostaPartitaFinita() {
-        TurnService turnService = new TurnService(new RibellioneService());
+        TurnService turnService = new TurnService(new RibellioneService(new ConquestService()));
         Game game = creaGameBase();
         game.iniziaPartita();
 
